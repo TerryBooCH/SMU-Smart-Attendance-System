@@ -25,3 +25,6 @@ dist-ssr
 
 # Package lock
 package-lock.json
+
+# Vite
+.vite

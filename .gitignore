@@ -1,0 +1,46 @@
+# ----------------------
+# Backend (Maven) build files
+# ----------------------
+/backend/target/
+**/target/
+
+# ----------------------
+# Frontend (Node.js / JavaScript) build files
+# ----------------------
+/frontend/node_modules/
+**/node_modules/
+# If frontend uses a build folder like dist or build
+/frontend/dist/
+/frontend/build/
+
+# ----------------------
+# IDE / Editor files
+# ----------------------
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Eclipse
+.project
+.classpath
+.settings/
+
+# VS Code
+.vscode/
+
+# ----------------------
+# OS / Temp files
+# ----------------------
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*~
+
+# ----------------------
+# Optional: JetBrains caches
+# ----------------------
+/out/

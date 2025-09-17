@@ -8,7 +8,7 @@
 - [Features](#features)
 - [Technologies](#technologies)
 - [Architecture](#architecture)
-- [Project-Structure](#project-structure)
+- [Setup-and-Build](#setup-and-build)
 
 ---
 
@@ -42,21 +42,18 @@ The system follows a **client-server architecture**:
 
 ---
 
-## Project Structure
+## Setup and Build
 
-A Maven multi-module structure is used:
-smu-smart-attendance-system/
-│
-├── backend/               # Spring Boot application
-│   ├── src/main/java/     # Java source files
-│   ├── src/main/resources/# Configurations (application.properties, etc.)
-│   └── pom.xml            # Backend dependencies
-│
-├── frontend/              # React application
-│   ├── public/            # Static files
-│   ├── src/               # React components, pages, services
-│   └── package.json       # Frontend dependencies
-│
-├── pom.xml                # Parent POM (manages modules and common configs)
-└── README.md              # Project documentation
-
+1. Download the Maven **Binary zip archive**.  
+2. Verify installation with:  
+   ```bash
+   mvn --version
+   ```
+3. Install all project dependencies:
+   ```bash
+   mvn dependency:resolve
+   ```
+4. After writing or modifying code (Java classes, etc.), compile everything with:
+   ```bash
+   mvn clean compile
+   ```

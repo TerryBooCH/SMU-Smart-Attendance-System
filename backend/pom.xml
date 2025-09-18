@@ -52,6 +52,12 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.46.0.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-community-dialects</artifactId>
+            <version>6.6.26.Final</version>
+        </dependency>
         
         <!-- Computer Vision - JavaCV and OpenCV -->
         <dependency>

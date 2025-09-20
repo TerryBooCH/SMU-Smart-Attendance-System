@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @MappedSuperclass // Not a table, but extended by tables
-public abstract class Entity {
+public abstract class BaseEntity {
 
     @Id // Marks the primary key
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Uses database's auto-increment to generate IDs

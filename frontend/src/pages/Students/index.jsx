@@ -1,15 +1,15 @@
-import React from 'react'
-import Sidebar from '../../components/Sidebar'
+import React from "react";
+import Sidebar from "../../components/Sidebar";
 
 const Students = () => {
   return (
-    <div className='min-h-screen flex'>
+    <div className="min-h-screen flex">
       <Sidebar />
-      <div className="h-screen flex flex-col flex-1">
-
+      <div className="h-screen p-2 flex flex-col flex-1 bg-[#f9f9f9]">
+        <main className="h-full w-full bg-white border-1 border-[#cecece] rounded-2xl  shadow-md"></main>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default Students
+export default Students;

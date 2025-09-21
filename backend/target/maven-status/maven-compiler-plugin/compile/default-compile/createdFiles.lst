@@ -1,6 +1,13 @@
-com\smu\smartattendancesystem\controllers\StudentController.class
 com\smu\smartattendancesystem\config\SecurityConfig.class
+com\smu\smartattendancesystem\models\CourseEnrollment.class
+com\smu\smartattendancesystem\models\Session.class
+com\smu\smartattendancesystem\models\Section.class
+com\smu\smartattendancesystem\SmartAttendanceSystemApplication.class
+com\smu\smartattendancesystem\controllers\StudentController.class
+com\smu\smartattendancesystem\models\FaceData.class
+com\smu\smartattendancesystem\models\Attendance.class
+com\smu\smartattendancesystem\models\BaseEntity.class
 com\smu\smartattendancesystem\repositories\StudentRepository.class
 com\smu\smartattendancesystem\services\StudentService.class
 com\smu\smartattendancesystem\models\Student.class
-com\smu\smartattendancesystem\SmartAttendanceSystemApplication.class
+com\smu\smartattendancesystem\models\Course.class

@@ -1,41 +1,39 @@
 package com.smu.smartattendancesystem.services;
 
-import com.smu.smartattendancesystem.models.Student;
-import com.smu.smartattendancesystem.repositories.StudentRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.smu.smartattendancesystem.managers.StudentManager;
+import com.smu.smartattendancesystem.models.Student;
 
 @Service
 public class StudentService {
 
-    private final StudentRepository studentRepository;
+    private final StudentManager studentManager;
 
-    public StudentService(StudentRepository studentRepository) {
-        this.studentRepository = studentRepository;
+    public StudentService(StudentManager studentManager) {
+        this.studentManager = studentManager;
     }
 
     public List<Student> getAllStudents() {
-        return studentRepository.findAll();
+        return studentManager.findAll();
     }
 
     public Optional<Student> getStudentById(String studentId) {
-        return studentRepository.findById(studentId);
+        return studentManager.findById(studentId);
     }
 
     public Student createStudent(Student student) {
-        return studentRepository.save(student);
+        return studentManager.enroll(student);
     }
 
     public Student updateStudent(String studentId, Student updatedStudent) {
-        if (studentRepository.existsById(studentId)) {
-            return studentRepository.save(updatedStudent);
-        }
-        return null;
+        return studentManager.update(studentId, updatedStudent);
     }
 
     public void deleteStudent(String studentId) {
-        studentRepository.deleteById(studentId);
+        studentManager.remove(studentId);
     }
 }

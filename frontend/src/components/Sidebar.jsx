@@ -9,6 +9,7 @@ import {
   FileText,
   Settings,
   LogOut,
+  House,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -26,6 +27,8 @@ const Sidebar = () => {
     ) {
       return true;
     } else if (path === "/reports" && location.pathname === "/reports") {
+      return true;
+    } else if (path === "/home" && location.pathname === "/home") {
       return true;
     }
     return false;
@@ -65,24 +68,24 @@ const Sidebar = () => {
         {/* Navigation section */}
         <div className="px-2.5 flex flex-col gap-2.5 w-full flex-grow">
           <Link
-            to="/students"
-            className={`inline-flex items-center px-2 py-2 rounded-lg h-10   hover:bg-black/5 ${
-                isActive("/students") ? "bg-black/10 " : ""
-              }`}
+            to="/home"
+            className={`inline-flex items-center px-2 py-2 rounded-lg h-10  hover:bg-black/5 ${
+              isActive("/home") ? "bg-black/10 " : ""
+            }`}
           >
-            <Users
+            <House
               height={"20px"}
               width={"20px"}
               strokeWidth={1.4}
               className="group-hover:opacity-0 transition duration-300 "
             />
-            <span className="ml-3 text-sm ">Students</span>
+            <span className="ml-3 text-sm ">Home</span>
           </Link>
           <Link
             to="/sessions"
             className={`inline-flex items-center px-2 py-2 rounded-lg h-10  hover:bg-black/5 ${
-                isActive("/sessions") ? "bg-black/10 " : ""
-              }`}
+              isActive("/sessions") ? "bg-black/10 " : ""
+            }`}
           >
             <School
               height={"20px"}
@@ -95,8 +98,8 @@ const Sidebar = () => {
           <Link
             to="/live-recognition"
             className={`inline-flex items-center px-2 py-2 rounded-lg h-10  hover:bg-black/5 ${
-                isActive("/live-recognition") ? "bg-black/10" : ""
-              }`}
+              isActive("/live-recognition") ? "bg-black/10" : ""
+            }`}
           >
             <Video
               height={"20px"}
@@ -107,10 +110,24 @@ const Sidebar = () => {
             <span className="ml-3 text-sm ">Live Recognition</span>
           </Link>
           <Link
+            to="/students"
+            className={`inline-flex items-center px-2 py-2 rounded-lg h-10   hover:bg-black/5 ${
+              isActive("/students") ? "bg-black/10 " : ""
+            }`}
+          >
+            <Users
+              height={"20px"}
+              width={"20px"}
+              strokeWidth={1.4}
+              className="group-hover:opacity-0 transition duration-300 "
+            />
+            <span className="ml-3 text-sm ">Students</span>
+          </Link>
+          <Link
             to="/reports"
             className={`inline-flex items-center px-2 py-2 rounded-lg h-10  hover:bg-black/5 ${
-                isActive("/reports") ? "bg-black/10" : ""
-              }`}
+              isActive("/reports") ? "bg-black/10" : ""
+            }`}
           >
             <FileText
               height={"20px"}

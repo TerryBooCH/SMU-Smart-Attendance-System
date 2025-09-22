@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
 import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import Students from "./pages/Students";
@@ -12,6 +13,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/signin" element={<SignIn />} />
         <Route path="/students" element={<Students />} />
         <Route path="/sessions" element={<Sessions />} />

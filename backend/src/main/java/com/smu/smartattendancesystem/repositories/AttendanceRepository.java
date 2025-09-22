@@ -7,7 +7,7 @@ import java.util.List;
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     // Find all attendance records for a given session
-    List<Attendance> findBySession_SessionId(Long sessionId);
+    List<Attendance> findBySession_Id(Long sessionId);
 
     // Find all attendance records for a given student
     List<Attendance> findByStudent_StudentId(String studentId);

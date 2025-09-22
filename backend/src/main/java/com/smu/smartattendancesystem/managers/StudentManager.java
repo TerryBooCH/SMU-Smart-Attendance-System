@@ -16,32 +16,39 @@ public class StudentManager {
     }
 
     // CREATE: Add a new student
-    // Use case: enrollment, onboarding new students
     public Student addStudent(Student student) {
         return studentRepo.save(student);
     }
 
-    // READ: Get student by ID
-    // Use case: view student profile
-    public Optional<Student> getStudentById(String studentId) {
-        return studentRepo.findById(studentId);
+    // READ: Get student by primary key (Long id)
+    public Optional<Student> getStudentById(Long id) {
+        return studentRepo.findById(id);
+    }
+
+    // READ: Get student by business ID (String studentId)
+    public Optional<Student> getStudentByStudentId(String studentId) {
+        return studentRepo.findByStudentId(studentId);
     }
 
     // READ: Get all students
-    // Use case: admin listing all students
     public List<Student> getAllStudents() {
         return studentRepo.findAll();
     }
 
     // UPDATE: Update existing student
-    // Use case: change email, phone, or class group
     public Student updateStudent(Student student) {
         return studentRepo.save(student);
     }
 
-    // DELETE: Remove a student by ID
-    // Use case: student leaves institution
-    public void deleteStudent(String studentId) {
-        studentRepo.deleteById(studentId);
+    // DELETE: Remove a student by primary key
+    public void deleteStudent(Long id) {
+        studentRepo.deleteById(id);
+    }
+
+    // DELETE: Remove a student by business ID
+    public void deleteStudentByStudentId(String studentId) {
+        studentRepo.findByStudentId(studentId).ifPresent(student -> {
+            studentRepo.delete(student);
+        });
     }
 }

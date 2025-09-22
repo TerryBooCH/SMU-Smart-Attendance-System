@@ -1,6 +1,8 @@
 package com.smu.smartattendancesystem.models;
 
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Entity
@@ -8,6 +10,7 @@ import java.util.List;
 public class Session extends BaseEntity {
 
     private String name;
+    private LocalDate sessionDate;
     private String startAt;
     private String endAt;
     private boolean isOpen;
@@ -18,8 +21,9 @@ public class Session extends BaseEntity {
 
     public Session() {}
 
-    public Session(String name, String startAt, String endAt, boolean isOpen, Integer lateAfterMinutes) { // Constructor to make new sessions
+    public Session(String name, LocalDate sessionDate, String startAt, String endAt, boolean isOpen, Integer lateAfterMinutes) { // Constructor to make new sessions
         this.name = name;
+        this.sessionDate = sessionDate;
         this.startAt = startAt;
         this.endAt = endAt;
         this.isOpen = isOpen;
@@ -73,5 +77,13 @@ public class Session extends BaseEntity {
 
     public void setAttendances(List<Attendance> attendances) { 
         this.attendances = attendances; 
+    }
+
+    public LocalDate getSessionDate() {
+        return sessionDate;
+    }
+
+    public void setSessionDate(LocalDate sessionDate) {
+        this.sessionDate = sessionDate;
     }
 }

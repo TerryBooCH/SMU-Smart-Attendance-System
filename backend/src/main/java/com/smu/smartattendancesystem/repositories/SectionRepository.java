@@ -10,7 +10,7 @@ import java.util.List;
 public interface SectionRepository extends JpaRepository<Section, Long> {
 
     // Find all sections for a course
-    List<Section> findByCourse_CourseId(Long courseId);
+    List<Section> findByCourse_Id(Long courseId);
 
     // Find a section by its code (useful for UI search)
     Section findBySectionCode(String sectionCode);

@@ -11,8 +11,8 @@ import java.util.List;
 public interface SessionRepository extends JpaRepository<Session, Long> {
 
     // Find sessions by course name
-    List<Session> findByCourseName(String courseName);
+    List<Session> findByName(String courseName);
 
     // Find sessions on a specific date
-    List<Session> findByDate(LocalDate date);
+    List<Session> findBySessionDate(LocalDate date);
 }

@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/students")
+@RequestMapping("/api/students") // Changed to avoid conflicts
 public class StudentController {
     private final StudentManager studentManager;
 
@@ -28,22 +28,42 @@ public class StudentController {
         return studentManager.getAllStudents();
     }
 
-    // READ one
-    @GetMapping("/{id}")
-    public Optional<Student> getStudent(@PathVariable String id) {
-        return studentManager.getStudentById(id);
+    // READ one by studentId
+    @GetMapping("/{studentId}")
+    public Optional<Student> getStudent(@PathVariable String studentId) {
+        System.out.println("=== GET Student Called with ID: " + studentId + " ===");
+        return studentManager.getStudentByStudentId(studentId);
     }
 
-    // UPDATE
-    @PutMapping("/{id}")
-    public Student updateStudent(@PathVariable String id, @RequestBody Student student) {
-        student.setStudentId(id); // ensure correct ID
-        return studentManager.updateStudent(student);
+    // UPDATE by studentId
+    @PutMapping("/{studentId}")
+    public Student updateStudent(@PathVariable String studentId, @RequestBody Student student) {
+        System.out.println("=== UPDATE Student Called with ID: " + studentId + " ===");
+        Optional<Student> existingStudentOpt = studentManager.getStudentByStudentId(studentId);
+        
+        if (existingStudentOpt.isEmpty()) {
+            throw new RuntimeException("Student not found with ID: " + studentId);
+        }
+        
+        Student existingStudent = existingStudentOpt.get();
+        existingStudent.setName(student.getName());
+        existingStudent.setEmail(student.getEmail());
+        existingStudent.setPhone(student.getPhone());
+        
+        return studentManager.updateStudent(existingStudent);
     }
 
-    // DELETE
-    @DeleteMapping("/{id}")
-    public void deleteStudent(@PathVariable String id) {
-        studentManager.deleteStudent(id);
+    // DELETE by studentId
+    @DeleteMapping("/{studentId}")
+    public String deleteStudent(@PathVariable String studentId) {
+        System.out.println("=== DELETE Student Called with ID: " + studentId + " ===");
+        Optional<Student> student = studentManager.getStudentByStudentId(studentId);
+        
+        if (student.isEmpty()) {
+            throw new RuntimeException("Student not found with ID: " + studentId);
+        }
+        
+        studentManager.deleteStudent(student.get().getId());
+        return "Student deleted successfully";
     }
 }

@@ -16,7 +16,7 @@ const QuickNav = () => {
         <div className="flex flex-col">
           <h3 className="mb-2 font-semibold text-gray-500 text-sm">Quick Start</h3>
           <div 
-            className="bg-gray-50 rounded-xl p-8 flex-1 cursor-pointer border-3 border-primary flex flex-col items-center justify-center text-center hover:bg-gray-100 transition-colors"
+            className="bg-white rounded-xl p-8 flex-1 cursor-pointer border-3 border-primary flex flex-col items-center justify-center text-center hover:bg-gray-100 transition-colors"
             onClick={() => navigate('/sessions')}
           >
             <div className="mb-4">
@@ -30,7 +30,7 @@ const QuickNav = () => {
           <h3 className="mb-2 font-semibold text-gray-500 text-sm">Other Actions</h3>
           <div className="flex-1 flex flex-col gap-4">
             <div 
-              className="bg-gray-50 rounded-xl p-4 flex-1 cursor-pointer border border-gray-300 hover:border-gray-400 hover:bg-gray-100 transition-colors min-h-[120px] flex items-start gap-4"
+              className="bg-white rounded-xl p-4 flex-1 cursor-pointer border border-gray-300 hover:border-gray-400 hover:bg-gray-100 transition-colors min-h-[120px] flex items-start gap-4"
               onClick={() => navigate('/students')}
             >
               <div className="flex-shrink-0 mt-1">
@@ -42,7 +42,7 @@ const QuickNav = () => {
               </div>
             </div>
             <div 
-              className="bg-gray-50 rounded-xl p-4 flex-1 cursor-pointer border border-gray-300 hover:border-gray-400 hover:bg-gray-100 transition-colors min-h-[120px] flex items-start gap-4"
+              className="bg-white rounded-xl p-4 flex-1 cursor-pointer border border-gray-300 hover:border-gray-400 hover:bg-gray-100 transition-colors min-h-[120px] flex items-start gap-4"
               onClick={() => navigate('/recognition')}
             >
               <div className="flex-shrink-0 mt-1">
@@ -54,7 +54,7 @@ const QuickNav = () => {
               </div>
             </div>
             <div 
-              className="bg-gray-50 rounded-xl p-4 flex-1 cursor-pointer border border-gray-300 hover:border-gray-400 hover:bg-gray-100 transition-colors min-h-[120px] flex items-start gap-4"
+              className="bg-white rounded-xl p-4 flex-1 cursor-pointer border border-gray-300 hover:border-gray-400 hover:bg-gray-100 transition-colors min-h-[120px] flex items-start gap-4"
               onClick={() => navigate('/reports')}
             >
               <div className="flex-shrink-0 mt-1">

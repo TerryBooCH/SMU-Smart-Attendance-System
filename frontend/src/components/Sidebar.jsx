@@ -82,20 +82,6 @@ const Sidebar = () => {
             <span className="ml-3 text-sm ">Home</span>
           </Link>
           <Link
-            to="/students"
-            className={`inline-flex items-center px-2 py-2 rounded-lg h-10   hover:bg-black/5 ${
-              isActive("/students") ? "bg-black/10 " : ""
-            }`}
-          >
-            <Users
-              height={"20px"}
-              width={"20px"}
-              strokeWidth={1.4}
-              className="group-hover:opacity-0 transition duration-300 "
-            />
-            <span className="ml-3 text-sm ">Students</span>
-          </Link>
-          <Link
             to="/sessions"
             className={`inline-flex items-center px-2 py-2 rounded-lg h-10  hover:bg-black/5 ${
               isActive("/sessions") ? "bg-black/10 " : ""
@@ -122,6 +108,20 @@ const Sidebar = () => {
               className="group-hover:opacity-0 transition duration-300 "
             />
             <span className="ml-3 text-sm ">Live Recognition</span>
+          </Link>
+          <Link
+            to="/students"
+            className={`inline-flex items-center px-2 py-2 rounded-lg h-10   hover:bg-black/5 ${
+              isActive("/students") ? "bg-black/10 " : ""
+            }`}
+          >
+            <Users
+              height={"20px"}
+              width={"20px"}
+              strokeWidth={1.4}
+              className="group-hover:opacity-0 transition duration-300 "
+            />
+            <span className="ml-3 text-sm ">Students</span>
           </Link>
           <Link
             to="/reports"

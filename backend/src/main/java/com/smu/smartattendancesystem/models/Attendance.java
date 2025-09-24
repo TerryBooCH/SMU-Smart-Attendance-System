@@ -19,7 +19,8 @@ public class Attendance extends BaseEntity {
     private Double confidence;
     private String timestamp;
 
-    public Attendance() {}
+    // Constructors
+    public Attendance() {} // No-argument constructor required fr JPA
 
     public Attendance(Student student, Session session, String status, String method, Double confidence, String timestamp) { // Constructor to create Attendance records
         this.student = student;

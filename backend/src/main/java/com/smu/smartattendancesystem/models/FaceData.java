@@ -16,6 +16,7 @@ public class FaceData extends BaseEntity {
     @JoinColumn(name = "student_id", nullable = false) // Adds a aforeign key column 'student_id' linking to Student's primary key
     private Student student;
 
+    // Constructors
     public FaceData() {}
 
     public FaceData(String imagePath, byte[] embedding) { // Constructor for creating new face entries

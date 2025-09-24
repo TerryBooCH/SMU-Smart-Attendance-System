@@ -14,6 +14,16 @@ public class Section extends BaseEntity {
     private String term;
     private String schedule;
 
+    // Constructors
+    public Section() {}
+
+    public Section(Course course, String sectionCode, String term, String schedule) {
+        this.course = course;
+        this.sectionCode = sectionCode;
+        this.term = term;
+        this.schedule = schedule;
+    }
+
     // Getters & Setters
     public Course getCourse() {
         return course;

@@ -16,6 +16,15 @@ public class CourseEnrollment extends BaseEntity {
 
     private String enrolledAt;
 
+    // Constructors
+    public CourseEnrollment() {}
+
+    public CourseEnrollment(Course course, Student student, String enrolledAt) {
+        this.course = course;
+        this.student = student;
+        this.enrolledAt = enrolledAt;
+    }
+
     // Getters & Setters
     public Course getCourse() {
         return course;

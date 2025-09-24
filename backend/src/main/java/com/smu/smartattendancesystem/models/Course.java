@@ -11,6 +11,14 @@ public class Course extends BaseEntity {
 
     private String title;
 
+    // Constructors
+    public Course() {};
+
+    public Course(String code, String title) {
+        this.code = code;
+        this.title = title;
+    }
+
     // Getters & Setters
     public String getCode() {
         return code;

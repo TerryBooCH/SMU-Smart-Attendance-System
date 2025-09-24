@@ -19,6 +19,7 @@ public class Session extends BaseEntity {
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // One-to-many relationship with Attendance
     private List<Attendance> attendances;
 
+    // Constructors
     public Session() {}
 
     public Session(String name, LocalDate sessionDate, String startAt, String endAt, boolean isOpen, Integer lateAfterMinutes) { // Constructor to make new sessions

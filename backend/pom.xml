@@ -22,7 +22,7 @@
     <description>Vision-based smart attendance system with face recognition</description>
     
     <properties>
-        <java.version>24</java.version> <!-- could use LTS version 17 -->
+        <java.version>21</java.version> <!-- could use LTS version 17 -->
         <javacv.version>1.5.9</javacv.version>
         <opencv.version>4.7.0-1.5.9</opencv.version>
     </properties>

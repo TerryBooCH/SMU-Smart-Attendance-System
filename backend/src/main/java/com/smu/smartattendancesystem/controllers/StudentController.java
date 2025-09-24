@@ -1,52 +1,69 @@
 package com.smu.smartattendancesystem.controllers;
 
+import com.smu.smartattendancesystem.managers.StudentManager;
+import com.smu.smartattendancesystem.models.Student;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.smu.smartattendancesystem.models.Student;
-import com.smu.smartattendancesystem.services.StudentService;
-
 @RestController
-@RequestMapping("/api/students")
+@RequestMapping("/api/students") 
 public class StudentController {
+    private final StudentManager studentManager;
 
-    private final StudentService studentService;
-
-    public StudentController(StudentService studentService) {
-        this.studentService = studentService;
+    public StudentController(StudentManager studentManager) {
+        this.studentManager = studentManager;
     }
 
+    // CREATE
+    @PostMapping
+    public Student addStudent(@RequestBody Student student) {
+        return studentManager.addStudent(student);
+    }
+
+    // READ all
     @GetMapping
     public List<Student> getAllStudents() {
-        return studentService.getAllStudents();
+        return studentManager.getAllStudents();
     }
 
-    @GetMapping("/{id}")
-    public Optional<Student> getStudentById(@PathVariable String id) {
-        return studentService.getStudentById(id);
+    // READ one by studentId
+    @GetMapping("/{studentId}")
+    public Optional<Student> getStudent(@PathVariable String studentId) {
+        System.out.println("=== GET Student Called with ID: " + studentId + " ===");
+        return studentManager.getStudentByStudentId(studentId);
     }
 
-    @PostMapping
-    public Student createStudent(@RequestBody Student student) {
-        return studentService.createStudent(student);
+    // UPDATE by studentId
+    @PutMapping("/{studentId}")
+    public Student updateStudent(@PathVariable String studentId, @RequestBody Student student) {
+        System.out.println("=== UPDATE Student Called with ID: " + studentId + " ===");
+        Optional<Student> existingStudentOpt = studentManager.getStudentByStudentId(studentId);
+        
+        if (existingStudentOpt.isEmpty()) {
+            throw new RuntimeException("Student not found with ID: " + studentId);
+        }
+        
+        Student existingStudent = existingStudentOpt.get();
+        existingStudent.setName(student.getName());
+        existingStudent.setEmail(student.getEmail());
+        existingStudent.setPhone(student.getPhone());
+        
+        return studentManager.updateStudent(existingStudent);
     }
 
-    @PutMapping("/{id}")
-    public Student updateStudent(@PathVariable String id, @RequestBody Student student) {
-        return studentService.updateStudent(id, student);
-    }
-
-    @DeleteMapping("/{id}")
-    public void deleteStudent(@PathVariable String id) {
-        studentService.deleteStudent(id);
+    // DELETE by studentId
+    @DeleteMapping("/{studentId}")
+    public String deleteStudent(@PathVariable String studentId) {
+        System.out.println("=== DELETE Student Called with ID: " + studentId + " ===");
+        Optional<Student> student = studentManager.getStudentByStudentId(studentId);
+        
+        if (student.isEmpty()) {
+            throw new RuntimeException("Student not found with ID: " + studentId);
+        }
+        
+        studentManager.deleteStudent(student.get().getId());
+        return "Student deleted successfully";
     }
 }

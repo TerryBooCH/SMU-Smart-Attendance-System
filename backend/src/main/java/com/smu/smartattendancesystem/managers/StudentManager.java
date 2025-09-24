@@ -1,42 +1,54 @@
 package com.smu.smartattendancesystem.managers;
 
+import com.smu.smartattendancesystem.models.Student;
+import com.smu.smartattendancesystem.repositories.StudentRepository;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.stereotype.Component;
-
-import com.smu.smartattendancesystem.models.Student;
-import com.smu.smartattendancesystem.repositories.StudentRepository;
-
-@Component
+@Service
 public class StudentManager {
+    private final StudentRepository studentRepo;
 
-    private final StudentRepository studentRepository;
-
-    public StudentManager(StudentRepository studentRepository) {
-        this.studentRepository = studentRepository;
+    public StudentManager(StudentRepository studentRepo) {
+        this.studentRepo = studentRepo;
     }
 
-    public List<Student> findAll() {
-        return studentRepository.findAll();
+    // CREATE: Add a new student
+    public Student addStudent(Student student) {
+        return studentRepo.save(student);
     }
 
-    public Optional<Student> findById(String studentId) {
-        return studentRepository.findById(studentId);
+    // READ: Get student by primary key (Long id)
+    public Optional<Student> getStudentById(Long id) {
+        return studentRepo.findById(id);
     }
 
-    public Student enroll(Student student) {
-        return studentRepository.save(student);
+    // READ: Get student by business ID (String studentId)
+    public Optional<Student> getStudentByStudentId(String studentId) {
+        return studentRepo.findByStudentId(studentId);
     }
 
-    public Student update(String studentId, Student updatedStudent) {
-        if (studentRepository.existsById(studentId)) {
-            return studentRepository.save(updatedStudent);
-        }
-        return null;
+    // READ: Get all students
+    public List<Student> getAllStudents() {
+        return studentRepo.findAll();
     }
 
-    public void remove(String studentId) {
-        studentRepository.deleteById(studentId);
+    // UPDATE: Update existing student
+    public Student updateStudent(Student student) {
+        return studentRepo.save(student);
+    }
+
+    // DELETE: Remove a student by primary key
+    public void deleteStudent(Long id) {
+        studentRepo.deleteById(id);
+    }
+
+    // DELETE: Remove a student by business ID
+    public void deleteStudentByStudentId(String studentId) {
+        studentRepo.findByStudentId(studentId).ifPresent(student -> {
+            studentRepo.delete(student);
+        });
     }
 }

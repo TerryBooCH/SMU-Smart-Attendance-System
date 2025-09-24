@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/students") // Changed to avoid conflicts
+@RequestMapping("/api/students") 
 public class StudentController {
     private final StudentManager studentManager;
 

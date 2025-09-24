@@ -17,12 +17,6 @@ const PreAuthNavbar = () => {
 
         <div className="flex items-center gap-3">
           <a
-            href="/signup"
-            className="text-sm font-medium py-2 px-3 rounded-full border-1 border-[#cecece] text-gray-muted hover:bg-gray-50 hover:shadow-md hover:text-black hover:scale-105 transition-all duration-200"
-          >
-            New Account
-          </a>
-          <a
             href="/signin"
             className="text-sm py-2 px-3 bg-primary text-white rounded-full font-medium hover:scale-105 hover:shadow-md transition-all duration-200"
           >

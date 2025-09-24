@@ -39,12 +39,6 @@ const Hero = () => {
                 <ArrowRight size={20} />
               </div>
             </a>
-            <a
-              href="/signup"
-              className="sm:py-2.5 sm:px-8 rounded-full font-medium sm:text-base lg:text-lg text-black border-1 border-[#cecece] hover:scale-105 hover:bg-gray-50 hover:shadow-md transition-all duration-200"
-            >
-              New Account
-            </a>
           </div>
         </div>
         <div>

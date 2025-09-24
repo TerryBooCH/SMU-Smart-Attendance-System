@@ -26,6 +26,18 @@ const SignInForm = () => {
                 required
               />
             </div>
+            <div class="mb-6">
+              <label for="password" class="block mb-2 text-sm font-medium">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                class="bg-gray-50 border border-[#cecece] text-gray-900 text-sm rounded-xl focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-3  "
+                placeholder="Password"
+                required
+              />
+            </div>
             {/* Submit Button */}
             <div>
               <button className="text-white bg-primary font-medium w-full px-2.5 py-2 rounded-xl cursor-pointer">
@@ -33,19 +45,6 @@ const SignInForm = () => {
               </button>
             </div>
           </form>
-
-          {/* Bottom Link */}
-          <div className="text-center text-sm mt-6">
-            <p>
-              Don't have an account?{" "}
-              <Link
-                to="/signup"
-                className="text-primary transition-colors"
-              >
-                Sign Up
-              </Link>
-            </p>
-          </div>
         </div>
       </div>
     </div>

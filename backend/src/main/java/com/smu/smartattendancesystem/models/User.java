@@ -19,17 +19,17 @@ public class User extends BaseEntity {
     private String passwordHash;
 
     @Column(nullable = false)
-    private boolean isTA;
+    private int permissionLevel; // 0 = Student, 1 = TA, 2 = Professor
 
     // Default constructor required by JPA
     public User() {}
 
     // Constructor: takes plain password, hashes it, and stores it
-    public User(String name, String email, String plainPassword, boolean isTA) {
+    public User(String name, String email, String plainPassword, int permissionLevel) {
         this.name = name;
         this.email = email;
         this.passwordHash = hashPassword(plainPassword);
-        this.isTA = isTA;
+        this.permissionLevel = permissionLevel;
     }
 
     // Hashing method (SHA-256)
@@ -71,12 +71,12 @@ public class User extends BaseEntity {
         return passwordHash; 
     }
 
-    public boolean isTA() {
-        return isTA;
+    public int getPermissionLevel() {
+        return permissionLevel;
     }
 
-    public void setTA(boolean isTA) {
-        this.isTA = isTA;
+    public void setPermissionLevel(int permissionLevel) {
+        this.permissionLevel = permissionLevel;
     }
 
     @JsonProperty("password") // Accept "password" from JSON as plain text

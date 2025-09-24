@@ -13,7 +13,7 @@ public class FaceData extends BaseEntity {
     private byte[] embedding; // Stores the face embedding (numerical vector, 128-512 floats, stored as byte array)
 
     @OneToOne // The owning side of the one-to-one realtionship with Student
-    @JoinColumn(name = "student_id", nullable = false) // Adds a aforeign key column 'student_id' linking to Student's primary key
+    @JoinColumn(name = "student_id", nullable = false) // Adds a aforeign key column 'student_id' linking to Student's student_id
     private Student student;
 
     // Constructors

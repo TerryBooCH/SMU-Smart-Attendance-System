@@ -21,6 +21,11 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private int permissionLevel; // 0 = Student, 1 = TA, 2 = Professor
 
+    // Optional foreign key to Student table - only for users who are students
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = true) // Makes it optional
+    private Student student;
+
     // Default constructor required by JPA
     public User() {}
 
@@ -30,6 +35,16 @@ public class User extends BaseEntity {
         this.email = email;
         this.passwordHash = hashPassword(plainPassword);
         this.permissionLevel = permissionLevel;
+        this.student = null; // Initially no student association
+    }
+
+    // Constructor with student association
+    public User(String name, String email, String plainPassword, int permissionLevel, Student student) {
+        this.name = name;
+        this.email = email;
+        this.passwordHash = hashPassword(plainPassword);
+        this.permissionLevel = permissionLevel;
+        this.student = student;
     }
 
     // Hashing method (SHA-256)
@@ -77,6 +92,24 @@ public class User extends BaseEntity {
 
     public void setPermissionLevel(int permissionLevel) {
         this.permissionLevel = permissionLevel;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    // Helper method to check if user is linked to a student
+    public boolean isLinkedToStudent() {
+        return student != null;
+    }
+
+    // Helper method to get student ID if linked
+    public String getLinkedStudentId() {
+        return student != null ? student.getStudentId() : null;
     }
 
     @JsonProperty("password") // Accept "password" from JSON as plain text

@@ -1,11 +1,12 @@
 package com.smu.smartattendancesystem.managers;
 
-import com.smu.smartattendancesystem.models.Student;
-import com.smu.smartattendancesystem.repositories.StudentRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.smu.smartattendancesystem.models.Student;
+import com.smu.smartattendancesystem.repositories.StudentRepository;
 
 @Service
 public class StudentManager {
@@ -36,7 +37,7 @@ public class StudentManager {
     }
 
     // UPDATE: Update existing student
-    public Student updateStudent(Student student) {
+    public Student updateStudent(String studentId, Student student) {
         return studentRepo.save(student);
     }
 

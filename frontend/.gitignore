@@ -28,3 +28,6 @@ package-lock.json
 
 # Vite
 .vite
+
+#env
+.env

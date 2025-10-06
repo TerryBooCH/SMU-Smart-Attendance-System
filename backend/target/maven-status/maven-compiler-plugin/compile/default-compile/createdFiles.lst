@@ -1,4 +1,7 @@
 com\smu\smartattendancesystem\managers\CourseManager.class
+com\smu\smartattendancesystem\repositories\UserRepository.class
+com\smu\smartattendancesystem\config\WebConfig.class
+com\smu\smartattendancesystem\managers\UserManager.class
 com\smu\smartattendancesystem\config\SecurityConfig.class
 com\smu\smartattendancesystem\models\CourseEnrollment.class
 com\smu\smartattendancesystem\models\Session.class
@@ -11,8 +14,11 @@ com\smu\smartattendancesystem\repositories\SessionRepository.class
 com\smu\smartattendancesystem\managers\SectionManager.class
 com\smu\smartattendancesystem\models\BaseEntity.class
 com\smu\smartattendancesystem\repositories\CourseRepository.class
+com\smu\smartattendancesystem\config\WebConfig$1.class
 com\smu\smartattendancesystem\repositories\StudentRepository.class
+com\smu\smartattendancesystem\services\StudentService.class
 com\smu\smartattendancesystem\models\Course.class
+com\smu\smartattendancesystem\models\User.class
 com\smu\smartattendancesystem\managers\FaceDataManager.class
 com\smu\smartattendancesystem\models\Section.class
 com\smu\smartattendancesystem\repositories\CourseEnrollmentRepository.class

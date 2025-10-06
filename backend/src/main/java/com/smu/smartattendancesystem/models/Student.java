@@ -1,6 +1,13 @@
 package com.smu.smartattendancesystem.models;
 
-import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "student")
@@ -13,9 +20,13 @@ public class Student extends BaseEntity {
     private String email;
     private String phone;
 
-    // One-to-one with FaceData
-    @OneToOne(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // Any operation on Student also applies to FaceData
-    private FaceData faceData;
+    // Create a One-to-Many relationship with FaceData (1 student to 10-20 images)
+    @OneToMany(
+        mappedBy = "student", 
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    private List<FaceData> faceData = new ArrayList<>();
 
     // Constructors
     public Student() {}
@@ -59,11 +70,11 @@ public class Student extends BaseEntity {
         this.phone = phone; 
     }
 
-    public FaceData getFaceData() { 
-        return faceData; 
+    public List<FaceData> getFaceData() {
+        return faceData;
     }
 
-    public void setFaceData(FaceData faceData) { 
-        this.faceData = faceData; 
+    public void setFaceData(List<FaceData> faceData) {
+        this.faceData = faceData;
     }
 }

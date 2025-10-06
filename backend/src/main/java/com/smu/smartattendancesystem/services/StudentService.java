@@ -18,22 +18,22 @@ public class StudentService {
     }
 
     public List<Student> getAllStudents() {
-        return studentManager.findAll();
+        return studentManager.getAllStudents();
     }
 
-    public Optional<Student> getStudentById(String studentId) {
-        return studentManager.findById(studentId);
+    public Optional<Student> getStudentByStudentId(String studentId) {
+        return studentManager.getStudentByStudentId(studentId);
     }
 
     public Student createStudent(Student student) {
-        return studentManager.enroll(student);
+        return studentManager.addStudent(student);
     }
 
     public Student updateStudent(String studentId, Student updatedStudent) {
-        return studentManager.update(studentId, updatedStudent);
+        return studentManager.updateStudent(studentId, updatedStudent);
     }
 
     public void deleteStudent(String studentId) {
-        studentManager.remove(studentId);
+        studentManager.deleteStudentByStudentId(studentId);
     }
 }

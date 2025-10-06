@@ -1,11 +1,19 @@
 package com.smu.smartattendancesystem.controllers;
 
-import com.smu.smartattendancesystem.services.StudentService;
-import com.smu.smartattendancesystem.models.Student;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.smu.smartattendancesystem.models.Student;
+import com.smu.smartattendancesystem.services.StudentService;
 
 @RestController
 @RequestMapping("/api/students") 
@@ -32,14 +40,14 @@ public class StudentController {
     @GetMapping("/{studentId}")
     public Optional<Student> getStudent(@PathVariable String studentId) {
         System.out.println("=== GET Student Called with ID: " + studentId + " ===");
-        return studentService.getStudentById(studentId);
+        return studentService.getStudentByStudentId(studentId);
     }
 
     // UPDATE by studentId
     @PutMapping("/{studentId}")
     public Student updateStudent(@PathVariable String studentId, @RequestBody Student student) {
         System.out.println("=== UPDATE Student Called with ID: " + studentId + " ===");
-        Optional<Student> existingStudentOpt = studentService.getStudentById(studentId);
+        Optional<Student> existingStudentOpt = studentService.getStudentByStudentId(studentId);
         
         if (existingStudentOpt.isEmpty()) {
             throw new RuntimeException("Student not found with ID: " + studentId);
@@ -57,7 +65,7 @@ public class StudentController {
     @DeleteMapping("/{studentId}")
     public String deleteStudent(@PathVariable String studentId) {
         System.out.println("=== DELETE Student Called with ID: " + studentId + " ===");
-        Optional<Student> student = studentService.getStudentById(studentId);
+        Optional<Student> student = studentService.getStudentByStudentId(studentId);
         
         if (student.isEmpty()) {
             throw new RuntimeException("Student not found with ID: " + studentId);

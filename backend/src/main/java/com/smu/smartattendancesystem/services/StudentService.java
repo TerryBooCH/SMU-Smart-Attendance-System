@@ -21,7 +21,7 @@ public class StudentService {
         return studentManager.getAllStudents();
     }
 
-    public Optional<Student> getStudentById(String studentId) {
+    public Optional<Student> getStudentByStudentId(String studentId) {
         return studentManager.getStudentByStudentId(studentId);
     }
 

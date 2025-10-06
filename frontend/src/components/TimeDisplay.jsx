@@ -15,9 +15,9 @@ const TimeDisplay = () => {
   const minutes = currentTime.getMinutes();
   const seconds = currentTime.getSeconds();
 
-  const secondAngle = seconds * 6 - 90;
-  const minuteAngle = minutes * 6 + seconds * 0.1 - 90;
-  const hourAngle = hours * 30 + minutes * 0.5 - 90;
+  const secondAngle = seconds * 6;
+  const minuteAngle = minutes * 6 + seconds * 0.1;
+  const hourAngle = hours * 30 + minutes * 0.5;
 
   const formatTime = () => {
     return currentTime.toLocaleTimeString("en-US", {

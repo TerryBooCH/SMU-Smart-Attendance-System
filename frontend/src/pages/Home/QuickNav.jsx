@@ -50,7 +50,7 @@ const QuickNav = () => {
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-8 pb-16">
+    <div className="max-w-6xl mx-auto px-8 pb-16 flex-1">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Quick Actions</h2>
         <p className="text-gray-600">

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import Logo from "../assets/logo.svg";
+
 import {
   Users,
   School,
@@ -62,18 +64,18 @@ const Sidebar = () => {
       } transition-all duration-300 ease-in-out flex-shrink-0`}
     >
       <nav
-        className="fixed top-0 left-0 h-screen bg-white border-r border-gray-200 shadow-lg flex flex-col transition-all duration-300 ease-in-out"
+        className="fixed top-0 left-0 h-screen bg-white border-r border-[#cecece]  flex flex-col transition-all duration-300 ease-in-out"
         style={{ width: isCollapsed ? "80px" : "288px" }}
       >
         {/* Header / Logo section */}
-        <div className="px-4 py-6 border-b border-gray-100">
+        <div className="px-4 py-4 border-b border-[#cecece] min-h-[7rem] ">
           <div className="group relative flex items-center rounded-xl transition-all duration-200 p-3">
             <div className="flex-shrink-0 w-6 flex items-center justify-center">
               <button
                 onClick={toggleSidebar}
-                className="p-2 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-lg flex items-center justify-center transition-all duration-300 hover:shadow-xl -m-2 cursor-pointer"
+                className="flex items-center justify-center transition-all duration-300  -m-2 cursor-pointer"
               >
-                <Sparkles size={24} className="text-white" />
+                <img src={Logo} alt="AgentSoC" className="size-[43px]" />
               </button>
             </div>
             <div
@@ -195,7 +197,7 @@ const Sidebar = () => {
         </div>
 
         {/* Account section */}
-        <div className="border-t border-gray-100 p-4 space-y-2">
+        <div className="border-t border-[#cecece] p-4 space-y-2">
           <div
             className={`px-2 py-1 mb-2 overflow-hidden transition-all duration-300 ease-in-out ${
               isCollapsed ? "max-h-0 opacity-0" : "max-h-10 opacity-100"
@@ -224,7 +226,7 @@ const Sidebar = () => {
               Settings
             </span>
           </Link>
-          <button className="group w-full flex items-center rounded-xl transition-all duration-200 text-red-600 hover:text-red-700 hover:bg-red-50 p-3">
+          <button className="group cursor-pointer w-full flex items-center rounded-xl transition-all duration-200 text-red-600 hover:text-red-700 hover:bg-red-50 p-3">
             <div className="flex-shrink-0 w-6 flex justify-center">
               <LogOut
                 size={20}
@@ -246,7 +248,7 @@ const Sidebar = () => {
               isCollapsed ? "max-h-0 opacity-0" : "max-h-20 opacity-100"
             }`}
           >
-            <div className="p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+            <div className="p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-[#cecece]">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-full flex items-center justify-center flex-shrink-0">
                   <span className="text-white text-xs font-bold">U</span>

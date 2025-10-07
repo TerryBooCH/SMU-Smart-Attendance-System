@@ -12,6 +12,17 @@ export const studentService = {
     }
   },
 
+  createStudent: async (studentData) => {
+    try {
+      const response = await apiClient.post("/api/students", studentData);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating student:", error);
+      throw error;
+    }
+  },
+
   deleteStudentByStudentId: async (studentId) => {
     try {
       const response = await apiClient.delete(`/api/students/${studentId}`);

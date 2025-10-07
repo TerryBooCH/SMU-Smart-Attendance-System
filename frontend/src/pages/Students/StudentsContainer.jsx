@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import useStudent from "../../hooks/useStudent";
 import { Edit, Trash2, Eye } from "lucide-react";
 import { formatDate } from "../../utils/dateUtils";
@@ -7,12 +7,17 @@ import DeleteStudentButton from "../../components/DeleteStudentButton";
 
 const StudentsContainer = () => {
   const { students, loading, error, fetchAllStudents } = useStudent();
-  
-  useEffect(() => {
-    fetchAllStudents();
-  }, []);
+  const hasFetched = useRef(false);
 
-  if (loading) {
+  useEffect(() => {
+    // Only fetch once on mount
+    if (!hasFetched.current) {
+      fetchAllStudents();
+      hasFetched.current = true;
+    }
+  }, [fetchAllStudents]);
+
+  if (loading && students.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg text-gray-600">Loading students...</div>
@@ -30,13 +35,6 @@ const StudentsContainer = () => {
 
   return (
     <div className="mx-auto p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">All Students</h1>
-        <p className="text-gray-600 mt-1">
-          Total: {students?.length || 0} students
-        </p>
-      </div>
-
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">

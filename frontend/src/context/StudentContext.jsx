@@ -4,7 +4,7 @@ import { studentService } from "../api/studentService";
 const StudentContext = createContext();
 
 export const StudentProvider = ({ children }) => {
-  const [students, setStudents] = useState({});
+  const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -14,13 +14,32 @@ export const StudentProvider = ({ children }) => {
       setError(null);
 
       const response = await studentService.getAllStudents();
-
       setStudents(response || []);
-      console.log(response);
       return response;
     } catch (error) {
       console.error("Error fetching students:", error);
       setError(error.message || "Failed to fetch students");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createStudent = async (studentData) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await studentService.createStudent(studentData);
+      
+      const newStudent = response.data || response.student || response;
+      
+      // Add new student to local state 
+      setStudents((prev) => [...prev, newStudent]);
+
+      return response;
+    } catch (error) {
+      console.error("Error creating student:", error);
       throw error;
     } finally {
       setLoading(false);
@@ -32,26 +51,19 @@ export const StudentProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await studentService.deleteStudentByStudentId(studentId);
+      await studentService.deleteStudentByStudentId(studentId);
 
-      if (response.status == 200) {
-        // Remove student locally after successful deletion
-        setStudents((prevStudents) => {
-          if (Array.isArray(prevStudents)) {
-            return prevStudents.filter(
-              (student) => student.studentId !== studentId
-            );
-          }
-          // If students is an object, remove the key
-          const { [studentId]: deleted, ...rest } = prevStudents;
-          return rest;
-        });
-      }
+      // Remove student from local state 
+      setStudents((prev) => 
+        prev.filter((student) => 
+          student.studentId !== studentId && 
+          student.student_id !== studentId
+        )
+      );
 
-      return response;
+      return { status: 200, message: "Student deleted successfully" };
     } catch (error) {
       console.error("Error deleting student:", error);
-      setError(error.message || "Failed to delete student");
       throw error;
     } finally {
       setLoading(false);
@@ -65,10 +77,20 @@ export const StudentProvider = ({ children }) => {
     setStudents,
     fetchAllStudents,
     deleteStudentByStudentId,
+    createStudent,
   };
+
   return (
     <StudentContext.Provider value={value}>{children}</StudentContext.Provider>
   );
+};
+
+export const useStudents = () => {
+  const context = useContext(StudentContext);
+  if (!context) {
+    throw new Error("useStudents must be used within StudentProvider");
+  }
+  return context;
 };
 
 export default StudentContext;

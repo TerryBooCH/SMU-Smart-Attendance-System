@@ -14,14 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.smu.smartattendancesystem.models.Student;
 import com.smu.smartattendancesystem.services.StudentService;
+import com.smu.smartattendancesystem.services.FaceDataService;
 
 @RestController
 @RequestMapping("/api/students") 
 public class StudentController {
     private final StudentService studentService;
+    private final FaceDataService faceDataService;
 
-    public StudentController(StudentService studentService) {
+    public StudentController(StudentService studentService, FaceDataService faceDataService) {
         this.studentService = studentService;
+        this.faceDataService = faceDataService;
     }
 
     // CREATE

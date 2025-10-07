@@ -20,12 +20,13 @@
 
 .bg-blue-mesh {
   background-color: hsla(0, 0%, 100%, 1);
-  background-image:
-    radial-gradient(at 96% 6%, hsla(221, 82%, 53%, 0.21) 0px, transparent 50%),
+  background-image: radial-gradient(
+      at 96% 6%,
+      hsla(221, 82%, 53%, 0.21) 0px,
+      transparent 50%
+    ),
     radial-gradient(at 0% 48%, hsla(221, 82%, 53%, 0.26) 0px, transparent 50%);
 }
-
-
 
 .float-1 {
   animation: float 3s ease-in-out infinite;
@@ -41,13 +42,22 @@
   animation-delay: 1s;
 }
 
+.animate-modalPopIn {
+  animation: modalPopIn 0.3s ease-out forwards;
+}
+
+.toast-modern {
+  animation: slideIn 0.3s ease-out;
+  backdrop-filter: blur(10px);
+}
+
 @layer utilities {
   .text-primary {
     color: #2563eb;
   }
 
   .text-gray-muted {
-    color: #71717A;
+    color: #71717a;
   }
 
   .bg-primary {
@@ -59,8 +69,20 @@
   }
 }
 
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
 @keyframes float {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0px);
   }
 
@@ -81,5 +103,22 @@
 
   button {
     background-color: #f9f9f9;
+  }
+}
+
+@keyframes modalPopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
   }
 }

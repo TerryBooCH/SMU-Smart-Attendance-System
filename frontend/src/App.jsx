@@ -1,5 +1,9 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ModalProvider } from "./context/ModalContext";
 import { StudentProvider } from "./context/StudentContext";
+import { ToastProvider } from "./context/ToastContext";
+import Modal from "./components/Modal";
+import ToastContainer from "./components/ToastContainer";
 import Home from "./pages/Home";
 import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
@@ -13,16 +17,22 @@ function App() {
   return (
     <BrowserRouter>
       <StudentProvider>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/home" element={<Home />} />
-          <Route path="/signin" element={<SignIn />} />
-          <Route path="/students" element={<Students />} />
-          <Route path="/sessions" element={<Sessions />} />
-          <Route path="/reports" element={<Reports />} />
-          <Route path="/live-recognition" element={<LiveRecognition />} />
-          <Route path="/settings" element={<Settings />} />
-        </Routes>
+        <ModalProvider>
+          <ToastProvider>
+            <Modal />
+            <ToastContainer />
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/signin" element={<SignIn />} />
+              <Route path="/students" element={<Students />} />
+              <Route path="/sessions" element={<Sessions />} />
+              <Route path="/reports" element={<Reports />} />
+              <Route path="/live-recognition" element={<LiveRecognition />} />
+              <Route path="/settings" element={<Settings />} />
+            </Routes>
+          </ToastProvider>
+        </ModalProvider>
       </StudentProvider>
     </BrowserRouter>
   );

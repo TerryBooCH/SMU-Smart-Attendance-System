@@ -3,6 +3,7 @@ import useStudent from "../../hooks/useStudent";
 import { Edit, Trash2, Eye } from "lucide-react";
 import { formatDate } from "../../utils/dateUtils";
 import { getInitials } from "../../utils/stringUtils";
+import DeleteStudentButton from "../../components/DeleteStudentButton";
 
 const StudentsContainer = () => {
   const { students, loading, error, fetchAllStudents } = useStudent();
@@ -122,13 +123,7 @@ const StudentsContainer = () => {
                         >
                           <Edit className="w-5 h-5" />
                         </button>
-                        <button
-                          onClick={() => console.log("Delete", student.id)}
-                          className="text-red-600 hover:text-red-900"
-                          title="Delete"
-                        >
-                          <Trash2 className="w-5 h-5" />
-                        </button>
+                        <DeleteStudentButton student={student} />
                       </div>
                     </td>
                   </tr>

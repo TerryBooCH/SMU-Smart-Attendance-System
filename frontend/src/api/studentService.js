@@ -11,4 +11,15 @@ export const studentService = {
       throw error;
     }
   },
+
+  deleteStudentByStudentId: async (studentId) => {
+    try {
+      const response = await apiClient.delete(`/api/students/${studentId}`);
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.error("Error deleting student:", error);
+      throw error;
+    }
+  },
 };

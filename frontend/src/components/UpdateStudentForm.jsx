@@ -1,22 +1,30 @@
 import React, { useState, useRef, useEffect, useContext } from "react";
-import { validateCreateStudentForm } from "../../utils/validateForm";
-import { useModal } from "../../context/ModalContext";
-import { useToast } from "../../hooks/useToast";
-import useStudent from "../../hooks/useStudent";
-import { CircleAlert } from "lucide-react";
+import { validateUpdateStudentForm } from "../utils/validateForm";
+import { useModal } from "../context/ModalContext";
+import { useToast } from "../hooks/useToast";
+import useStudent from "../hooks/useStudent";
+import StudentContext from "../context/StudentContext";
 
-const CreateStudentForm = () => {
+const UpdateStudentForm = ({ student }) => {
   const { closeModal } = useModal();
   const { success, errror } = useToast();
-  const { createStudent } = useStudent();
+  const { updateStudentByStudentId } = useStudent();
   const [formValues, setFormValues] = useState({
-    studentId: "",
-    name: "",
-    email: "",
-    phone: "",
+    name: student?.name || "",
+    email: student?.email || "",
+    phone: student?.phone || "",
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check if form has been modified
+  const isFormChanged = () => {
+    return (
+      formValues.name !== (student?.name || "") ||
+      formValues.email !== (student?.email || "") ||
+      formValues.phone !== (student?.phone || "")
+    );
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,26 +49,25 @@ const CreateStudentForm = () => {
 
     // Trim all form values before validation
     const trimmedValues = {
-      studentId: formValues.studentId.trim(),
       name: formValues.name.trim(),
       email: formValues.email.trim(),
       phone: formValues.phone.trim(),
     };
 
     // Validate form with trimmed values
-    const errors = validateCreateStudentForm(trimmedValues);
+    const errors = validateUpdateStudentForm(trimmedValues);
     setFormErrors(errors);
 
     if (Object.keys(errors).length === 0) {
       try {
         setIsSubmitting(true);
-        await createStudent(trimmedValues); // Submit trimmed values
-        success("Student created successfully");
+        await updateStudentByStudentId(student.studentId, trimmedValues);
+        success("Student updated successfully");
         closeModal();
       } catch (error) {
         console.error("Error submitting form:", error);
         setFormErrors({
-          submit: error.message || "Failed to create student",
+          submit: error.message || "Failed to update student",
         });
       } finally {
         setIsSubmitting(false);
@@ -80,33 +87,6 @@ const CreateStudentForm = () => {
           </div>
         )}
         <div className="mb-5">
-          <div className="w-full mb-4">
-            <label
-              htmlFor="studentId"
-              className="block mb-2 text-sm text-gray-900 font-lexend"
-            >
-              Student ID
-            </label>
-            <input
-              type="text"
-              id="studentId"
-              name="studentId"
-              value={formValues.studentId}
-              onChange={handleChange}
-              required
-              disabled={isSubmitting}
-              className={`font-lexend bg-white border border-[#cecece] text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
-                formErrors.studentId ? "border-red-500" : "border-gray-300"
-              } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
-              placeholder="e.g., S12345"
-            />
-            {formErrors.studentId && (
-              <p className="mt-2 text-sm text-red-600 font-lexend">
-                {formErrors.studentId}
-              </p>
-            )}
-          </div>
-
           <div className="w-full mb-4">
             <label
               htmlFor="name"
@@ -200,13 +180,11 @@ const CreateStudentForm = () => {
             <button
               type="submit"
               disabled={
-                isSubmitting ||
-                !formValues.studentId.trim() ||
-                !formValues.name.trim()
+                isSubmitting || !formValues.name.trim() || !isFormChanged()
               }
               className="text-white bg-black text-medium px-3 py-2 rounded-lg font-lexend cursor-pointer hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSubmitting ? "Creating..." : "Create"}
+              {isSubmitting ? "Updating..." : "Update"}
             </button>
           </div>
         </div>
@@ -215,4 +193,4 @@ const CreateStudentForm = () => {
   );
 };
 
-export default CreateStudentForm;
+export default UpdateStudentForm;

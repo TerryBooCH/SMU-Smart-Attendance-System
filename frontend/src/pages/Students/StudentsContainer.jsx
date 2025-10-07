@@ -1,9 +1,10 @@
 import React, { useEffect, useRef } from "react";
 import useStudent from "../../hooks/useStudent";
-import { Edit, Trash2, Eye } from "lucide-react";
+import { Eye } from "lucide-react";
 import { formatDate } from "../../utils/dateUtils";
 import { getInitials } from "../../utils/stringUtils";
 import DeleteStudentButton from "../../components/DeleteStudentButton";
+import UpdateStudentButton from "../../components/UpdateStudentButton";
 
 const StudentsContainer = () => {
   const { students, loading, error, fetchAllStudents } = useStudent();
@@ -109,18 +110,12 @@ const StudentsContainer = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => console.log("View", student.id)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="flex items-center cursor-pointer px-2 py-2 text-black"
                           title="View"
                         >
-                          <Eye className="w-5 h-5" />
+                          <Eye size={16} />
                         </button>
-                        <button
-                          onClick={() => console.log("Edit", student.id)}
-                          className="text-green-600 hover:text-green-900"
-                          title="Edit"
-                        >
-                          <Edit className="w-5 h-5" />
-                        </button>
+                        <UpdateStudentButton student={student} />
                         <DeleteStudentButton student={student} />
                       </div>
                     </td>

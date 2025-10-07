@@ -11,7 +11,7 @@ const DeleteStudentButton = ({ student }) => {
   return (
     <button
       onClick={handleDeleteStudent}
-      className="flex items-center gap-2 cursor-pointer  w-full h-full px-2 py-2 text-red-500"
+      className="flex items-center cursor-pointer   px-2 py-2 text-red-500"
     >
       <Trash2 size={16} />
     </button>

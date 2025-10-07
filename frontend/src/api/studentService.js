@@ -33,4 +33,15 @@ export const studentService = {
       throw error;
     }
   },
+
+  updateStudentByStudentId: async (studentId, studentData) => {
+    try {
+      const response = await apiClient.put(`/api/students/${studentId}`, studentData);
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.error("Error updating student:", error);
+      throw error;
+    }
+  },
 };

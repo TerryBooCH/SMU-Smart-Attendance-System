@@ -31,15 +31,44 @@ export const StudentProvider = ({ children }) => {
       setError(null);
 
       const response = await studentService.createStudent(studentData);
-      
+
       const newStudent = response.data || response.student || response;
-      
-      // Add new student to local state 
+
+      // Add new student to local state
       setStudents((prev) => [...prev, newStudent]);
 
       return response;
     } catch (error) {
       console.error("Error creating student:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateStudentByStudentId = async (studentId, studentData) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await studentService.updateStudentByStudentId(
+        studentId,
+        studentData
+      );
+
+      const updatedStudent = response.data || response.student || response;
+
+      // Update student in local state
+      setStudents((prev) =>
+        prev.map((student) => {
+          const currentStudentId = student.studentId || student.student_id;
+          return currentStudentId === studentId ? updatedStudent : student;
+        })
+      );
+
+      return response;
+    } catch (error) {
+      console.error("Error updating student:", error);
       throw error;
     } finally {
       setLoading(false);
@@ -53,11 +82,11 @@ export const StudentProvider = ({ children }) => {
 
       await studentService.deleteStudentByStudentId(studentId);
 
-      // Remove student from local state 
-      setStudents((prev) => 
-        prev.filter((student) => 
-          student.studentId !== studentId && 
-          student.student_id !== studentId
+      // Remove student from local state
+      setStudents((prev) =>
+        prev.filter(
+          (student) =>
+            student.studentId !== studentId && student.student_id !== studentId
         )
       );
 
@@ -77,6 +106,7 @@ export const StudentProvider = ({ children }) => {
     setStudents,
     fetchAllStudents,
     deleteStudentByStudentId,
+    updateStudentByStudentId,
     createStudent,
   };
 

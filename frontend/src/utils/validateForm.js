@@ -29,12 +29,12 @@ export const validateCreateStudentForm = (values) => {
 
   // Validate Phone (optional, but must be exactly 8 digits if provided)
   if (values.phone && values.phone.trim()) {
-    // Remove any spaces, dashes, or other non-digit characters for validation
-    const cleanedPhone = values.phone.replace(/\D/g, "");
-    if (cleanedPhone.length !== 8) {
+    const phoneValue = values.phone.trim();
+    // Check if phone contains only digits
+    if (!/^\d+$/.test(phoneValue)) {
+      errors.phone = "Phone number must contain only numbers";
+    } else if (phoneValue.length !== 8) {
       errors.phone = "Phone number must be exactly 8 digits";
-    } else if (!/^\d{8}$/.test(cleanedPhone)) {
-      errors.phone = "Phone number must contain only digits";
     }
   }
 
@@ -61,12 +61,12 @@ export const validateUpdateStudentForm = (values) => {
 
   // Validate Phone
   if (values.phone && values.phone.trim()) {
-    // Remove any spaces, dashes, or other non-digit characters for validation
-    const cleanedPhone = values.phone.replace(/\D/g, "");
-    if (cleanedPhone.length !== 8) {
+    const phoneValue = values.phone.trim();
+    // Check if phone contains only digits
+    if (!/^\d+$/.test(phoneValue)) {
+      errors.phone = "Phone number must contain only numbers";
+    } else if (phoneValue.length !== 8) {
       errors.phone = "Phone number must be exactly 8 digits";
-    } else if (!/^\d{8}$/.test(cleanedPhone)) {
-      errors.phone = "Phone number must contain only digits";
     }
   }
 

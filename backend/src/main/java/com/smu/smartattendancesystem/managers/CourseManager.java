@@ -1,47 +1,64 @@
 package com.smu.smartattendancesystem.managers;
 
-import com.smu.smartattendancesystem.models.Course;
-import com.smu.smartattendancesystem.repositories.CourseRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
-@Service
+import org.springframework.stereotype.Component;
+
+import com.smu.smartattendancesystem.models.Course;
+import com.smu.smartattendancesystem.services.CourseService;
+
+/**
+ * Manager class for Course operations.
+ * Acts as a facade to simplify course management operations.
+ * Delegates to CourseService for business logic.
+ */
+@Component
 public class CourseManager {
-    private final CourseRepository courseRepo;
-
-    public CourseManager(CourseRepository courseRepo) {
-        this.courseRepo = courseRepo;
+    
+    private final CourseService courseService;
+    
+    public CourseManager(CourseService courseService) {
+        this.courseService = courseService;
     }
-
-    // CREATE: Add a new course
-    // Use case: admin sets up new module
+    
+    // Add a new course
     public Course addCourse(Course course) {
-        return courseRepo.save(course);
+        return courseService.createCourse(course);
     }
-
-    // READ: Get course by ID
-    // Use case: student/lecturer views course details
+    
+    // Get course by ID
     public Optional<Course> getCourse(Long id) {
-        return courseRepo.findById(id);
+        return courseService.getCourseById(id);
     }
-
-    // READ: List all courses
-    // Use case: students browse available modules
+    
+    // Get course by code
+    public Optional<Course> getCourseByCode(String code) {
+        return courseService.getCourseByCode(code);
+    }
+    
+    // List all courses
     public List<Course> getAllCourses() {
-        return courseRepo.findAll();
+        return courseService.getAllCourses();
     }
-
-    // UPDATE: Update course info
-    // Use case: change course name or code
-    public Course updateCourse(Course course) {
-        return courseRepo.save(course);
+    
+    // Update course information
+    public Course updateCourse(Long id, Course course) {
+        return courseService.updateCourse(id, course);
     }
-
-    // DELETE: Remove a course
-    // Use case: course discontinued
+    
+    // Remove a course
     public void deleteCourse(Long id) {
-        courseRepo.deleteById(id);
+        courseService.deleteCourse(id);
+    }
+    
+    // Check if course exists by ID
+    public boolean courseExists(Long id) {
+        return courseService.existsById(id);
+    }
+    
+    // Check if course exists by code
+    public boolean courseExistsByCode(String code) {
+        return courseService.existsByCode(code);
     }
 }

@@ -1,16 +1,9 @@
 import React from "react";
 import Logo from "../../assets/logo.svg";
-import TimeDisplay from "../../components/TimeDisplay";
+import TimeDisplay from "./TimeDisplay";
+import { getGreeting, getCurrentDate } from "../../utils/dateUtils";
 
 const Greetings = () => {
-  const currentHour = new Date().getHours();
-  
-  const getGreeting = () => {
-    if (currentHour < 12) return "Good Morning";
-    if (currentHour < 17) return "Good Afternoon";
-    return "Good Evening";
-  };
-
   return (
     <div className="relative overflow-hidden">
       <div className="relative max-w-6xl mx-auto pt-16 pb-12 px-8">
@@ -38,7 +31,7 @@ const Greetings = () => {
             System Online
           </div>
           <div className="text-sm text-gray-500">
-            Last updated: {new Date().toLocaleDateString()}
+            Last updated: {getCurrentDate()}
           </div>
         </div>
       </div>

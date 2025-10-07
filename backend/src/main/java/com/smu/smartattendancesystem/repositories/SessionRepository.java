@@ -1,11 +1,12 @@
 package com.smu.smartattendancesystem.repositories;
 
-import com.smu.smartattendancesystem.models.Session;
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-import java.util.List;
+import com.smu.smartattendancesystem.models.Session;
 
 @Repository
 public interface SessionRepository extends JpaRepository<Session, Long> {

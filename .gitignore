@@ -49,3 +49,23 @@ Thumbs.db
 # Optional: JetBrains caches
 # ----------------------
 /out/
+
+# ----------------------
+# Ignore all binary files
+# ----------------------
+*.db
+*.db-shm
+*.db-wal
+*.exe
+*.dll
+*.so
+*.o
+*.a
+*.class
+*.jar
+*.pyc
+*.pyo
+*.bin
+*.dat
+*.lst
+*.log

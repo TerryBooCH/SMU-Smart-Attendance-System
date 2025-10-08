@@ -7,17 +7,19 @@ const CreateStudentButton = () => {
   const { openModal } = useModal();
 
   const handleCreateStudent = () => {
-    // Open the modal with DeleteChatForm component
-    openModal(<CreateStudentForm  />, "Create Student");
+    openModal(<CreateStudentForm />, "Create Student");
   };
 
   return (
     <button
-      className={`text-white bg-primary gap-3 py-2.5 px-4 flex items-center justify-center rounded-xl cursor-pointer`}
       onClick={handleCreateStudent}
+      className="flex items-center gap-2 px-4 py-2 text-sm font-lexend font-medium text-white 
+                 bg-primary rounded-xl transition-all duration-200 
+                 hover:bg-primary/90 active:scale-[0.98] 
+                 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
     >
-      <CirclePlus size={23} strokeWidth={1.2} />
-      Enroll
+      <CirclePlus size={18} strokeWidth={1.8} />
+      <span>Enroll</span>
     </button>
   );
 };

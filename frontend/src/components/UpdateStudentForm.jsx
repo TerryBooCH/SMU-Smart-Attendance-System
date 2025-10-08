@@ -170,7 +170,10 @@ const UpdateStudentForm = ({ student }) => {
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
-              className="border text-black border-black text-medium px-3 py-2 rounded-lg font-lexend cursor-pointer hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 text-sm rounded-xl border border-gray-300 text-gray-700 cursor-pointer
+                      hover:bg-gray-100 active:scale-[0.98] 
+                      transition-all duration-200 disabled:opacity-50 
+                      disabled:cursor-not-allowed font-medium"
               onClick={closeModal}
               disabled={isSubmitting}
             >
@@ -181,7 +184,8 @@ const UpdateStudentForm = ({ student }) => {
               disabled={
                 isSubmitting || !formValues.name.trim() || !isFormChanged()
               }
-              className="text-white bg-black text-medium px-3 py-2 rounded-lg font-lexend cursor-pointer hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 rounded-xl text-sm text-white flex items-center justify-center gap-2 
+                      font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700 active:scale-[0.98] cursor-pointer"
             >
               {isSubmitting ? "Updating..." : "Update"}
             </button>

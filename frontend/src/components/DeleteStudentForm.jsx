@@ -1,12 +1,15 @@
 import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import useStudent from "../hooks/useStudent";
 import { useModal } from "../hooks/useModal";
 import { useToast } from "../hooks/useToast";
 
-const DeleteStudentForm = ({ student, onDelete }) => {
+const DeleteStudentForm = ({ student }) => {
   const { deleteStudentByStudentId } = useStudent();
   const { closeModal } = useModal();
   const { success, error } = useToast();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleDelete = async (e) => {
     e.preventDefault();
@@ -15,17 +18,19 @@ const DeleteStudentForm = ({ student, onDelete }) => {
 
       if (response.status === 200) {
         success(`"${student.name}" successfully deleted`);
+        closeModal();
+
+        // Only redirect if user is on /student/:id page
+        if (location.pathname === `/student/${student.studentId}`) {
+          navigate("/students");
+        }
       } else {
-        // Add error toast notification
         error(
           `Failed to delete student: ${response.data?.error || "Unknown error"}`
         );
       }
-
-      closeModal();
     } catch (err) {
       console.error("Error deleting student:", err);
-      // Add error toast notification
       error(`Failed to delete student: ${err.message || "Unknown error"}`);
       closeModal();
     }
@@ -49,7 +54,10 @@ const DeleteStudentForm = ({ student, onDelete }) => {
         <div className="flex items-center justify-end gap-3">
           <button
             type="button"
-            className="border border-black text-black text-medium px-3 py-2 rounded-lg font-lexend cursor-pointer"
+            className="px-4 py-2 text-sm rounded-xl border border-gray-300 text-gray-700 cursor-pointer
+                      hover:bg-gray-100 active:scale-[0.98] 
+                      transition-all duration-200 disabled:opacity-50 
+                      disabled:cursor-not-allowed font-medium"
             onClick={closeModal}
           >
             Cancel
@@ -57,7 +65,8 @@ const DeleteStudentForm = ({ student, onDelete }) => {
 
           <button
             type="submit"
-            className="text-white bg-red-600 hover:bg-red-700 text-medium px-3 py-2 rounded-lg font-lexend cursor-pointer"
+            className="px-4 py-2 rounded-xl text-sm text-white flex items-center justify-center gap-2 
+                      font-medium transition-all duration-200  bg-red-500 hover:bg-red-700 active:scale-[0.98] cursor-pointer"
           >
             Delete Student
           </button>

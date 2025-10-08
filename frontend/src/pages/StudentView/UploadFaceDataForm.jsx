@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { UploadCloud, X, Loader2 } from "lucide-react"; // Added Loader2 icon
+import { UploadCloud, X, Loader2 } from "lucide-react";
 import { useModal } from "../../hooks/useModal";
 import useStudent from "../../hooks/useStudent";
 import useToast from "../../hooks/useToast";
@@ -7,20 +7,23 @@ import useToast from "../../hooks/useToast";
 const UploadFaceDataForm = ({ student }) => {
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
-  const { uploadStudentFaceData, loading } = useStudent(); // <-- from context
+  const { uploadStudentFaceData, loading } = useStudent();
   const { success, error } = useToast();
   const { closeModal } = useModal();
 
-  const handleDrag = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (loading) return; // prevent drag when uploading
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  }, [loading]);
+  const handleDrag = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (loading) return;
+      if (e.type === "dragenter" || e.type === "dragover") {
+        setDragActive(true);
+      } else if (e.type === "dragleave") {
+        setDragActive(false);
+      }
+    },
+    [loading]
+  );
 
   const handleDrop = useCallback(
     (e) => {
@@ -45,13 +48,11 @@ const UploadFaceDataForm = ({ student }) => {
   };
 
   const handleRemoveFile = () => {
-    if (loading) return;
-    setFile(null);
+    if (!loading) setFile(null);
   };
 
   const handleUpload = async () => {
     if (!file || loading) return;
-
     try {
       await uploadStudentFaceData(student.studentId, file);
       success("Face data uploaded successfully!");
@@ -63,7 +64,7 @@ const UploadFaceDataForm = ({ student }) => {
   };
 
   return (
-    <div className="flex flex-col items-center gap-6 py-4">
+    <div className="flex flex-col items-center gap-6 py-4 font-lexend">
       {/* Drag & Drop Zone */}
       <div
         onDragEnter={handleDrag}
@@ -102,13 +103,13 @@ const UploadFaceDataForm = ({ student }) => {
             <img
               src={URL.createObjectURL(file)}
               alt="Preview"
-              className="w-32 h-32 object-cover rounded-lg shadow-md"
+              className="w-32 h-32 object-cover rounded-xl shadow-md"
             />
             <button
               type="button"
               onClick={handleRemoveFile}
               disabled={loading}
-              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-gray-100 cursor-pointer disabled:opacity-50"
+              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition-all duration-200 disabled:opacity-50"
             >
               <X size={16} />
             </button>
@@ -127,24 +128,31 @@ const UploadFaceDataForm = ({ student }) => {
 
       {/* Buttons */}
       <div className="flex justify-end gap-3 w-full mt-4">
+        {/* Cancel Button */}
         <button
           type="button"
           onClick={closeModal}
           disabled={loading}
-          className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+          className={`px-4 py-2 text-sm rounded-xl border border-gray-300 text-gray-700 cursor-pointer
+                      hover:bg-gray-100 active:scale-[0.98] 
+                      transition-all duration-200 disabled:opacity-50 
+                      disabled:cursor-not-allowed font-medium`}
         >
           Cancel
         </button>
 
+        {/* Upload Button */}
         <button
           type="button"
           onClick={handleUpload}
           disabled={!file || loading}
-          className={`px-4 py-2 rounded-lg text-white transition-all duration-200 cursor-pointer flex items-center justify-center gap-2 ${
-            file && !loading
-              ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
-              : "bg-blue-300 cursor-not-allowed"
-          }`}
+          className={`px-4 py-2 rounded-xl text-sm text-white flex items-center justify-center gap-2 
+                      font-medium transition-all duration-200 
+                      ${
+                        file && !loading
+                          ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
+                          : "bg-blue-300 cursor-not-allowed"
+                      }`}
         >
           {loading ? (
             <>

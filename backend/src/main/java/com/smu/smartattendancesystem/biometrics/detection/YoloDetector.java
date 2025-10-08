@@ -1,7 +1,6 @@
 package com.smu.smartattendancesystem.biometrics.detection;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.nio.file.Path;
 import java.util.AbstractMap.SimpleEntry;
 
@@ -39,8 +38,8 @@ public class YoloDetector extends BaseDetector {
         return new SimpleEntry<>(scale, blob);
     }
 
-    public ArrayList<DetectionResult> detect(Mat image) {
-        ArrayList<DetectionResult> candidates = new ArrayList<>();
+    public List<DetectionResult> detect(Mat image) {
+        List<DetectionResult> candidates = new ArrayList<>();
 
         SimpleEntry<Double, Mat> res = preprocess(image);
         double scale = res.getKey();

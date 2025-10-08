@@ -1,6 +1,6 @@
 package com.smu.smartattendancesystem.biometrics.detection;
 
-import java.util.ArrayList;
+import java.util.*;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
@@ -18,7 +18,7 @@ public class CascadeDetector extends BaseDetector {
     }
 
     // CascadeDetectors (LBP, Haar) do not return any scores for the images, so whatever is detected is final 
-    public ArrayList<DetectionResult> detect(Mat image) {
+    public List<DetectionResult> detect(Mat image) {
         ArrayList<DetectionResult> results = new ArrayList<>();
 
         Mat grayscale = new Mat();

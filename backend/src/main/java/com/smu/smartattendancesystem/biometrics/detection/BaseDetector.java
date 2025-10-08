@@ -1,7 +1,6 @@
 package com.smu.smartattendancesystem.biometrics.detection;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.*;
 import org.opencv.core.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,8 +10,8 @@ public abstract class BaseDetector {
     protected static final Path basePath = Paths.get(System.getProperty("user.dir"));
 
     // Filters out bounding boxes with high overlap with higher-confidence boxes 
-    public ArrayList<DetectionResult> nonMaximumSuppression(ArrayList<DetectionResult> candidates, double nmsThreshold) {
-        ArrayList<DetectionResult> results = new ArrayList<>();
+    public List<DetectionResult> nonMaximumSuppression(List<DetectionResult> candidates, double nmsThreshold) {
+        List<DetectionResult> results = new ArrayList<>();
         Collections.sort(candidates);
 
         for (DetectionResult candidate : candidates) {
@@ -31,9 +30,9 @@ public abstract class BaseDetector {
         return results;
     }
 
-    public ArrayList<DetectionResult> nonMaximumSuppression(ArrayList<DetectionResult> results) {
+    public List<DetectionResult> nonMaximumSuppression(List<DetectionResult> results) {
         return nonMaximumSuppression(results, 0.5);
     }
 
-    public abstract ArrayList<DetectionResult> detect(Mat image);
+    public abstract List<DetectionResult> detect(Mat image);
 }

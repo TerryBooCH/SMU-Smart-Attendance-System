@@ -1,4 +1,6 @@
 import React from "react";
+import Tooltip from "../../components/ToolTip";
+import { Info } from "lucide-react";
 
 const StudentIdContainer = ({ student }) => {
   return (
@@ -11,9 +13,20 @@ const StudentIdContainer = ({ student }) => {
 
         {/* Content */}
         <div className="p-6">
-          <label className="block text-sm font-medium text-gray-600 mb-2">
-            ID Number
-          </label>
+          <div className="flex items-center gap-2 mb-2 ">
+            <label className="block text-sm font-medium text-gray-600  ">
+              ID Number
+            </label>
+            <div className="cursor-pointer">
+              <Tooltip
+                content="This is the unique ID number assigned to this student."
+                position="right"
+              >
+                <Info size={16} />
+              </Tooltip>
+            </div>
+          </div>
+
           <input
             type="text"
             value={student?.studentId || ""}
@@ -21,7 +34,7 @@ const StudentIdContainer = ({ student }) => {
             className="w-full px-4 py-2.5 border border-[#d4d4d4] rounded-xl bg-gray-100 text-gray-700 cursor-not-allowed focus:outline-none focus:ring-0"
           />
           <p className="text-xs text-gray-500 mt-2">
-            This ID  cannot be changed.
+            This ID cannot be changed.
           </p>
         </div>
       </div>

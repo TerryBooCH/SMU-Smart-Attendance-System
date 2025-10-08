@@ -36,7 +36,10 @@ export const studentService = {
 
   updateStudentByStudentId: async (studentId, studentData) => {
     try {
-      const response = await apiClient.put(`/api/students/${studentId}`, studentData);
+      const response = await apiClient.put(
+        `/api/students/${studentId}`,
+        studentData
+      );
       console.log(response);
       return response;
     } catch (error) {
@@ -52,6 +55,29 @@ export const studentService = {
       return response.data;
     } catch (error) {
       console.error("Error getting student:", error);
+      throw error;
+    }
+  },
+
+  uploadStudentFaceData: async (studentId, file) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await apiClient.post(
+        `/api/students/${studentId}/faces`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Face data upload response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error uploading face data:", error);
       throw error;
     }
   },

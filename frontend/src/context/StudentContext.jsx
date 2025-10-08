@@ -26,7 +26,6 @@ export const StudentProvider = ({ children }) => {
     }
   };
 
-  // Add this new function
   const fetchStudentById = async (studentId) => {
     try {
       setLoading(true);
@@ -82,9 +81,11 @@ export const StudentProvider = ({ children }) => {
       );
 
       // Update selectedStudent if it's the one being updated
-      if (selectedStudent && 
-          (selectedStudent.studentId === studentId || 
-           selectedStudent.student_id === studentId)) {
+      if (
+        selectedStudent &&
+        (selectedStudent.studentId === studentId ||
+          selectedStudent.student_id === studentId)
+      ) {
         setSelectedStudent(updatedStudent);
       }
 
@@ -112,15 +113,36 @@ export const StudentProvider = ({ children }) => {
       );
 
       // Clear selectedStudent if it was deleted
-      if (selectedStudent && 
-          (selectedStudent.studentId === studentId || 
-           selectedStudent.student_id === studentId)) {
+      if (
+        selectedStudent &&
+        (selectedStudent.studentId === studentId ||
+          selectedStudent.student_id === studentId)
+      ) {
         setSelectedStudent(null);
       }
 
       return { status: 200, message: "Student deleted successfully" };
     } catch (error) {
       console.error("Error deleting student:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const uploadStudentFaceData = async (studentId, file) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await studentService.uploadStudentFaceData(
+        studentId,
+        file
+      );
+      console.log("Face data uploaded successfully:", response);
+      return response;
+    } catch (error) {
+      console.error("Error uploading face data:", error);
+      setError(error.message || "Failed to upload face data");
       throw error;
     } finally {
       setLoading(false);
@@ -135,10 +157,11 @@ export const StudentProvider = ({ children }) => {
     setStudents,
     setSelectedStudent,
     fetchAllStudents,
-    fetchStudentById, // Add this
+    fetchStudentById,
     deleteStudentByStudentId,
     updateStudentByStudentId,
     createStudent,
+    uploadStudentFaceData,
   };
 
   return (

@@ -5,6 +5,7 @@ import PageHeader from "../../components/PageHeader";
 import UserBanner from './UserBanner';
 import { useStudents } from '../../context/StudentContext';
 import UpdateStudentDetailsForm from './UpdateStudentDetailsForm';
+import StudentFaceDataContainer from './StudentFaceDataContainer';
 
 const StudentView = () => {
   const { id } = useParams();
@@ -69,6 +70,9 @@ const StudentView = () => {
           student={selectedStudent}
         />
         <UpdateStudentDetailsForm 
+          student={selectedStudent}
+        />
+        <StudentFaceDataContainer 
           student={selectedStudent}
         />
       </main>

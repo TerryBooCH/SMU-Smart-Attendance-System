@@ -44,4 +44,15 @@ export const studentService = {
       throw error;
     }
   },
+
+  getStudentByStudentId: async (studentId) => {
+    try {
+      const response = await apiClient.get(`/api/students/${studentId}`);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error getting student:", error);
+      throw error;
+    }
+  },
 };

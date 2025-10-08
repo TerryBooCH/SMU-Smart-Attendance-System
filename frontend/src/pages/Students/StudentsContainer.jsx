@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import useStudent from "../../hooks/useStudent";
 import { Eye } from "lucide-react";
 import { formatDate } from "../../utils/dateUtils";
@@ -9,6 +10,7 @@ import UpdateStudentButton from "../../components/UpdateStudentButton";
 const StudentsContainer = () => {
   const { students, loading, error, fetchAllStudents } = useStudent();
   const hasFetched = useRef(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Only fetch once on mount
@@ -109,7 +111,7 @@ const StudentsContainer = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
-                          onClick={() => console.log("View", student.id)}
+                          onClick={() => navigate(`/student/${student.studentId}`)}
                           className="flex items-center cursor-pointer px-2 py-2 text-black"
                           title="View"
                         >

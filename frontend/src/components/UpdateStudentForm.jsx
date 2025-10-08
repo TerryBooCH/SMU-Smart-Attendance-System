@@ -3,7 +3,6 @@ import { validateUpdateStudentForm } from "../utils/validateForm";
 import { useModal } from "../context/ModalContext";
 import { useToast } from "../hooks/useToast";
 import useStudent from "../hooks/useStudent";
-import StudentContext from "../context/StudentContext";
 
 const UpdateStudentForm = ({ student }) => {
   const { closeModal } = useModal();

@@ -109,7 +109,7 @@ const UploadFaceDataForm = ({ student }) => {
               type="button"
               onClick={handleRemoveFile}
               disabled={loading}
-              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition-all duration-200 disabled:opacity-50"
+              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 cursor-pointer"
             >
               <X size={16} />
             </button>
@@ -150,7 +150,7 @@ const UploadFaceDataForm = ({ student }) => {
                       font-medium transition-all duration-200 
                       ${
                         file && !loading
-                          ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]"
+                          ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98] cursor-pointer"
                           : "bg-blue-300 cursor-not-allowed"
                       }`}
         >

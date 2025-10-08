@@ -1,6 +1,6 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import PageHeader from "../../components/PageHeader";
+import Breadcrumb from "../../components/Breadcrumb";
 
 const Sessions = () => {
   return (
@@ -8,7 +8,7 @@ const Sessions = () => {
       <Sidebar />
  
         <main className="h-screen w-full bg-[#fafafa]">
-          <PageHeader title="Sessions" subtitle={"Manage attendance sessions."} />
+          <Breadcrumb items={[{label: "Home", href: "/home"}, { label: "Sessions" }]}/>
         </main>
      
     </div>

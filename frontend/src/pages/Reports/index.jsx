@@ -1,6 +1,6 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import PageHeader from "../../components/PageHeader";
+import Breadcrumb from "../../components/Breadcrumb";
 
 const Reports = () => {
   return (
@@ -8,7 +8,7 @@ const Reports = () => {
       <Sidebar />
       
         <main className="h-screen w-full bg-[#fafafa] ">
-          <PageHeader title="Reports" subtitle={"Generate reports."} />
+          <Breadcrumb items={[{label: "Home", href: "/home"}, { label: "Reports" }]} />
         </main>
     
     </div>

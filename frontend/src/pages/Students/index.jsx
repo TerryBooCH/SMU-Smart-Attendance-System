@@ -1,6 +1,6 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
-import PageHeader from "../../components/PageHeader";
+import Breadcrumb from "../../components/Breadcrumb";
 import StudentsContainer from "./StudentsContainer";
 import Toolbar from "./Toolbar";
 
@@ -10,7 +10,7 @@ const Students = () => {
       <Sidebar />
 
       <main className="h-screen w-full bg-[#fafafa] ">
-        <PageHeader title="Students" subtitle={"Manage student records."} />
+        <Breadcrumb items={[{label: "Home", href: "/home"}, { label: "Students"}]} />
         <Toolbar />
         <StudentsContainer />
       </main>

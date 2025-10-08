@@ -1,15 +1,15 @@
-import React, { useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
-import PageHeader from "../../components/PageHeader";
-import UserBanner from './UserBanner';
-import { useStudents } from '../../context/StudentContext';
-import UpdateStudentDetailsForm from './UpdateStudentDetailsForm';
-import StudentFaceDataContainer from './StudentFaceDataContainer';
+import Breadcrumb from "../../components/Breadcrumb";
+import UserBanner from "./UserBanner";
+import { useStudents } from "../../context/StudentContext";
+import UpdateStudentDetailsForm from "./UpdateStudentDetailsForm";
+import StudentFaceDataContainer from "./StudentFaceDataContainer";
 
 const StudentView = () => {
   const { id } = useParams();
-  
+
   const { selectedStudent, loading, error, fetchStudentById } = useStudents();
 
   useEffect(() => {
@@ -23,7 +23,13 @@ const StudentView = () => {
       <div className="min-h-screen flex">
         <Sidebar />
         <main className="h-screen w-full bg-[#fafafa]">
-          <PageHeader title="Students" subtitle="Manage student records." />
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/home" },
+              { label: "Students", href: "/students" },
+              { label: "View Student", href: `/student/${id}` },
+            ]}
+          />
           <div className="flex items-center justify-center h-64">
             <p className="text-gray-500">Loading student data...</p>
           </div>
@@ -37,7 +43,13 @@ const StudentView = () => {
       <div className="min-h-screen flex">
         <Sidebar />
         <main className="h-screen w-full bg-[#fafafa]">
-          <PageHeader title="Students" subtitle="Manage student records." />
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/home" },
+              { label: "Students", href: "/students" },
+              { label: "View Student", href: `/student/` },
+            ]}
+          />
           <div className="flex items-center justify-center h-64">
             <p className="text-red-500">{error}</p>
           </div>
@@ -51,7 +63,13 @@ const StudentView = () => {
       <div className="min-h-screen flex">
         <Sidebar />
         <main className="h-screen w-full bg-[#fafafa]">
-          <PageHeader title="Students" subtitle="Manage student records." />
+          <Breadcrumb
+            items={[
+              { label: "Home", href: "/home" },
+              { label: "Students", href: "/students" },
+              { label: "View Student", href: `/student/` },
+            ]}
+          />
           <div className="flex items-center justify-center h-64">
             <p className="text-gray-500">Student not found</p>
           </div>
@@ -65,16 +83,17 @@ const StudentView = () => {
       <Sidebar />
 
       <main className="h-screen w-full bg-[#fafafa]">
-        <PageHeader title="Students" subtitle="Manage student records." />
-        <UserBanner 
-          student={selectedStudent}
+        <Breadcrumb
+          items={[
+            { label: "Home", href: "/home" },
+            { label: "Students", href: "/students" },
+            { label: selectedStudent.name },
+          ]}
         />
-        <UpdateStudentDetailsForm 
-          student={selectedStudent}
-        />
-        <StudentFaceDataContainer 
-          student={selectedStudent}
-        />
+
+        <UserBanner student={selectedStudent} />
+        <UpdateStudentDetailsForm student={selectedStudent} />
+        <StudentFaceDataContainer student={selectedStudent} />
       </main>
     </div>
   );

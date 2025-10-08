@@ -73,8 +73,9 @@ const Sidebar = () => {
         style={{ width: isCollapsed ? "80px" : "288px" }}
       >
         {/* Header / Logo section */}
-        <div className="px-4 py-4 border-b border-[#cecece] min-h-[7rem] ">
-          <div className="group relative flex items-center rounded-xl transition-all duration-200 p-3">
+        <div className="px-4 py-2 border-b border-[#cecece] min-h-[5rem] flex items-center
+">
+          <div className="group relative flex items-center rounded-xl transition-all duration-200 p-3 w-full" >
             <div className="flex-shrink-0 w-6 flex items-center justify-center">
               <button
                 onClick={toggleSidebar}
@@ -93,9 +94,7 @@ const Sidebar = () => {
                   <span className="font-bold text-lg transition-colors duration-200 whitespace-nowrap text-gray-900">
                     Smartend
                   </span>
-                  <p className="text-xs mt-0.5 transition-colors duration-200 whitespace-nowrap text-gray-500">
-                    Attendance System
-                  </p>
+
                 </div>
                 <button
                   onClick={toggleSidebar}

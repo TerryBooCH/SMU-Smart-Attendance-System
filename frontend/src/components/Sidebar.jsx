@@ -53,7 +53,12 @@ const Sidebar = () => {
     },
   ];
 
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path) => {
+    if (path === "/students") {
+      return location.pathname.startsWith("/student");
+    }
+    return location.pathname === path;
+  };
 
   const toggleSidebar = () => setIsCollapsed(!isCollapsed);
 

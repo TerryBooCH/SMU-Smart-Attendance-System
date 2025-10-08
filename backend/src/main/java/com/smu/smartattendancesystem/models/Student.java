@@ -3,6 +3,8 @@ package com.smu.smartattendancesystem.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,6 +23,7 @@ public class Student extends BaseEntity {
     private String phone;
 
     // Create a One-to-Many relationship with FaceData (1 student to 10-20 images)
+    @JsonIgnore
     @OneToMany(
         mappedBy = "student", 
         cascade = CascadeType.ALL,

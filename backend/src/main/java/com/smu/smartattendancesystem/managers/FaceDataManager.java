@@ -1,10 +1,12 @@
 package com.smu.smartattendancesystem.managers;
 
-import com.smu.smartattendancesystem.models.FaceData;
-import com.smu.smartattendancesystem.repositories.FaceDataRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import com.smu.smartattendancesystem.models.FaceData;
+import com.smu.smartattendancesystem.repositories.FaceDataRepository;
 
 @Service
 public class FaceDataManager {
@@ -24,6 +26,18 @@ public class FaceDataManager {
     // Use case: retrieve image/embedding for recognition
     public Optional<FaceData> getFaceData(Long id) {
         return faceRepo.findById(id);
+    }
+
+    public List<FaceData> listByStudentId(String studentId) {
+        return faceRepo.findAllByStudent_StudentId(studentId);
+    }
+
+    public long countByStudentId(String studentId) {
+        return faceRepo.countByStudent_StudentId(studentId);
+    }
+
+    public Optional<FaceData> getByIdAndStudentId(Long id, String studentId) {
+        return faceRepo.findByIdAndStudent_StudentId(id, studentId);
     }
 
     // UPDATE: Update face data

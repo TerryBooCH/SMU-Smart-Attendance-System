@@ -5,6 +5,11 @@
 **/target/
 
 # ----------------------
+# Student Images
+# ----------------------
+/backend/faces/
+
+# ----------------------
 # Frontend (Node.js / JavaScript) build files
 # ----------------------
 /frontend/node_modules/

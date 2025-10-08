@@ -1,5 +1,8 @@
 package com.smu.smartattendancesystem.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,6 +19,8 @@ public class FaceData extends BaseEntity {
     private String imagePath; // Stores path/filename of student's face image
 
     @Lob // Tells JPA this field may be large (BLOB)
+    @Basic(fetch = FetchType.LAZY)
+    @JsonIgnore
     private byte[] embedding; // Stores the face embedding (numerical vector, 128-512 floats, stored as byte array)
 
     // The owning side of the Many-To-One relationship with Student

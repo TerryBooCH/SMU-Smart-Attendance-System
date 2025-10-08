@@ -1,11 +1,12 @@
 package com.smu.smartattendancesystem.managers;
 
-import com.smu.smartattendancesystem.models.CourseEnrollment;
-import com.smu.smartattendancesystem.repositories.CourseEnrollmentRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.smu.smartattendancesystem.models.CourseEnrollment;
+import com.smu.smartattendancesystem.repositories.CourseEnrollmentRepository;
 
 @Service
 public class CourseEnrollmentManager {

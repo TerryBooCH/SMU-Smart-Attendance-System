@@ -1,7 +1,13 @@
 package com.smu.smartattendancesystem.models;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.PreUpdate;
 
 @MappedSuperclass // Not a table, but extended by tables
 public abstract class BaseEntity {
@@ -21,13 +27,21 @@ public abstract class BaseEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    // Getters
+    // Getters and setter
     public Long getId() { 
         return id; 
     }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
+
     public LocalDateTime getCreatedAt() { 
         return createdAt; 
+    }
+    
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
     public LocalDateTime getUpdatedAt() { 

@@ -2,12 +2,15 @@ package com.smu.smartattendancesystem.services;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import java.nio.file.*;
 
 @Service
 public class LocalImageStorage implements ImageStorage {
@@ -136,4 +139,32 @@ public class LocalImageStorage implements ImageStorage {
 
     }
 
+    /**
+     * Reads an image file by its relative path and returns its bytes.
+     *
+     * @param relativePath path like "S1234567A/uuid.jpg"
+     * @return byte array of the image
+     * @throws IOException if the file cannot be read
+     */
+    public byte[] read(String relativePath) throws IOException {
+        if (relativePath == null || relativePath.isBlank()) {
+            throw new IllegalArgumentException("relativePath is required");
+        }
+
+        // Resolve the full file path inside the root directory
+        Path targetPath = root.resolve(relativePath).normalize();
+
+        if (!targetPath.startsWith(root)) {
+            throw new SecurityException("Invalid file path");
+        }
+
+        // Check if file exists
+        if (!Files.exists(targetPath)) {
+            throw new IOException("File not found: " + targetPath);
+        }
+
+        // Read and return bytes of the image to be converted to base64
+        System.out.println("Reading file: " + targetPath);
+        return Files.readAllBytes(targetPath);
+    }
 }

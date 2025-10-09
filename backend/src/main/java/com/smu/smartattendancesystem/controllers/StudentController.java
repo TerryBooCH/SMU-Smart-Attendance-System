@@ -106,7 +106,15 @@ public class StudentController {
     public ResponseEntity<?> uploadFace(@PathVariable String studentId, @RequestParam("file") MultipartFile file) {
         try {
             FaceData fd = faceDataService.uploadSingleImage(studentId, file);
-            return ResponseEntity.ok(fd);
+            var fdDto = faceDataService.toDto(fd);
+
+            // Custom response
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", fdDto);
+            response.put("status", "success");
+            response.put("message", "Face data uploaded successfully");
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
@@ -124,7 +132,7 @@ public class StudentController {
     public ResponseEntity<?> deleteFace(@PathVariable String studentId, @PathVariable Long faceDataId) {
         try {
             faceDataService.delete(studentId, faceDataId);
-            return ResponseEntity.ok(createSuccessResponse("Face data deleted successfully"));
+            return ResponseEntity.noContent().build();
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));

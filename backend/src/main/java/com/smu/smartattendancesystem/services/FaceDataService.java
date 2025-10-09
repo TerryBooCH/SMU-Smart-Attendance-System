@@ -72,6 +72,16 @@ public class FaceDataService {
     // Return list of face data for a student
     @Transactional(readOnly = true)
     public List<FaceDataDTO> list(String studentId) {
+
+        // Validate if student exists
+        Student student;
+        Optional<Student> optStudent = studentManager.getStudentByStudentId(studentId);
+        if (optStudent.isPresent()) {
+            student = optStudent.get();
+        } else {
+            throw new NoSuchElementException("Student not found: " + studentId);
+        }
+
         List<FaceData> faces = faceManager.listByStudentId(studentId);
         List<FaceDataDTO> dtos = new ArrayList<>();
         // Create a DTO for each face data
@@ -103,6 +113,11 @@ public class FaceDataService {
 
         // Delete FaceData record from database
         faceManager.deleteFaceData(faceDataId);
+    }
+
+    // Convert FaceData entity to DTO to be returned to frontend
+    public FaceDataDTO toDto(FaceData fd) {
+        return FaceDataDTO.fromEntity(fd, storage);
     }
 
     // Batch image upload for a student

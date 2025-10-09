@@ -11,11 +11,12 @@ import DeleteStudentContainer from "./DeleteStudentContainer";
 
 const StudentView = () => {
   const { id } = useParams();
-  const { selectedStudent, loading, error, fetchStudentById } = useStudent();
+  const { selectedStudent, studentFaceData, loading, error, fetchStudentById, getFaceDataByStudentId } = useStudent();
 
   useEffect(() => {
     if (id) {
       fetchStudentById(id);
+      getFaceDataByStudentId(id);
     }
   }, [id]);
 
@@ -68,7 +69,7 @@ const StudentView = () => {
       <UserBanner student={selectedStudent} />
       <StudentIdContainer student={selectedStudent} />
       <UpdateStudentDetailsForm student={selectedStudent} />
-      <StudentFaceDataContainer student={selectedStudent} />
+      <StudentFaceDataContainer student={selectedStudent} faceData={studentFaceData} loading={loading} />
       <DeleteStudentContainer student={selectedStudent} />
     </>
   );

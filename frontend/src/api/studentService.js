@@ -81,4 +81,15 @@ export const studentService = {
       throw error;
     }
   },
+
+  getFaceDataByStudentId: async (studentId) => {
+    try {
+      const response = await apiClient.get(`/api/students/${studentId}/faces`);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error getting face data:", error);
+      throw error;
+    }
+  },
 };

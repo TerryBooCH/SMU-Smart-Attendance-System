@@ -72,6 +72,16 @@ public class FaceDataService {
     // Return list of face data for a student
     @Transactional(readOnly = true)
     public List<FaceDataDTO> list(String studentId) {
+
+        // Validate if student exists
+        Student student;
+        Optional<Student> optStudent = studentManager.getStudentByStudentId(studentId);
+        if (optStudent.isPresent()) {
+            student = optStudent.get();
+        } else {
+            throw new NoSuchElementException("Student not found: " + studentId);
+        }
+
         List<FaceData> faces = faceManager.listByStudentId(studentId);
         List<FaceDataDTO> dtos = new ArrayList<>();
         // Create a DTO for each face data

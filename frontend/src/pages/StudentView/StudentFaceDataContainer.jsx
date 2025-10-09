@@ -1,5 +1,6 @@
 import React from "react";
 import UploadFaceDataButton from "./UploadFaceDataButton";
+import CaptureFaceDataButton from "./CaptureFaceDataButton";
 import Tooltip from "../../components/ToolTip";
 import { Info } from "lucide-react";
 
@@ -20,8 +21,10 @@ const StudentFaceDataContainer = ({ student }) => {
               </Tooltip>
             </div>
           </div>
-
-          <UploadFaceDataButton student={student} />
+          <div className="flex items-center gap-2 justify-center">
+            <CaptureFaceDataButton student={student} />
+            <UploadFaceDataButton student={student} />
+          </div>
         </div>
 
         {/* Content (future image section placeholder) */}

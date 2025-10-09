@@ -105,13 +105,12 @@ public class StudentController {
     @PostMapping(value = "/{studentId}/faces", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadFace(@PathVariable String studentId, @RequestParam("file") MultipartFile file) {
         try {
-            faceDataService.uploadSingleImage(studentId, file);
-            return ResponseEntity
             FaceData fd = faceDataService.uploadSingleImage(studentId, file);
+            var fdDto = faceDataService.toDto(fd);
 
             // Custom response
             Map<String, Object> response = new HashMap<>();
-            response.put("data", fd);
+            response.put("data", fdDto);
             response.put("status", "success");
             response.put("message", "Face data uploaded successfully");
 

@@ -115,5 +115,10 @@ public class FaceDataService {
         faceManager.deleteFaceData(faceDataId);
     }
 
+    // Convert FaceData entity to DTO to be returned to frontend
+    public FaceDataDTO toDto(FaceData fd) {
+        return FaceDataDTO.fromEntity(fd, storage);
+    }
+
     // Batch image upload for a student
 }

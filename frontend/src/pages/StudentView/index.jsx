@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Breadcrumb from "../../components/Breadcrumb";
 import UserBanner from "./UserBanner";
-import { useStudents } from "../../context/StudentContext";
+import useStudent from "../../hooks/useStudent";
 import UpdateStudentDetailsForm from "./UpdateStudentDetailsForm";
 import StudentFaceDataContainer from "./StudentFaceDataContainer";
 import StudentIdContainer from "./StudentIdContainer";
@@ -11,7 +11,7 @@ import DeleteStudentContainer from "./DeleteStudentContainer";
 
 const StudentView = () => {
   const { id } = useParams();
-  const { selectedStudent, loading, error, fetchStudentById } = useStudents();
+  const { selectedStudent, loading, error, fetchStudentById } = useStudent();
 
   useEffect(() => {
     if (id) {

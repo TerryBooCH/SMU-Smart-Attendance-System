@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ModalProvider } from "./context/ModalContext";
 import { StudentProvider } from "./context/StudentContext";
+import { SessionProvider } from "./context/SessionContext";
 import { ToastProvider } from "./context/ToastContext";
 import Modal from "./components/Modal";
 import ToastContainer from "./components/ToastContainer";
@@ -18,23 +19,25 @@ function App() {
   return (
     <BrowserRouter>
       <StudentProvider>
-        <ModalProvider>
-          <ToastProvider>
-            <Modal />
-            <ToastContainer />
-            <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/signin" element={<SignIn />} />
-              <Route path="/students" element={<Students />} />
-              <Route path="/student/:id" element={<StudentView />} />
-              <Route path="/sessions" element={<Sessions />} />
-              <Route path="/reports" element={<Reports />} />
-              <Route path="/live-recognition" element={<LiveRecognition />} />
-              <Route path="/settings" element={<Settings />} />
-            </Routes>
-          </ToastProvider>
-        </ModalProvider>
+        <SessionProvider>
+          <ModalProvider>
+            <ToastProvider>
+              <Modal />
+              <ToastContainer />
+              <Routes>
+                <Route path="/" element={<Landing />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/signin" element={<SignIn />} />
+                <Route path="/students" element={<Students />} />
+                <Route path="/student/:id" element={<StudentView />} />
+                <Route path="/sessions" element={<Sessions />} />
+                <Route path="/reports" element={<Reports />} />
+                <Route path="/live-recognition" element={<LiveRecognition />} />
+                <Route path="/settings" element={<Settings />} />
+              </Routes>
+            </ToastProvider>
+          </ModalProvider>
+        </SessionProvider>
       </StudentProvider>
     </BrowserRouter>
   );

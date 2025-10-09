@@ -1,13 +1,17 @@
 package com.smu.smartattendancesystem.services;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.*;
-
+import com.smu.smartattendancesystem.dto.FaceDataDTO;
 import com.smu.smartattendancesystem.managers.FaceDataManager;
 import com.smu.smartattendancesystem.managers.StudentManager;
 import com.smu.smartattendancesystem.models.FaceData;
@@ -67,8 +71,14 @@ public class FaceDataService {
 
     // Return list of face data for a student
     @Transactional(readOnly = true)
-    public List<FaceData> list(String studentId) {
-        return faceManager.listByStudentId(studentId);
+    public List<FaceDataDTO> list(String studentId) {
+        List<FaceData> faces = faceManager.listByStudentId(studentId);
+        List<FaceDataDTO> dtos = new ArrayList<>();
+        // Create a DTO for each face data
+        for (int i = 0; i < faces.size(); i++) {
+            dtos.add(FaceDataDTO.fromEntity(faces.get(i), storage));
+        }
+        return dtos;
     }
 
     @Transactional

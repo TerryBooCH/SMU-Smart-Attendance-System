@@ -33,7 +33,7 @@ public class FaceDataDTO {
             this.imageBase64 = "data:image/jpeg;base64," +
                     Base64.getEncoder().encodeToString(imageBytes);
         } catch (Exception e) {
-            this.imageBase64 = null; // handle missing file gracefully
+            this.imageBase64 = null; 
         }
     }
 

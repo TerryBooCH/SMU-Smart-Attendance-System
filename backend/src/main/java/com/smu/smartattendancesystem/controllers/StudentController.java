@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.smu.smartattendancesystem.models.FaceData;
 import com.smu.smartattendancesystem.models.Student;
 import com.smu.smartattendancesystem.services.FaceDataService;
 import com.smu.smartattendancesystem.services.StudentService;
@@ -105,8 +104,10 @@ public class StudentController {
     @PostMapping(value = "/{studentId}/faces", consumes = MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadFace(@PathVariable String studentId, @RequestParam("file") MultipartFile file) {
         try {
-            FaceData fd = faceDataService.uploadSingleImage(studentId, file);
-            return ResponseEntity.ok(fd);
+            faceDataService.uploadSingleImage(studentId, file);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(createSuccessResponse("Face data uploaded successfully"));
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));

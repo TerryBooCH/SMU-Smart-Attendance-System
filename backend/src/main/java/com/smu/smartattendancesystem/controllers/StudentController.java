@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.smu.smartattendancesystem.models.FaceData;
 import com.smu.smartattendancesystem.models.Student;
 import com.smu.smartattendancesystem.services.FaceDataService;
 import com.smu.smartattendancesystem.services.StudentService;
@@ -106,8 +107,15 @@ public class StudentController {
         try {
             faceDataService.uploadSingleImage(studentId, file);
             return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(createSuccessResponse("Face data uploaded successfully"));
+            FaceData fd = faceDataService.uploadSingleImage(studentId, file);
+
+            // Custom response
+            Map<String, Object> response = new HashMap<>();
+            response.put("data", fd);
+            response.put("status", "success");
+            response.put("message", "Face data uploaded successfully");
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
@@ -125,7 +133,7 @@ public class StudentController {
     public ResponseEntity<?> deleteFace(@PathVariable String studentId, @PathVariable Long faceDataId) {
         try {
             faceDataService.delete(studentId, faceDataId);
-            return ResponseEntity.ok(createSuccessResponse("Face data deleted successfully"));
+            return ResponseEntity.noContent().build();
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));

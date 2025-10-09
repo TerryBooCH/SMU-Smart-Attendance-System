@@ -11,9 +11,8 @@ public class FaceDataDTO {
     private Long id;
     private String studentId;
     private String studentName;
-    private String imageBase64;
-    private String imagePath;
     private LocalDateTime createdAt;
+    private String imageBase64;
 
     // Default constructor for Jackson
     public FaceDataDTO() {
@@ -22,7 +21,6 @@ public class FaceDataDTO {
     // Constructor from entity
     public FaceDataDTO(FaceData faceData, LocalImageStorage storage) {
         this.id = faceData.getId();
-        this.imagePath = faceData.getImagePath();
         this.createdAt = faceData.getCreatedAt();
         this.studentId = faceData.getStudent().getStudentId();
         this.studentName = faceData.getStudent().getName();
@@ -73,14 +71,6 @@ public class FaceDataDTO {
 
     public void setImageBase64(String imageBase64) {
         this.imageBase64 = imageBase64;
-    }
-
-    public String getImagePath() {
-        return imagePath;
-    }
-
-    public void setImagePath(String imagePath) {
-        this.imagePath = imagePath;
     }
 
     public LocalDateTime getCreatedAt() {

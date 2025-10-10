@@ -11,7 +11,14 @@ import DeleteStudentContainer from "./DeleteStudentContainer";
 
 const StudentView = () => {
   const { id } = useParams();
-  const { selectedStudent, studentFaceData, loading, error, fetchStudentById, getFaceDataByStudentId } = useStudent();
+  const {
+    selectedStudent,
+    studentFaceData,
+    loading,
+    error,
+    fetchStudentById,
+    getFaceDataByStudentId,
+  } = useStudent();
 
   useEffect(() => {
     if (id) {
@@ -40,14 +47,6 @@ const StudentView = () => {
     </div>
   );
 
-  if (loading) {
-    return renderLayout(
-      <div className="flex items-center justify-center h-64">
-        <p className="text-gray-500">Loading student data...</p>
-      </div>
-    );
-  }
-
   if (error) {
     return renderLayout(
       <div className="flex items-center justify-center h-64">
@@ -69,7 +68,11 @@ const StudentView = () => {
       <UserBanner student={selectedStudent} />
       <StudentIdContainer student={selectedStudent} />
       <UpdateStudentDetailsForm student={selectedStudent} />
-      <StudentFaceDataContainer student={selectedStudent} faceData={studentFaceData} loading={loading} />
+      <StudentFaceDataContainer
+        student={selectedStudent}
+        faceData={studentFaceData}
+        loading={loading}
+      />
       <DeleteStudentContainer student={selectedStudent} />
     </>
   );

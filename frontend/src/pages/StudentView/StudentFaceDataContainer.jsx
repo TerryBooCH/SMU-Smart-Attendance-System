@@ -8,6 +8,7 @@ import { Info } from "lucide-react";
 const StudentFaceDataContainer = ({ student, faceData, loading }) => {
   const faceCount = faceData?.length || 0;
   const isFull = faceCount >= 20;
+  const hasImages = faceData && faceData.length > 0;
 
   return (
     <div className="p-6">
@@ -20,8 +21,8 @@ const StudentFaceDataContainer = ({ student, faceData, loading }) => {
               <span
                 className={`text-sm font-medium px-2 py-0.5 rounded-full border transition-colors duration-300 ${
                   isFull
-                    ? 'bg-red-100 text-red-600 border-red-200'
-                    : 'bg-green-100 text-green-600 border-green-200'
+                    ? "bg-red-100 text-red-600 border-red-200"
+                    : "bg-green-100 text-green-600 border-green-200"
                 }`}
               >
                 {faceCount}/20
@@ -46,15 +47,19 @@ const StudentFaceDataContainer = ({ student, faceData, loading }) => {
 
         {/* Content */}
         <div className="p-6">
-          {loading ? (
-            <div className="flex flex-col items-center justify-center text-gray-500 border border-dashed border-[#d4d4d4] rounded-xl py-12 bg-gray-50/50">
-              <p className="text-sm font-lexend text-gray-600">Loading...</p>
-            </div>
-          ) : faceData && faceData.length > 0 ? (
+          {hasImages ? (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-3 justify-center">
               {faceData.map((data) => (
-                <FaceImageCard key={data.id} faceData={data} student={student} />
+                <FaceImageCard
+                  key={data.id}
+                  faceData={data}
+                  student={student}
+                />
               ))}
+            </div>
+          ) : loading ? (
+            <div className="flex flex-col items-center justify-center text-gray-500 border border-dashed border-[#d4d4d4] rounded-xl py-12 bg-gray-50/50">
+              <p className="text-sm font-lexend text-gray-600">Loading...</p>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center text-gray-500 border border-dashed border-[#d4d4d4] rounded-xl py-12 bg-gray-50/50">

@@ -190,7 +190,7 @@ const UpdateStudentDetailsForm = ({ student }) => {
                 type="button"
                 onClick={handleReset}
                 disabled={isSubmitting || !isFormChanged()}
-                className="text-gray-700 bg-white border border-gray-300 text-sm font-lexend px-4 py-2 rounded-xl hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-gray-700 bg-white border border-gray-300 text-sm font-lexend px-4 py-2 rounded-xl hover:bg-gray-50 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Reset
               </button>
@@ -199,7 +199,7 @@ const UpdateStudentDetailsForm = ({ student }) => {
                 disabled={
                   isSubmitting || !formValues.name.trim() || !isFormChanged()
                 }
-                className="text-white bg-black text-sm font-lexend px-4 py-2 rounded-xl hover:bg-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="text-white bg-black text-sm font-lexend px-4 py-2 rounded-xl hover:bg-gray-800 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? "Updating..." : "Update"}
               </button>

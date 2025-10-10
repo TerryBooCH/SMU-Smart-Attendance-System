@@ -11,4 +11,15 @@ export const courseService = {
       throw error;
     }
   },
+
+  createCourse: async (courseData) => {
+    try {
+      const response = await apiClient.post("/api/courses", courseData);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error creating course:", error);
+      throw error;
+    }
+  },
 };

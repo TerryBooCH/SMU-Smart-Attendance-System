@@ -25,12 +25,31 @@ export const CourseProvider = ({ children }) => {
     }
   };
 
+  const createCourse = async (courseData) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await courseService.createCourse(courseData);
+      const newCourse = response.data || response.course || response;
+      setCourses((prev) => [...prev, newCourse]);
+
+      return response;
+    } catch (error) {
+      console.error("Error creating course:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     courses,
     loading,
     error,
     setCourses,
     fetchAllCourses,
+    createCourse,
   };
 
   return (

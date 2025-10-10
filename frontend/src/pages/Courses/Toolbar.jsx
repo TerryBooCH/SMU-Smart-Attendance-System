@@ -1,4 +1,5 @@
 import React from "react";
+import CreateCourseButton from "./CreateCourseButton";
 
 
 const Toolbar = () => {
@@ -9,7 +10,7 @@ const Toolbar = () => {
           <h1 className="text-3xl font-bold text-gray-800">Courses</h1>
         </div>
         <div>
-          
+          <CreateCourseButton />
         </div>
       </div>
     </div>

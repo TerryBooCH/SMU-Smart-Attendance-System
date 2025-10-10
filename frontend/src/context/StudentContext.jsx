@@ -137,25 +137,25 @@ export const StudentProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      // Convert file to base64
-      const base64String = await fileToBase64(file);
-
       // Upload the file
       const response = await studentService.uploadStudentFaceData(
         studentId,
         file
       );
 
-      if (response.status == 201) {
+      // Check for successful response
+      if (response.status === "success" || response.status === 201) {
         console.log("Face data uploaded successfully:", response);
 
+        const uploadedData = response.data;
+
+        // Create face data entry matching the GET response structure
         const newFaceData = {
-          id: response.id || response.faceId || Date.now(),
-          studentId: studentId,
-          imageBase64: base64String,
-          fileName: file.name,
-          uploadedAt: new Date().toISOString(),
-          ...response,
+          id: uploadedData.id,
+          studentId: uploadedData.studentId,
+          studentName: uploadedData.studentName,
+          imageBase64: uploadedData.imageBase64,
+          createdAt: uploadedData.createdAt,
         };
 
         setStudentFaceData((prev) => [...prev, newFaceData]);
@@ -164,7 +164,6 @@ export const StudentProvider = ({ children }) => {
       return response;
     } catch (error) {
       console.error("Error uploading face data:", error);
-      setError(error.message || "Failed to upload face data");
       throw error;
     } finally {
       setLoading(false);
@@ -189,6 +188,29 @@ export const StudentProvider = ({ children }) => {
     }
   };
 
+  const deleteStudentFaceDataByFaceId = async (studentId, faceId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      await studentService.deleteStudentFaceDataByFaceId(studentId, faceId);
+
+      // Remove the face data from local state
+      setStudentFaceData((prev) =>
+        prev.filter((faceData) => faceData.id !== faceId)
+      );
+
+      console.log("Face data deleted successfully");
+      return { status: 200, message: "Face data deleted successfully" };
+    } catch (error) {
+      console.error("Error deleting face data:", error);
+      setError(error.message || "Failed to delete face data");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     students,
     selectedStudent,
@@ -205,6 +227,7 @@ export const StudentProvider = ({ children }) => {
     createStudent,
     uploadStudentFaceData,
     getFaceDataByStudentId,
+    deleteStudentFaceDataByFaceId,
   };
 
   return (

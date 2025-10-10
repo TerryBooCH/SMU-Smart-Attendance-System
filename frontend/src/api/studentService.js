@@ -92,4 +92,17 @@ export const studentService = {
       throw error;
     }
   },
+
+  deleteStudentFaceDataByFaceId: async (studentId, faceId) => {
+    try {
+      const response = await apiClient.delete(
+        `/api/students/${studentId}/faces/${faceId}`
+      );
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.error("Error deleting face data:", error);
+      throw error;
+    }
+  },
 };

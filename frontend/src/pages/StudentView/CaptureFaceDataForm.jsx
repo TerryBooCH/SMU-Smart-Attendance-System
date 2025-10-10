@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from "react";
-import { Camera, X, Loader2, RefreshCw } from "lucide-react";
+import { Camera, X, Loader2, RefreshCw, CircleAlert } from "lucide-react";
 import { useModal } from "../../hooks/useModal";
 import useStudent from "../../hooks/useStudent";
 import useToast from "../../hooks/useToast";
@@ -8,10 +8,11 @@ const CaptureFaceDataForm = ({ student }) => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState(null);
+  const [inlineError, setInlineError] = useState(""); // inline error state
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const { uploadStudentFaceData, loading } = useStudent();
-  const { success, error } = useToast();
+  const { success } = useToast();
   const { closeModal } = useModal();
 
   // Check if webcam is available
@@ -51,7 +52,6 @@ const CaptureFaceDataForm = ({ student }) => {
       const webcamCheck = await checkWebcamAvailability();
       if (!webcamCheck.available) {
         setCameraError(webcamCheck.message);
-        error(webcamCheck.message);
         return;
       }
 
@@ -75,7 +75,6 @@ const CaptureFaceDataForm = ({ student }) => {
           await videoRef.current.play();
         } catch (playErr) {
           setCameraError("Unable to play video stream.");
-          error("Unable to play video stream.");
         }
       }
     } catch (err) {
@@ -95,9 +94,8 @@ const CaptureFaceDataForm = ({ student }) => {
       }
 
       setCameraError(errorMessage);
-      error(errorMessage);
     }
-  }, [error]);
+  }, []);
 
   // Stop camera
   const stopCamera = useCallback(() => {
@@ -128,6 +126,7 @@ const CaptureFaceDataForm = ({ student }) => {
             type: "image/jpeg",
           });
           setCapturedImage(file);
+          setInlineError("");
           stopCamera();
         }
       },
@@ -139,19 +138,39 @@ const CaptureFaceDataForm = ({ student }) => {
   // Retake photo
   const retakePhoto = useCallback(() => {
     setCapturedImage(null);
+    setInlineError("");
     startCamera();
   }, [startCamera]);
 
   // Handle upload
   const handleUpload = async () => {
     if (!capturedImage || loading) return;
+
     try {
-      await uploadStudentFaceData(student.studentId, capturedImage);
-      success("Face data uploaded successfully!");
-      stopCamera();
-      closeModal();
+      const response = await uploadStudentFaceData(
+        student.studentId,
+        capturedImage
+      );
+
+      if (response.status === 201 || response.status === "success") {
+        success("Face data uploaded successfully!");
+        stopCamera();
+        closeModal();
+      }
     } catch (err) {
-      error("Failed to upload face data. Please try again.");
+      console.error("Error uploading face data:", err);
+
+      // Default error message
+      let message = "Failed to upload face data. Please try again.";
+
+      if (err?.response?.status === 400) {
+        message =
+          "Cannot upload more images: maximum of 20 face images allowed.";
+      } else if (err?.data?.error) {
+        message = err.data.error;
+      }
+
+      setInlineError(message);
     }
   };
 
@@ -212,7 +231,10 @@ const CaptureFaceDataForm = ({ student }) => {
             />
             <button
               type="button"
-              onClick={() => setCapturedImage(null)}
+              onClick={() => {
+                setCapturedImage(null);
+                setInlineError("");
+              }}
               disabled={loading}
               className="absolute top-4 right-4 bg-white rounded-full p-2 shadow-lg hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 cursor-pointer"
             >
@@ -221,6 +243,14 @@ const CaptureFaceDataForm = ({ student }) => {
           </div>
         )}
       </div>
+
+      {/* Inline Error Box */}
+      {inlineError && (
+        <div className="w-full  bg-red-50 border border-red-400 text-red-800 px-4 py-2 rounded-lg text-center flex items-center justify-center gap-2">
+          <CircleAlert className="w-5 h-5" />
+          <span>{inlineError}</span>
+        </div>
+      )}
 
       {/* Camera Controls */}
       {!isCameraActive && !capturedImage && (

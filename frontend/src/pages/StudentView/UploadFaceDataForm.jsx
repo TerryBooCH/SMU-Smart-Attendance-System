@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { UploadCloud, X, Loader2 } from "lucide-react";
+import { UploadCloud, X, Loader2, CircleAlert } from "lucide-react";
 import { useModal } from "../../hooks/useModal";
 import useStudent from "../../hooks/useStudent";
 import useToast from "../../hooks/useToast";
@@ -7,8 +7,9 @@ import useToast from "../../hooks/useToast";
 const UploadFaceDataForm = ({ student }) => {
   const [file, setFile] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [inlineError, setInlineError] = useState(""); // inline error state
   const { uploadStudentFaceData, loading } = useStudent();
-  const { success, error } = useToast();
+  const { success } = useToast();
   const { closeModal } = useModal();
 
   const handleDrag = useCallback(
@@ -34,6 +35,7 @@ const UploadFaceDataForm = ({ student }) => {
       const droppedFile = e.dataTransfer.files?.[0];
       if (droppedFile && droppedFile.type.startsWith("image/")) {
         setFile(droppedFile);
+        setInlineError("");
       }
     },
     [loading]
@@ -44,22 +46,41 @@ const UploadFaceDataForm = ({ student }) => {
     const selectedFile = e.target.files?.[0];
     if (selectedFile && selectedFile.type.startsWith("image/")) {
       setFile(selectedFile);
+      setInlineError("");
     }
   };
 
   const handleRemoveFile = () => {
-    if (!loading) setFile(null);
+    if (!loading) {
+      setFile(null);
+      setInlineError("");
+    }
   };
 
   const handleUpload = async () => {
     if (!file || loading) return;
+
     try {
-      await uploadStudentFaceData(student.studentId, file);
-      success("Face data uploaded successfully!");
-      closeModal();
+      const response = await uploadStudentFaceData(student.studentId, file);
+
+      if (response.status === 201 || response.status === "success") {
+        success("Face data uploaded successfully!");
+        closeModal();
+      }
     } catch (err) {
-      console.error(err);
-      error("Failed to upload face data. Please try again.");
+      console.error("Error uploading face data:", err);
+
+      // Default error message
+      let message = "Failed to upload face data. Please try again.";
+
+      if (err?.response?.status === 400) {
+        message =
+          "Cannot upload more images: maximum of 20 face images allowed.";
+      } else if (err?.data?.error) {
+        message = err.data.error;
+      }
+
+      setInlineError(message);
     }
   };
 
@@ -117,6 +138,14 @@ const UploadFaceDataForm = ({ student }) => {
         )}
       </div>
 
+      {/* Inline Error Box */}
+      {inlineError && (
+        <div className="w-full  bg-red-50 border border-red-400 text-red-800 px-4 py-2 rounded-lg text-center flex items-center justify-center gap-2">
+          <CircleAlert className="w-5 h-5" />
+          <span>{inlineError}</span>
+        </div>
+      )}
+
       {/* File Info */}
       {file && (
         <div className="text-sm text-gray-600">
@@ -128,20 +157,18 @@ const UploadFaceDataForm = ({ student }) => {
 
       {/* Buttons */}
       <div className="flex justify-end gap-3 w-full mt-4">
-        {/* Cancel Button */}
         <button
           type="button"
           onClick={closeModal}
           disabled={loading}
-          className={`px-4 py-2 text-sm rounded-xl border border-gray-300 text-gray-700 cursor-pointer
+          className="px-4 py-2 text-sm rounded-xl border border-gray-300 text-gray-700 cursor-pointer
                       hover:bg-gray-100 active:scale-[0.98] 
                       transition-all duration-200 disabled:opacity-50 
-                      disabled:cursor-not-allowed font-medium`}
+                      disabled:cursor-not-allowed font-medium"
         >
           Cancel
         </button>
 
-        {/* Upload Button */}
         <button
           type="button"
           onClick={handleUpload}
@@ -150,7 +177,7 @@ const UploadFaceDataForm = ({ student }) => {
                       font-medium transition-all duration-200 
                       ${
                         file && !loading
-                          ? "bg-blue-600 hover:bg-blue-700 active:scale-[0.98] cursor-pointer"
+                          ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
                           : "bg-blue-300 cursor-not-allowed"
                       }`}
         >

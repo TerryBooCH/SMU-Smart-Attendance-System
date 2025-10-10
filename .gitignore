@@ -44,3 +44,9 @@ Thumbs.db
 # Optional: JetBrains caches
 # ----------------------
 /out/
+
+# ----------------------
+# Dataset files
+# ----------------------
+
+dataset*/

@@ -73,8 +73,4 @@ public class YoloDetector extends BaseDetector {
 
         return candidates;
     }
-
-    public static void main(String[] args) {
-        
-    }
 }

@@ -1,6 +1,8 @@
 import React from "react";
 import Sidebar from "../../components/Sidebar";
 import Breadcrumb from "../../components/Breadcrumb";
+import Toolbar from "./Toolbar";
+import CoursesContainer from "./CoursesContainer";
 
 const Courses = () => {
   return (
@@ -13,7 +15,10 @@ const Courses = () => {
             items={[{ label: "Home", href: "/home" }, { label: "Courses" }]}
           />
         </div>
-        <div className="flex-1 overflow-y-auto"></div>
+        <div className="flex-1 overflow-y-auto">
+          <Toolbar />
+          <CoursesContainer />
+        </div>
       </main>
     </div>
   );

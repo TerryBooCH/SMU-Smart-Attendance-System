@@ -4,7 +4,7 @@ import useSession from "../../hooks/useSession";
 import { Eye } from "lucide-react";
 import { formatDate } from "../../utils/dateUtils";
 
-const SessionContainer = () => {
+const SessionsContainer = () => {
   const { sessions, loading, error, fetchAllSessions } = useSession();
   const hasFetched = useRef(false);
   const navigate = useNavigate();
@@ -156,4 +156,4 @@ const SessionContainer = () => {
   );
 };
 
-export default SessionContainer;
+export default SessionsContainer;

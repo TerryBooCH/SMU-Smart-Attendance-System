@@ -2,7 +2,7 @@ import React from "react";
 import Sidebar from "../../components/Sidebar";
 import Breadcrumb from "../../components/Breadcrumb";
 import Toolbar from "./Toolbar";
-import SessionContainer from "./SessionContainer";
+import SessionsContainer from "./SessionsContainer";
 
 const Sessions = () => {
   return (
@@ -17,7 +17,7 @@ const Sessions = () => {
         </div>
         <div className="flex-1 overflow-y-auto">
           <Toolbar />
-          <SessionContainer />
+          <SessionsContainer />
         </div>
       </main>
     </div>

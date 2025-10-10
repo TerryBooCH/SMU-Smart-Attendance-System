@@ -26,7 +26,6 @@ import com.smu.smartattendancesystem.models.Course;
  */
 @RestController
 @RequestMapping("/api/courses")
-@CrossOrigin(origins = "*")
 public class CourseController {
     
     private final CourseManager courseManager;

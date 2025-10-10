@@ -1,12 +1,13 @@
 import React from "react";
 import { CirclePlus } from "lucide-react";
 import { useModal } from "../../hooks/useModal";
+import CreateSessionForm from "./CreateSessionForm";
 
 const CreateSessionButton = () => {
   const { openModal } = useModal();
 
   const handleCreateSession = () => {
-    openModal("<CreateStudentForm />", "Create Session");
+    openModal(<CreateSessionForm />, "Create Session");
   };
   return (
     <button

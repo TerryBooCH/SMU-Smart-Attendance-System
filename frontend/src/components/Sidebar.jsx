@@ -15,6 +15,7 @@ import {
   ChevronRight,
   PanelLeft,
   ArrowLeft,
+  BookOpen,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -38,31 +39,41 @@ const Sidebar = () => {
       shortcut: "2",
     },
     {
+      path: "/courses",
+      icon: BookOpen,
+      label: "Courses",
+      description: "Course management",
+      shortcut: "3",
+    },
+    {
       path: "/live-recognition",
       icon: Video,
       label: "Live Recognition",
       description: "Real-time detection",
-      shortcut: "3",
+      shortcut: "4",
     },
     {
       path: "/students",
       icon: Users,
       label: "Students",
       description: "Student management",
-      shortcut: "4",
+      shortcut: "5",
     },
     {
       path: "/reports",
       icon: FileText,
       label: "Reports",
       description: "Analytics & exports",
-      shortcut: "5",
+      shortcut: "6",
     },
   ];
 
   const isActive = (path) => {
     if (path === "/students") {
       return location.pathname.startsWith("/student");
+    }
+    if (path === "/courses") {
+      return location.pathname.startsWith("/course");
     }
     return location.pathname === path;
   };

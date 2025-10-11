@@ -8,7 +8,7 @@ const KeyboardShortcutsModalContent = () => {
       items: [
         { keys: ["Ctrl", "1"], label: "Go to Home" },
         { keys: ["Ctrl", "2"], label: "Go to Sessions" },
-        { keys: ["Ctrl", "3"], label: "Go to Courses" },
+        { keys: ["Ctrl", "3"], label: "Go to Rosters" },
         { keys: ["Ctrl", "4"], label: "Go to Live Recognition" },
         { keys: ["Ctrl", "5"], label: "Go to Students" },
         { keys: ["Ctrl", "6"], label: "Go to Reports" },

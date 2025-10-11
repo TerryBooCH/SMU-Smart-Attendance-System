@@ -1,13 +1,13 @@
 import React from 'react'
 import { CirclePlus } from "lucide-react";
 import { useModal } from "../../hooks/useModal";
-import CreateCourseForm from './CreateCourseForm';
+import CreateRosterForm from './CreateRosterForm';
 
-const CreateCourseButton = () => {
+const CreateRosterButton = () => {
   const { openModal } = useModal();
 
   const handleCreateCourse = () => {
-    openModal(<CreateCourseForm />, "Create Course");
+    openModal(<CreateRosterForm />, "Create Course");
   };
   return (
     <button
@@ -18,9 +18,9 @@ const CreateCourseButton = () => {
                      disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           <CirclePlus size={18} strokeWidth={1.8} />
-          <span>Create Course</span>
+          <span>Create Roster</span>
         </button>
   )
 }
 
-export default CreateCourseButton
+export default CreateRosterButton

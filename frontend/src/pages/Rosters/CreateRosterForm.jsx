@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { validateCreateCourseForm } from "../../utils/validateForm";
 import { useModal } from "../../context/ModalContext";
 import { useToast } from "../../hooks/useToast";
-import useCourse from "../../hooks/useCourse";
+import useCourse from "../../hooks/useRoster";
 import { CircleAlert } from "lucide-react";
 
-const CreateCourseForm = () => {
+const CreateRosterForm = () => {
   const { closeModal } = useModal();
   const { success, error } = useToast();
   const { createCourse } = useCourse();
@@ -162,4 +162,4 @@ const CreateCourseForm = () => {
   );
 };
 
-export default CreateCourseForm;
+export default CreateRosterForm;

@@ -1,23 +1,23 @@
 import React, { useEffect, useRef } from 'react';
-import useCourse from '../../hooks/useCourse';
+import useRoster from '../../hooks/useRoster';
 import { formatDate } from "../../utils/dateUtils";
 
-const CoursesContainer = () => {
-  const { courses, loading, error, fetchAllCourses } = useCourse();
+const RostersContainer = () => {
+  const { rosters, loading, error, fetchAllRosters } = useRoster();
   const hasFetched = useRef(false);
 
   useEffect(() => {
     // Only fetch once on mount
     if (!hasFetched.current) {
-      fetchAllCourses();
+      fetchAllRosters();
       hasFetched.current = true;
     }
-  }, [fetchAllCourses]);
+  }, [fetchAllRosters]);
 
-  if (loading && courses.length === 0) {
+  if (loading && rosters.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg text-gray-600">Loading courses...</div>
+        <div className="text-lg text-gray-600">Loading rosters...</div>
       </div>
     );
   }
@@ -52,22 +52,22 @@ const CoursesContainer = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {courses && courses.length > 0 ? (
-                courses.map((course) => (
-                  <tr key={course.id} className="hover:bg-gray-50">
+              {rosters && rosters.length > 0 ? (
+                rosters.map((roster) => (
+                  <tr key={roster.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {course.code || "N/A"}
+                        {roster.code || "N/A"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {course.title || "N/A"}
+                        {roster.title || "N/A"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {formatDate(course.createdAt)}
+                        {formatDate(roster.createdAt)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -83,7 +83,7 @@ const CoursesContainer = () => {
                     colSpan="4"
                     className="px-6 py-4 text-center text-sm text-gray-500"
                   >
-                    No courses found
+                    No rosters found
                   </td>
                 </tr>
               )}
@@ -95,4 +95,4 @@ const CoursesContainer = () => {
   );
 };
 
-export default CoursesContainer;
+export default RostersContainer;

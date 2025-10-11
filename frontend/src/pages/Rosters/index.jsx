@@ -2,9 +2,9 @@ import React from "react";
 import Sidebar from "../../components/Sidebar";
 import Breadcrumb from "../../components/Breadcrumb";
 import Toolbar from "./Toolbar";
-import CoursesContainer from "./CoursesContainer";
+import RostersContainer from "./RostersContainer";
 
-const Courses = () => {
+const Rosters = () => {
   return (
     <div className="min-h-screen flex">
       <Sidebar />
@@ -12,16 +12,16 @@ const Courses = () => {
       <main className="flex flex-col h-screen w-full bg-[#fafafa] overflow-hidden">
         <div className="sticky top-0 z-20 ">
           <Breadcrumb
-            items={[{ label: "Home", href: "/home" }, { label: "Courses" }]}
+            items={[{ label: "Home", href: "/home" }, { label: "Rosters" }]}
           />
         </div>
         <div className="flex-1 overflow-y-auto">
           <Toolbar />
-          <CoursesContainer />
+          <RostersContainer />
         </div>
       </main>
     </div>
   );
 };
 
-export default Courses;
+export default Rosters;

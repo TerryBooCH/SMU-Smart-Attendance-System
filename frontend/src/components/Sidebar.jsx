@@ -15,7 +15,7 @@ import {
   ChevronRight,
   PanelLeft,
   ArrowLeft,
-  BookOpen,
+  UsersRound,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -39,10 +39,10 @@ const Sidebar = () => {
       shortcut: "2",
     },
     {
-      path: "/courses",
-      icon: BookOpen,
-      label: "Courses",
-      description: "Course management",
+      path: "/rosters",
+      icon: UsersRound,
+      label: "Rosters",
+      description: "Roster management",
       shortcut: "3",
     },
     {

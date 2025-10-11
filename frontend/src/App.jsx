@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ModalProvider } from "./context/ModalContext";
 import { StudentProvider } from "./context/StudentContext";
 import { SessionProvider } from "./context/SessionContext";
-import { CourseProvider } from "./context/CourseContext";
+import { RosterProvider } from "./context/RosterContext";
 import { ToastProvider } from "./context/ToastContext";
 import Modal from "./components/Modal";
 import ToastContainer from "./components/ToastContainer";
@@ -12,7 +12,7 @@ import SignIn from "./pages/SignIn";
 import Students from "./pages/Students";
 import StudentView from "./pages/StudentView";
 import Sessions from "./pages/Sessions";
-import Courses from "./pages/Courses";
+import Rosters from "./pages/Rosters";
 import Reports from "./pages/Reports";
 import LiveRecognition from "./pages/LiveRecognition";
 import Settings from "./pages/Settings";
@@ -21,7 +21,7 @@ function App() {
   return (
     <BrowserRouter>
       <StudentProvider>
-        <CourseProvider>
+        <RosterProvider>
           <SessionProvider>
             <ModalProvider>
               <ToastProvider>
@@ -33,7 +33,7 @@ function App() {
                   <Route path="/signin" element={<SignIn />} />
                   <Route path="/students" element={<Students />} />
                   <Route path="/student/:id" element={<StudentView />} />
-                  <Route path="/courses" element={<Courses />} />
+                  <Route path="/rosters" element={<Rosters />} />
                   <Route path="/sessions" element={<Sessions />} />
                   <Route path="/reports" element={<Reports />} />
                   <Route
@@ -45,7 +45,7 @@ function App() {
               </ToastProvider>
             </ModalProvider>
           </SessionProvider>
-        </CourseProvider>
+        </RosterProvider>
       </StudentProvider>
     </BrowserRouter>
   );

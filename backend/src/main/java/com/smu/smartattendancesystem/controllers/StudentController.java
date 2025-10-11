@@ -38,8 +38,21 @@ public class StudentController {
 
     // CREATE
     @PostMapping
-    public Student addStudent(@RequestBody Student student) {
-        return studentService.createStudent(student);
+    public ResponseEntity<?> addStudent(@RequestBody Student student) {
+        try {
+            Student createdStudent = studentService.createStudent(student);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(createdStudent);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while creating student"));
+        }
     }
 
     // READ all

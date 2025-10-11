@@ -25,7 +25,15 @@ public class StudentService {
         return studentManager.getStudentByStudentId(studentId);
     }
 
-    public Student createStudent(Student student) {
+    public Student createStudent(Student student) throws IllegalArgumentException, IllegalStateException {
+        if (student == null || student.getStudentId() == null || student.getStudentId().isBlank()) {
+            throw new IllegalArgumentException("Student ID is invalid");
+        }
+
+        if (getStudentByStudentId(student.getStudentId()).isPresent()) {
+            throw new IllegalStateException("Student already exists with ID: " + student.getStudentId());
+        }
+
         return studentManager.addStudent(student);
     }
 

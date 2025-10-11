@@ -58,10 +58,19 @@ const CreateStudentForm = () => {
         success("Student created successfully");
         closeModal();
       } catch (error) {
-        console.error("Error submitting form:", error);
-        setFormErrors({
-          submit: error.message || "Failed to create student",
-        });
+        if (error.response?.status === 409) {
+          setFormErrors({
+            studentId:
+              "A student with this ID already exists. Please use a different Student ID.",
+            submit:
+              "A student with this ID already exists. Please use a different Student ID.",
+          });
+        } else {
+          console.error("Error submitting form:", error);
+          setFormErrors({
+            submit: error.message || "Failed to create student",
+          });
+        }
       } finally {
         setIsSubmitting(false);
       }

@@ -35,9 +35,9 @@ public class FaceDataService {
         this.maxImagesPerStudent = maxImagesPerStudent;
     }
 
-    // Upload single image for a student
+    // Upload one or more images for a student
     @Transactional
-    public FaceData uploadSingleImage(String studentId, MultipartFile file) throws IOException {
+    public List<FaceDataDTO> uploadImages(String studentId, List<MultipartFile> files) throws IOException {
 
         // Validate if student exists
         Student student;
@@ -49,24 +49,28 @@ public class FaceDataService {
         }
 
         // Validate file
-        if (file == null || file.isEmpty()) {
+        if (files == null || files.isEmpty()) {
             throw new IllegalArgumentException("No file provided");
         }
 
         // Check if max images reached for student
         long currentImageCount = faceManager.countByStudentId(studentId);
-
-        if (currentImageCount >= maxImagesPerStudent) {
+        if (currentImageCount + files.size() > maxImagesPerStudent) {
             throw new IllegalStateException("Max images reached for student: " + studentId);
         }
 
-        // Save image to local storage
-        String relativePath = storage.save(studentId, file);
+        // Save image to local storage, create facedata record and link it to student
+        List<FaceDataDTO> dtos = new ArrayList<>();
 
-        // Create FaceData record, and link it to the student
-        FaceData fd = new FaceData(relativePath, null); // embedding null for now
-        fd.setStudent(student);
-        return faceManager.addFaceData(fd);
+        for (int i = 0; i < files.size(); i++) {
+            String relativePath = storage.save(studentId, files.get(i));
+            FaceData fd = new FaceData(relativePath, null); // embedding null for now
+            fd.setStudent(student);
+            FaceData savedFd = faceManager.addFaceData(fd);
+            dtos.add(FaceDataDTO.fromEntity(savedFd, storage));
+        }
+
+        return dtos;
     }
 
     // Return list of face data for a student
@@ -120,5 +124,4 @@ public class FaceDataService {
         return FaceDataDTO.fromEntity(fd, storage);
     }
 
-    // Batch image upload for a student
 }

@@ -1,6 +1,7 @@
 package com.smu.smartattendancesystem.controllers;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.smu.smartattendancesystem.models.FaceData;
 import com.smu.smartattendancesystem.models.Student;
 import com.smu.smartattendancesystem.services.FaceDataService;
 import com.smu.smartattendancesystem.services.StudentService;
@@ -116,16 +116,15 @@ public class StudentController {
 
     // CREATE face data for a student
     @PostMapping(value = "/{studentId}/faces", consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadFace(@PathVariable String studentId, @RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadFace(@PathVariable String studentId, @RequestParam("file") List<MultipartFile> files) {
         try {
-            FaceData fd = faceDataService.uploadSingleImage(studentId, file);
-            var fdDto = faceDataService.toDto(fd);
+            var dtos = faceDataService.uploadImages(studentId, files);
 
             // Custom response
-            Map<String, Object> response = new HashMap<>();
-            response.put("data", fdDto);
-            response.put("status", "success");
+            Map<String, Object> response = new LinkedHashMap<>();
             response.put("message", "Face data uploaded successfully");
+            response.put("status", "success");
+            response.put("data", dtos);
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (NoSuchElementException e) {

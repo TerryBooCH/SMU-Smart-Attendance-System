@@ -72,8 +72,8 @@ const Sidebar = () => {
     if (path === "/students") {
       return location.pathname.startsWith("/student");
     }
-    if (path === "/courses") {
-      return location.pathname.startsWith("/course");
+    if (path === "/rosters") {
+      return location.pathname.startsWith("/roster");
     }
     return location.pathname === path;
   };

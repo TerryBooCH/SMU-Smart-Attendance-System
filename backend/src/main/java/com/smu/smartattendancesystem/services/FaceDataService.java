@@ -40,13 +40,7 @@ public class FaceDataService {
     public List<FaceDataDTO> uploadImages(String studentId, List<MultipartFile> files) throws IOException {
 
         // Validate if student exists
-        Student student;
-        Optional<Student> optStudent = studentManager.getStudentByStudentId(studentId);
-        if (optStudent.isPresent()) {
-            student = optStudent.get();
-        } else {
-            throw new NoSuchElementException("Student not found: " + studentId);
-        }
+        Student student = validateStudent(studentId);
 
         // Validate file
         if (files == null || files.isEmpty()) {
@@ -78,13 +72,7 @@ public class FaceDataService {
     public List<FaceDataDTO> list(String studentId) {
 
         // Validate if student exists
-        Student student;
-        Optional<Student> optStudent = studentManager.getStudentByStudentId(studentId);
-        if (optStudent.isPresent()) {
-            student = optStudent.get();
-        } else {
-            throw new NoSuchElementException("Student not found: " + studentId);
-        }
+        Student student = validateStudent(studentId);
 
         List<FaceData> faces = faceManager.listByStudentId(studentId);
         List<FaceDataDTO> dtos = new ArrayList<>();
@@ -98,10 +86,7 @@ public class FaceDataService {
     @Transactional
     public void delete(String studentId, Long faceDataId) throws IOException {
         // Validate if student exists
-        Optional<Student> optStudent = studentManager.getStudentByStudentId(studentId);
-        if (optStudent.isEmpty()) {
-            throw new NoSuchElementException("Student not found: " + studentId);
-        }
+        Student student = validateStudent(studentId);
 
         // Validate if face data exists and belongs to the student
         Optional<FaceData> optFaceData = faceManager.getByIdAndStudentId(faceDataId, studentId);
@@ -122,6 +107,16 @@ public class FaceDataService {
     // Convert FaceData entity to DTO to be returned to frontend
     public FaceDataDTO toDto(FaceData fd) {
         return FaceDataDTO.fromEntity(fd, storage);
+    }
+
+    // Student validation
+    private Student validateStudent(String studentId) throws NoSuchElementException {
+        Optional<Student> optStudent = studentManager.getStudentByStudentId(studentId);
+        if (optStudent.isPresent()) {
+            return optStudent.get();
+        } else {
+            throw new NoSuchElementException("Student not found: " + studentId);
+        }
     }
 
 }

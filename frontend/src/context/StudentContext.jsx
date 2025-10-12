@@ -132,43 +132,45 @@ export const StudentProvider = ({ children }) => {
     }
   };
 
-  const uploadStudentFaceData = async (studentId, file) => {
-    try {
-      setLoading(true);
-      setError(null);
+const uploadStudentFaceData = async (studentId, files) => {
+  try {
+    setLoading(true);
+    setError(null);
 
-      // Upload the file
-      const response = await studentService.uploadStudentFaceData(
-        studentId,
-        file
-      );
+    // Upload the files
+    const response = await studentService.uploadStudentFaceData(
+      studentId,
+      files
+    );
 
-      // Check for successful response
-      if (response.status === "success" || response.status === 201) {
-        console.log("Face data uploaded successfully:", response);
+    // Check for successful response
+    if (response.status === "success" || response.status === 201) {
+      console.log("Face data uploaded successfully:", response);
 
-        const uploadedData = response.data;
+      const uploadedDataArray = Array.isArray(response.data) 
+        ? response.data 
+        : [response.data];
 
-        // Create face data entry matching the GET response structure
-        const newFaceData = {
-          id: uploadedData.id,
-          studentId: uploadedData.studentId,
-          studentName: uploadedData.studentName,
-          imageBase64: uploadedData.imageBase64,
-          createdAt: uploadedData.createdAt,
-        };
+      // Create face data entries matching the GET response structure
+      const newFaceDataArray = uploadedDataArray.map((uploadedData) => ({
+        id: uploadedData.id,
+        studentId: uploadedData.studentId,
+        studentName: uploadedData.studentName,
+        imageBase64: uploadedData.imageBase64,
+        createdAt: uploadedData.createdAt,
+      }));
 
-        setStudentFaceData((prev) => [...prev, newFaceData]);
-      }
-
-      return response;
-    } catch (error) {
-      console.error("Error uploading face data:", error);
-      throw error;
-    } finally {
-      setLoading(false);
+      setStudentFaceData((prev) => [...prev, ...newFaceDataArray]);
     }
-  };
+
+    return response;
+  } catch (error) {
+    console.error("Error uploading face data:", error);
+    throw error;
+  } finally {
+    setLoading(false);
+  }
+};
 
   const getFaceDataByStudentId = async (studentId) => {
     try {

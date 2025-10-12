@@ -5,9 +5,9 @@ import useStudent from "../../hooks/useStudent";
 import useToast from "../../hooks/useToast";
 
 const UploadFaceDataForm = ({ student }) => {
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [dragActive, setDragActive] = useState(false);
-  const [inlineError, setInlineError] = useState(""); // inline error state
+  const [inlineError, setInlineError] = useState("");
   const { uploadStudentFaceData, loading } = useStudent();
   const { success } = useToast();
   const { closeModal } = useModal();
@@ -32,9 +32,13 @@ const UploadFaceDataForm = ({ student }) => {
       e.stopPropagation();
       if (loading) return;
       setDragActive(false);
-      const droppedFile = e.dataTransfer.files?.[0];
-      if (droppedFile && droppedFile.type.startsWith("image/")) {
-        setFile(droppedFile);
+
+      const droppedFiles = Array.from(e.dataTransfer.files).filter((file) =>
+        file.type.startsWith("image/")
+      );
+
+      if (droppedFiles.length > 0) {
+        setFiles((prev) => [...prev, ...droppedFiles]);
         setInlineError("");
       }
     },
@@ -43,34 +47,38 @@ const UploadFaceDataForm = ({ student }) => {
 
   const handleFileChange = (e) => {
     if (loading) return;
-    const selectedFile = e.target.files?.[0];
-    if (selectedFile && selectedFile.type.startsWith("image/")) {
-      setFile(selectedFile);
+    const selectedFiles = Array.from(e.target.files || []).filter((file) =>
+      file.type.startsWith("image/")
+    );
+
+    if (selectedFiles.length > 0) {
+      setFiles((prev) => [...prev, ...selectedFiles]);
       setInlineError("");
     }
   };
 
-  const handleRemoveFile = () => {
+  const handleRemoveFile = (index) => {
     if (!loading) {
-      setFile(null);
-      setInlineError("");
+      setFiles((prev) => prev.filter((_, i) => i !== index));
+      if (files.length === 1) {
+        setInlineError("");
+      }
     }
   };
 
   const handleUpload = async () => {
-    if (!file || loading) return;
+    if (files.length === 0 || loading) return;
 
     try {
-      const response = await uploadStudentFaceData(student.studentId, file);
+      const response = await uploadStudentFaceData(student.studentId, files);
 
       if (response.status === 201 || response.status === "success") {
-        success("Face data uploaded successfully!");
+        success(`${files.length} face image(s) uploaded successfully!`);
         closeModal();
       }
     } catch (err) {
       console.error("Error uploading face data:", err);
 
-      // Default error message
       let message = "Failed to upload face data. Please try again.";
 
       if (err?.response?.status === 400) {
@@ -98,59 +106,65 @@ const UploadFaceDataForm = ({ student }) => {
             : "border-gray-300 hover:border-blue-400"
         } ${loading ? "opacity-50 pointer-events-none" : ""}`}
       >
-        {!file ? (
-          <>
-            <UploadCloud className="w-10 h-10 text-gray-400 mb-2" />
-            <p className="text-sm text-gray-600 text-center">
-              Drag & drop your face image here <br /> or{" "}
-              <label
-                htmlFor="fileInput"
-                className="text-blue-600 cursor-pointer hover:underline font-medium"
-              >
-                browse
-              </label>
-            </p>
-            <input
-              id="fileInput"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="hidden"
-              disabled={loading}
-            />
-          </>
-        ) : (
-          <div className="relative w-full h-full flex flex-col items-center justify-center">
-            <img
-              src={URL.createObjectURL(file)}
-              alt="Preview"
-              className="w-32 h-32 object-cover rounded-xl shadow-md"
-            />
-            <button
-              type="button"
-              onClick={handleRemoveFile}
-              disabled={loading}
-              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 cursor-pointer"
-            >
-              <X size={16} />
-            </button>
-          </div>
-        )}
+        <UploadCloud className="w-10 h-10 text-gray-400 mb-2" />
+        <p className="text-sm text-gray-600 text-center">
+          Drag & drop your face images here <br /> or {" "}
+          <label
+            htmlFor="fileInput"
+            className="text-blue-600 cursor-pointer hover:underline font-medium"
+          >
+            browse
+          </label>
+        </p>
+        <input
+          id="fileInput"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+          disabled={loading}
+        />
       </div>
+
+      {/* Preview Section */}
+      {files.length > 0 && (
+        <div className="w-full max-h-56 overflow-y-auto border border-gray-200 rounded-xl p-3 bg-gray-50">
+          <div className="grid grid-cols-3 gap-2">
+            {files.map((file, index) => (
+              <div key={index} className="relative group">
+                <img
+                  src={URL.createObjectURL(file)}
+                  alt={`Preview ${index + 1}`}
+                  className="w-full h-24 object-cover rounded-lg shadow-md"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFile(index)}
+                  disabled={loading}
+                  className="absolute top-1 right-1 bg-white rounded-full p-1 shadow hover:bg-gray-100 transition-all duration-200 disabled:opacity-50 cursor-pointer opacity-0 group-hover:opacity-100"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Inline Error Box */}
       {inlineError && (
-        <div className="w-full  bg-red-50 border border-red-400 text-red-800 px-4 py-2 rounded-lg text-center flex items-center justify-center gap-2">
+        <div className="w-full bg-red-50 border border-red-400 text-red-800 px-4 py-2 rounded-lg text-center flex items-center justify-center gap-2">
           <CircleAlert className="w-5 h-5" />
           <span>{inlineError}</span>
         </div>
       )}
 
       {/* File Info */}
-      {file && (
+      {files.length > 0 && (
         <div className="text-sm text-gray-600">
           <p>
-            <strong>Selected file:</strong> {file.name}
+            <strong>Selected files:</strong> {files.length} image(s)
           </p>
         </div>
       )}
@@ -161,10 +175,7 @@ const UploadFaceDataForm = ({ student }) => {
           type="button"
           onClick={closeModal}
           disabled={loading}
-          className="px-4 py-2 text-sm rounded-xl border border-gray-300 text-gray-700 cursor-pointer
-                      hover:bg-gray-100 active:scale-[0.98] 
-                      transition-all duration-200 disabled:opacity-50 
-                      disabled:cursor-not-allowed font-medium"
+          className="px-4 py-2 text-sm rounded-xl border border-gray-300 text-gray-700 cursor-pointer hover:bg-gray-100 active:scale-[0.98] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
         >
           Cancel
         </button>
@@ -172,14 +183,12 @@ const UploadFaceDataForm = ({ student }) => {
         <button
           type="button"
           onClick={handleUpload}
-          disabled={!file || loading}
-          className={`px-4 py-2 rounded-xl text-sm text-white flex items-center justify-center gap-2 
-                      font-medium transition-all duration-200 
-                      ${
-                        file && !loading
-                          ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
-                          : "bg-blue-300 cursor-not-allowed"
-                      }`}
+          disabled={files.length === 0 || loading}
+          className={`px-4 py-2 rounded-xl text-sm text-white flex items-center justify-center gap-2 font-medium transition-all duration-200 ${
+            files.length > 0 && !loading
+              ? "bg-blue-600 hover:bg-blue-700 cursor-pointer"
+              : "bg-blue-300 cursor-not-allowed"
+          }`}
         >
           {loading ? (
             <>
@@ -187,7 +196,7 @@ const UploadFaceDataForm = ({ student }) => {
               Uploading...
             </>
           ) : (
-            "Upload"
+            `Upload ${files.length > 0 ? `(${files.length})` : ""}`
           )}
         </button>
       </div>

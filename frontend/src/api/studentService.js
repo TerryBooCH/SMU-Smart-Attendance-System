@@ -59,28 +59,31 @@ export const studentService = {
     }
   },
 
-  uploadStudentFaceData: async (studentId, file) => {
-    try {
-      const formData = new FormData();
+uploadStudentFaceData: async (studentId, files) => {
+  try {
+    const formData = new FormData();
+    
+    files.forEach((file) => {
       formData.append("file", file);
+    });
 
-      const response = await apiClient.post(
-        `/api/students/${studentId}/faces`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+    const response = await apiClient.post(
+      `/api/students/${studentId}/faces`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
 
-      console.log("Face data upload response:", response.data);
-      return response.data;
-    } catch (error) {
-      console.error("Error uploading face data:", error);
-      throw error;
-    }
-  },
+    console.log("Face data upload response:", response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading face data:", error);
+    throw error;
+  }
+},
 
   getFaceDataByStudentId: async (studentId) => {
     try {

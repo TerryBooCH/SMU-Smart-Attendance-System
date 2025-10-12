@@ -8,7 +8,7 @@ const CaptureFaceDataForm = ({ student }) => {
   const [capturedImage, setCapturedImage] = useState(null);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [cameraError, setCameraError] = useState(null);
-  const [inlineError, setInlineError] = useState(""); // inline error state
+  const [inlineError, setInlineError] = useState("");
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const { uploadStudentFaceData, loading } = useStudent();
@@ -149,7 +149,7 @@ const CaptureFaceDataForm = ({ student }) => {
     try {
       const response = await uploadStudentFaceData(
         student.studentId,
-        capturedImage
+        [capturedImage]
       );
 
       if (response.status === 201 || response.status === "success") {
@@ -160,7 +160,6 @@ const CaptureFaceDataForm = ({ student }) => {
     } catch (err) {
       console.error("Error uploading face data:", err);
 
-      // Default error message
       let message = "Failed to upload face data. Please try again.";
 
       if (err?.response?.status === 400) {
@@ -246,7 +245,7 @@ const CaptureFaceDataForm = ({ student }) => {
 
       {/* Inline Error Box */}
       {inlineError && (
-        <div className="w-full  bg-red-50 border border-red-400 text-red-800 px-4 py-2 rounded-lg text-center flex items-center justify-center gap-2">
+        <div className="w-full bg-red-50 border border-red-400 text-red-800 px-4 py-2 rounded-lg text-center flex items-center justify-center gap-2">
           <CircleAlert className="w-5 h-5" />
           <span>{inlineError}</span>
         </div>

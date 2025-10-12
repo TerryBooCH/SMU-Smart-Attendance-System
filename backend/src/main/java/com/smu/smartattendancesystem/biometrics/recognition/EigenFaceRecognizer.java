@@ -11,21 +11,24 @@ import smile.math.matrix.Matrix;
 import com.fasterxml.jackson.core.json.*;
 import com.fasterxml.jackson.core.type.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smu.smartattendancesystem.biometrics.metrics.*;
 
 public class EigenFaceRecognizer extends BaseRecognizer {
     private int image_size = 64; 
     private PCA pca;
+    private BaseMetric metric;
 
-    public EigenFaceRecognizer(PCA pca, int image_size) {
+    public EigenFaceRecognizer(PCA pca, BaseMetric metric, int image_size) {
         this.pca = pca;
         this.image_size = image_size;
-    }
-    
-    public EigenFaceRecognizer(PCA pca) {
-        this(pca, 64);
+        this.metric = metric;
     }
 
-    public static EigenFaceRecognizer fromConfig(Path jsonPath) throws IOException{
+    public EigenFaceRecognizer(PCA pca, BaseMetric metric) {
+        this(pca, metric, 64);
+    }
+
+    public static EigenFaceRecognizer fromConfig(Path jsonPath, BaseMetric metric) throws IOException{
         // TODO load config containing image_size, pca_dim, and each of the principal components
         ObjectMapper mapper = new ObjectMapper();
 
@@ -57,7 +60,7 @@ public class EigenFaceRecognizer extends BaseRecognizer {
 
         PCA pca = new PCA(mean, eigenvalues, loadings, projection);
 
-        return new EigenFaceRecognizer(pca, image_size);
+        return new EigenFaceRecognizer(pca, metric, image_size);
     }
 
     private Mat letterbox_resize(Mat image, Scalar fillColor) {
@@ -133,15 +136,17 @@ public class EigenFaceRecognizer extends BaseRecognizer {
     }
 
     public double computeScore(Mat faceA, Mat faceB) {
-        
-        return 0.0;
+        double[] vectorA = transform(faceA);
+        double[] vectorB = transform(faceB);
+
+        return metric.compareVectors(vectorA, vectorB);
     }
 
     public static void main(String[] args) {
         Path path = basePath.resolve("src\\main\\resources\\weights\\mtcnn_eigenface.config");
 
         try {
-            EigenFaceRecognizer recognizer = EigenFaceRecognizer.fromConfig(path);
+            EigenFaceRecognizer recognizer = EigenFaceRecognizer.fromConfig(path, new EuclideanDistance());
         } catch (IOException e) {
             System.out.println("failed");
         }

@@ -14,7 +14,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smu.smartattendancesystem.biometrics.metrics.*;
 
 public class EigenFaceRecognizer extends BaseRecognizer {
-    private int image_size = 64; 
+    private int image_size;
     private PCA pca;
     private BaseMetric metric;
 
@@ -29,11 +29,9 @@ public class EigenFaceRecognizer extends BaseRecognizer {
     }
 
     public static EigenFaceRecognizer fromConfig(Path jsonPath, BaseMetric metric) throws IOException{
-        // TODO load config containing image_size, pca_dim, and each of the principal components
         ObjectMapper mapper = new ObjectMapper();
 
         Map<String, Object> config = mapper.readValue(jsonPath.toFile(), new TypeReference<Map<String, Object>>() {});
-        System.out.println(config);
 
         int image_size = ((Number) config.get("img_size")).intValue();
 
@@ -55,8 +53,8 @@ public class EigenFaceRecognizer extends BaseRecognizer {
         List<Double> eigList = (List<Double>) config.get("eigenvalues");
         double[] eigenvalues = eigList.stream().mapToDouble(Double::doubleValue).toArray();
 
-        Matrix loadings = Matrix.of(components);
-        Matrix projection = loadings.transpose();
+        Matrix projection = Matrix.of(components);
+        Matrix loadings = projection.transpose();
 
         PCA pca = new PCA(mean, eigenvalues, loadings, projection);
 
@@ -103,7 +101,7 @@ public class EigenFaceRecognizer extends BaseRecognizer {
         if (image.channels() > 1) {
             Imgproc.cvtColor(image, gray, Imgproc.COLOR_BGR2GRAY);
         } else {
-            gray = image.clone(); // already grayscale
+            gray = image.clone();
         }
         return gray;
     }
@@ -140,16 +138,5 @@ public class EigenFaceRecognizer extends BaseRecognizer {
         double[] vectorB = transform(faceB);
 
         return metric.compareVectors(vectorA, vectorB);
-    }
-
-    public static void main(String[] args) {
-        Path path = basePath.resolve("src\\main\\resources\\weights\\mtcnn_eigenface.config");
-
-        try {
-            EigenFaceRecognizer recognizer = EigenFaceRecognizer.fromConfig(path, new EuclideanDistance());
-        } catch (IOException e) {
-            System.out.println("failed");
-        }
-        System.out.println("test");
     }
 }

@@ -12,8 +12,8 @@ import com.smu.smartattendancesystem.models.Session;
 public interface SessionRepository extends JpaRepository<Session, Long> {
 
     // Find sessions by course name
-    List<Session> findByName(String courseName);
+    List<Session> findByCourseName(String courseName);
 
     // Find sessions on a specific date
-    List<Session> findBySessionDate(LocalDate date);
+    List<Session> findByStartAt(LocalDate date);
 }

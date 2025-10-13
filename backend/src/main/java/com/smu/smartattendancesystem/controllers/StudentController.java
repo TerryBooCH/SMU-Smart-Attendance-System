@@ -163,6 +163,7 @@ public class StudentController {
         return response;
     }
 
+    @SuppressWarnings("unused")
     private Map<String, String> createSuccessResponse(String message) {
         Map<String, String> response = new HashMap<>();
         response.put("message", message);

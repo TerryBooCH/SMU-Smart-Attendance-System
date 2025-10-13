@@ -74,6 +74,7 @@ public class FaceDataService {
     public List<FaceDataDTO> list(String studentId) {
 
         // Validate if student exists
+        @SuppressWarnings("unused")
         Student student;
         Optional<Student> optStudent = studentManager.getStudentByStudentId(studentId);
         if (optStudent.isPresent()) {

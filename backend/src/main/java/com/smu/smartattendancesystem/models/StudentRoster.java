@@ -1,28 +1,29 @@
 package com.smu.smartattendancesystem.models;
 
 import jakarta.persistence.*;
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "student_roster")
-public class StudentRoster { // Does not extend BaseEntity so the id wont conflict with StudentRosterId for primary key
+@IdClass(StudentRosterId.class)
+public class StudentRoster implements Serializable {
 
-    @EmbeddedId
-    private StudentRosterId id = new StudentRosterId();
-
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("studentId")
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("rosterId")
     @JoinColumn(name = "roster_id", nullable = false)
     private Roster roster;
 
-    @Column(name = "created_at")
-    private String createdAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    public StudentRoster() {}
+    // Constructors
+    public StudentRoster() {
+    }
 
     public StudentRoster(Student student, Roster roster) {
         this.student = student;
@@ -46,11 +47,11 @@ public class StudentRoster { // Does not extend BaseEntity so the id wont confli
         this.roster = roster;
     }
 
-    public String getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }

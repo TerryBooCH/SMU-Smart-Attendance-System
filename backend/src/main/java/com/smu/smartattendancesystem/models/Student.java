@@ -1,36 +1,29 @@
 package com.smu.smartattendancesystem.models;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "student")
 public class Student extends BaseEntity {
 
-    @Column(nullable = false, unique = true)
-    private String studentId;
+    @Column(name = "student_id", nullable = false, unique = true)
+    private String studentId; // e.g. S1234567A
 
+    @Column(nullable = false)
     private String name;
+
     private String email;
     private String phone;
 
-    // A student can have multiple face data records
-    @JsonIgnore
+    // Relationships
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FaceData> faceData = new ArrayList<>();
+    private List<FaceData> faceDataList;
 
-    // A student can be part of multiple rosters
-    @JsonIgnore
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StudentRoster> studentRosters = new ArrayList<>();
-
-    // A student can have multiple attendance records across sessions
-    @JsonIgnore
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Attendance> attendances = new ArrayList<>();
+    @ManyToMany
+    @JoinTable(name = "student_roster", joinColumns = @JoinColumn(name = "student_id"), inverseJoinColumns = @JoinColumn(name = "roster_id"))
+    private List<Roster> rosters;
 
     // Constructors
     public Student() {
@@ -43,7 +36,7 @@ public class Student extends BaseEntity {
         this.phone = phone;
     }
 
-    // Getters & Setters
+    // Getters and Setters
     public String getStudentId() {
         return studentId;
     }
@@ -76,27 +69,19 @@ public class Student extends BaseEntity {
         this.phone = phone;
     }
 
-    public List<FaceData> getFaceData() {
-        return faceData;
+    public List<FaceData> getFaceDataList() {
+        return faceDataList;
     }
 
-    public void setFaceData(List<FaceData> faceData) {
-        this.faceData = faceData;
+    public void setFaceDataList(List<FaceData> faceDataList) {
+        this.faceDataList = faceDataList;
     }
 
-    public List<StudentRoster> getStudentRosters() {
-        return studentRosters;
+    public List<Roster> getRosters() {
+        return rosters;
     }
 
-    public void setStudentRosters(List<StudentRoster> studentRosters) {
-        this.studentRosters = studentRosters;
-    }
-
-    public List<Attendance> getAttendances() {
-        return attendances;
-    }
-
-    public void setAttendances(List<Attendance> attendances) {
-        this.attendances = attendances;
+    public void setRosters(List<Roster> rosters) {
+        this.rosters = rosters;
     }
 }

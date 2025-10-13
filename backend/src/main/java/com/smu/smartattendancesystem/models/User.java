@@ -1,9 +1,9 @@
 package com.smu.smartattendancesystem.models;
 
 import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Entity
 @Table(name = "user")
@@ -12,49 +12,50 @@ public class User extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false, unique = true) 
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(nullable = false)
+    @Column(name = "permission_level", nullable = false)
     private int permissionLevel; // 0 = Student, 1 = TA, 2 = Professor
 
-    // Optional foreign key to Student table - only for users who are students
+    // Optional link to Student table
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = true) // Makes it optional
+    @JoinColumn(name = "student_id", referencedColumnName = "id")
     private Student student;
 
-    // Default constructor required by JPA
-    public User() {}
+    // ─────────────────────────────────────────────
+    // Constructors
+    // ─────────────────────────────────────────────
 
-    // Constructor: takes plain password, hashes it, and stores it
+    public User() {
+    }
+
     public User(String name, String email, String plainPassword, int permissionLevel) {
         this.name = name;
         this.email = email;
         this.passwordHash = hashPassword(plainPassword);
         this.permissionLevel = permissionLevel;
-        this.student = null; // Initially no student association
     }
 
-    // Constructor with student association
     public User(String name, String email, String plainPassword, int permissionLevel, Student student) {
-        this.name = name;
-        this.email = email;
-        this.passwordHash = hashPassword(plainPassword);
-        this.permissionLevel = permissionLevel;
+        this(name, email, plainPassword, permissionLevel);
         this.student = student;
     }
 
-    // Hashing method (SHA-256)
+    // ─────────────────────────────────────────────
+    // Password Handling
+    // ─────────────────────────────────────────────
+
     private String hashPassword(String plainPassword) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] hashedBytes = md.digest(plainPassword.getBytes());
             StringBuilder sb = new StringBuilder();
             for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b)); // Convert to hex
+                sb.append(String.format("%02x", b)); // Convert byte to hex
             }
             return sb.toString();
         } catch (NoSuchAlgorithmException e) {
@@ -62,28 +63,37 @@ public class User extends BaseEntity {
         }
     }
 
-    // Password verification
     public boolean checkPassword(String plainPassword) {
         return this.passwordHash.equals(hashPassword(plainPassword));
     }
 
-    // Getters & Setters
-    public String getName() { 
-        return name; 
-    }
-    public void setName(String name) { 
-        this.name = name; 
+    @JsonProperty("password") // Accept "password" from JSON input
+    public void setPassword(String plainPassword) {
+        this.passwordHash = hashPassword(plainPassword);
     }
 
-    public String getEmail() { 
-        return email; 
-    }
-    public void setEmail(String email) { 
-        this.email = email; 
+    // ─────────────────────────────────────────────
+    // Getters and Setters
+    // ─────────────────────────────────────────────
+
+    public String getName() {
+        return name;
     }
 
-    public String getPasswordHash() { 
-        return passwordHash; 
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
     public int getPermissionLevel() {
@@ -102,18 +112,15 @@ public class User extends BaseEntity {
         this.student = student;
     }
 
-    // Helper method to check if user is linked to a student
+    // ─────────────────────────────────────────────
+    // Helper Methods
+    // ─────────────────────────────────────────────
+
     public boolean isLinkedToStudent() {
         return student != null;
     }
 
-    // Helper method to get student ID if linked
     public String getLinkedStudentId() {
-        return student != null ? student.getStudentId() : null;
-    }
-
-    @JsonProperty("password") // Accept "password" from JSON as plain text
-    public void setPassword(String plainPassword) {
-        this.passwordHash = hashPassword(plainPassword);
+        return (student != null) ? student.getStudentId() : null;
     }
 }

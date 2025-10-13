@@ -1,87 +1,74 @@
 package com.smu.smartattendancesystem.models;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "session")
 public class Session extends BaseEntity {
 
-    private String name;
-    private LocalDate sessionDate;
-    private String startAt;
-    private String endAt;
-    private boolean isOpen;
-    private Integer lateAfterMinutes;
-    private String location;
-
-    // Each session belongs to a single roster (group of students)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "roster_id", nullable = false)
     private Roster roster;
 
-    // One session has many attendance records
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Attendance> attendances = new ArrayList<>();
+    @Column(name = "course_name", nullable = false)
+    private String courseName;
 
-    @PrePersist
-    protected void onCreate() {
-        if (sessionDate == null) {
-            sessionDate = LocalDate.now();
-        }
-        if (lateAfterMinutes == null) {
-            lateAfterMinutes = 15;
-        }
-    }
+    @Column(name = "start_at", nullable = false)
+    private LocalDateTime startAt;
+
+    private LocalDateTime endAt;
+
+    @Column(name = "is_open", nullable = false)
+    private boolean isOpen = false;
+
+    private Integer lateAfterMinutes;
+
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attendance> attendanceList;
 
     // Constructors
     public Session() {
     }
 
-    public Session(Roster roster, String name, String startAt, String endAt, String location, boolean isOpen,
-            Integer lateAfterMinutes) {
+    public Session(Roster roster, String courseName, LocalDateTime startAt, LocalDateTime endAt) {
         this.roster = roster;
-        this.name = name;
+        this.courseName = courseName;
         this.startAt = startAt;
         this.endAt = endAt;
-        this.location = location;
-        this.isOpen = isOpen;
-        this.lateAfterMinutes = lateAfterMinutes;
     }
 
-    // Getters & Setters
-    public String getName() {
-        return name;
+    // Getters and Setters
+    public Roster getRoster() {
+        return roster;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setRoster(Roster roster) {
+        this.roster = roster;
     }
 
-    public LocalDate getSessionDate() {
-        return sessionDate;
+    public String getCourseName() {
+        return courseName;
     }
 
-    public void setSessionDate(LocalDate sessionDate) {
-        this.sessionDate = sessionDate;
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
     }
 
-    public String getStartAt() {
+    public LocalDateTime getStartAt() {
         return startAt;
     }
 
-    public void setStartAt(String startAt) {
+    public void setStartAt(LocalDateTime startAt) {
         this.startAt = startAt;
     }
 
-    public String getEndAt() {
+    public LocalDateTime getEndAt() {
         return endAt;
     }
 
-    public void setEndAt(String endAt) {
+    public void setEndAt(LocalDateTime endAt) {
         this.endAt = endAt;
     }
 
@@ -101,27 +88,11 @@ public class Session extends BaseEntity {
         this.lateAfterMinutes = lateAfterMinutes;
     }
 
-    public String getLocation() {
-        return location;
+    public List<Attendance> getAttendanceList() {
+        return attendanceList;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public Roster getRoster() {
-        return roster;
-    }
-
-    public void setRoster(Roster roster) {
-        this.roster = roster;
-    }
-
-    public List<Attendance> getAttendances() {
-        return attendances;
-    }
-
-    public void setAttendances(List<Attendance> attendances) {
-        this.attendances = attendances;
+    public void setAttendanceList(List<Attendance> attendanceList) {
+        this.attendanceList = attendanceList;
     }
 }

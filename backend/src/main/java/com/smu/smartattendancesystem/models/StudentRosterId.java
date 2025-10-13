@@ -1,49 +1,33 @@
 package com.smu.smartattendancesystem.models;
 
-import jakarta.persistence.Embeddable;
 import java.io.Serializable;
 import java.util.Objects;
 
-@Embeddable
 public class StudentRosterId implements Serializable {
+    private Long student;
+    private Long roster;
 
-    private Integer studentId;
-    private Integer rosterId;
-
-    public StudentRosterId() {}
-
-    public StudentRosterId(Integer studentId, Integer rosterId) {
-        this.studentId = studentId;
-        this.rosterId = rosterId;
+    public StudentRosterId() {
     }
 
-    public Integer getStudentId() {
-        return studentId;
+    public StudentRosterId(Long student, Long roster) {
+        this.student = student;
+        this.roster = roster;
     }
 
-    public void setStudentId(Integer studentId) {
-        this.studentId = studentId;
-    }
-
-    public Integer getRosterId() {
-        return rosterId;
-    }
-
-    public void setRosterId(Integer rosterId) {
-        this.rosterId = rosterId;
-    }
-
+    // hashCode & equals required for composite key
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof StudentRosterId)) return false;
+        if (this == o)
+            return true;
+        if (!(o instanceof StudentRosterId))
+            return false;
         StudentRosterId that = (StudentRosterId) o;
-        return Objects.equals(studentId, that.studentId) &&
-               Objects.equals(rosterId, that.rosterId);
+        return Objects.equals(student, that.student) && Objects.equals(roster, that.roster);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(studentId, rosterId);
+        return Objects.hash(student, roster);
     }
 }

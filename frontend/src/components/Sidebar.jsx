@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../assets/logo.svg";
 import KeyboardShortcutsModalButton from "./KeyboardShortcutsModalButton";
+import useSidebar from "../hooks/useSidebar";
 
 import {
   Users,
@@ -21,7 +22,7 @@ import {
 const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { collapsed: isCollapsed, toggleCollapse } = useSidebar();
 
   const navigationItems = [
     {
@@ -78,8 +79,6 @@ const Sidebar = () => {
     return location.pathname === path;
   };
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
-
   // Keyboard navigation handler
   useEffect(() => {
     const handleKeyPress = (e) => {
@@ -96,7 +95,7 @@ const Sidebar = () => {
         // Ctrl/Cmd + B to toggle sidebar
         if (key === 'b' || key === 'B') {
           e.preventDefault();
-          setIsCollapsed(!isCollapsed);
+          toggleCollapse();
         }
         
         // Ctrl/Cmd + , for settings
@@ -109,7 +108,7 @@ const Sidebar = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [navigate, isCollapsed]);
+  }, [navigate, toggleCollapse]);
 
   return (
     <div
@@ -126,7 +125,7 @@ const Sidebar = () => {
           <div className="group relative flex items-center rounded-xl transition-all duration-200 p-3 w-full" >
             <div className="flex-shrink-0 w-6 flex items-center justify-center">
               <button
-                onClick={toggleSidebar}
+                onClick={toggleCollapse}
                 className="flex items-center justify-center transition-all duration-300  -m-2 cursor-pointer"
                 title="Toggle sidebar (Ctrl+B)"
               >
@@ -145,7 +144,7 @@ const Sidebar = () => {
                   </span>
                 </div>
                 <button
-                  onClick={toggleSidebar}
+                  onClick={toggleCollapse}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 flex-shrink-0 cursor-pointer"
                   title="Toggle sidebar (Ctrl+B)"
                 >

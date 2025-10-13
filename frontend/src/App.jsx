@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { SidebarProvider } from "./context/SidebarContext";
 import { ModalProvider } from "./context/ModalContext";
 import { StudentProvider } from "./context/StudentContext";
 import { SessionProvider } from "./context/SessionContext";
@@ -25,26 +26,28 @@ function App() {
         <RosterProvider>
           <SessionProvider>
             <ModalProvider>
-              <ToastProvider>
-                <Modal />
-                <ToastContainer />
-                <Routes>
-                  <Route path="/" element={<Landing />} />
-                  <Route path="/home" element={<Home />} />
-                  <Route path="/signin" element={<SignIn />} />
-                  <Route path="/students" element={<Students />} />
-                  <Route path="/student/:id" element={<StudentView />} />
-                  <Route path="/rosters" element={<Rosters />} />
-                  <Route path="/roster/:id" element={<RosterView />} />
-                  <Route path="/sessions" element={<Sessions />} />
-                  <Route path="/reports" element={<Reports />} />
-                  <Route
-                    path="/live-recognition"
-                    element={<LiveRecognition />}
-                  />
-                  <Route path="/settings" element={<Settings />} />
-                </Routes>
-              </ToastProvider>
+              <SidebarProvider>
+                <ToastProvider>
+                  <Modal />
+                  <ToastContainer />
+                  <Routes>
+                    <Route path="/" element={<Landing />} />
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/signin" element={<SignIn />} />
+                    <Route path="/students" element={<Students />} />
+                    <Route path="/student/:id" element={<StudentView />} />
+                    <Route path="/rosters" element={<Rosters />} />
+                    <Route path="/roster/:id" element={<RosterView />} />
+                    <Route path="/sessions" element={<Sessions />} />
+                    <Route path="/reports" element={<Reports />} />
+                    <Route
+                      path="/live-recognition"
+                      element={<LiveRecognition />}
+                    />
+                    <Route path="/settings" element={<Settings />} />
+                  </Routes>
+                </ToastProvider>
+              </SidebarProvider>
             </ModalProvider>
           </SessionProvider>
         </RosterProvider>

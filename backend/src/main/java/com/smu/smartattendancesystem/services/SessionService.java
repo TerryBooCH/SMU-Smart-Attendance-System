@@ -24,8 +24,8 @@ public class SessionService {
 
     public Session createSession(Session session) {
         // Set date to today if not provided
-        if (session.getSessionDate() == null) {
-            session.setSessionDate(java.time.LocalDate.now());
+        if (session.getStartAt() == null) {
+            session.setStartAt(java.time.LocalDateTime.now());
         }
         return sessionManager.createSession(session);
     }
@@ -78,8 +78,8 @@ public class SessionService {
         }
 
         // Update session roster
-        session.getRoster().clear();
-        session.getRoster().addAll(validatedStudents);
+        session.getRoster().clearRoster();
+        session.getRoster().addAllStudents(validatedStudents);
         
         return sessionManager.updateSession(session);
     }
@@ -97,7 +97,7 @@ public class SessionService {
             .orElseThrow(() -> new IllegalArgumentException("Student not found: " + studentId));
         
         // Add to roster with duplicate check
-        if (!session.addToRoster(student)) {
+        if (!session.getRoster().addToRoster(student)) {
             throw new IllegalArgumentException("Student already in roster or invalid");
         }
         
@@ -112,7 +112,7 @@ public class SessionService {
             throw new IllegalStateException("Cannot modify roster of an active session.");
         }
         
-        if (!session.removeFromRoster(studentId)) {
+        if (!session.getRoster().removeFromRoster(studentId)) {
             throw new IllegalArgumentException("Student not found in roster");
         }
         

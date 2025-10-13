@@ -70,6 +70,6 @@ public class SessionController {
             .filter(s -> s.getId().equals(id))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Session not found"));
-        return session.getRoster();
+        return session.getRoster().getStudents();
     }
 }

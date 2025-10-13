@@ -1,6 +1,8 @@
 package com.smu.smartattendancesystem.models;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 @Entity
@@ -12,10 +14,10 @@ public class Roster extends BaseEntity {
 
     // Relationships
     @ManyToMany(mappedBy = "rosters")
-    private List<Student> students;
+    private List<Student> students = new ArrayList<>();
 
     @OneToMany(mappedBy = "roster", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Session> sessions;
+    private List<Session> sessions = new ArrayList<>();
 
     // Constructors
     public Roster() {
@@ -25,7 +27,7 @@ public class Roster extends BaseEntity {
         this.name = name;
     }
 
-    // Getters and Setters
+    // Getters & Setters
     public String getName() {
         return name;
     }
@@ -48,5 +50,35 @@ public class Roster extends BaseEntity {
 
     public void setSessions(List<Session> sessions) {
         this.sessions = sessions;
+    }
+
+    // --- Custom Helper Methods ---
+    public void clearRoster() {
+        students.clear();
+    }
+
+    public void addAllStudents(List<Student> newStudents) {
+        students.clear();
+        students.addAll(newStudents);
+    }
+
+    public boolean addToRoster(Student student) {
+        if (students.stream().anyMatch(s -> s.getId().equals(student.getId()))) {
+            return false; // already exists
+        }
+        students.add(student);
+        return true;
+    }
+
+    public boolean removeFromRoster(Long studentId) {
+        Iterator<Student> it = students.iterator();
+        while (it.hasNext()) {
+            Student s = it.next();
+            if (s.getId().equals(studentId)) {
+                it.remove();
+                return true;
+            }
+        }
+        return false;
     }
 }

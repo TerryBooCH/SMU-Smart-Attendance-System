@@ -4,16 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "session")
@@ -27,36 +18,32 @@ public class Session extends BaseEntity {
     private Integer lateAfterMinutes;
     private String location;
 
-    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, fetch = FetchType.LAZY) // One-to-many relationship with Attendance
-    private List<Attendance> attendances;
+    // Each session belongs to a single roster (group of students)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "roster_id", nullable = false)
+    private Roster roster;
 
-    @ManyToOne
-    @JoinColumn(name = "course_id")
-    private Course course;
-
-    @ManyToMany
-    @JoinTable(
-        name = "session_roster",
-        joinColumns = @JoinColumn(name = "session_id"),
-        inverseJoinColumns = @JoinColumn(name = "student_id")
-    )
-    private List<Student> roster = new ArrayList<>();
+    // One session has many attendance records
+    @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Attendance> attendances = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {
         if (sessionDate == null) {
-            sessionDate = LocalDate.now(); // Auto-set to today
+            sessionDate = LocalDate.now();
         }
         if (lateAfterMinutes == null) {
-            lateAfterMinutes = 15; // Default late threshold
+            lateAfterMinutes = 15;
         }
     }
 
     // Constructors
-    public Session() {}
+    public Session() {
+    }
 
-    public Session(Course course, String name, String startAt, String endAt, String location, boolean isOpen, Integer lateAfterMinutes) {
-        this.course = course;
+    public Session(Roster roster, String name, String startAt, String endAt, String location, boolean isOpen,
+            Integer lateAfterMinutes) {
+        this.roster = roster;
         this.name = name;
         this.startAt = startAt;
         this.endAt = endAt;
@@ -66,52 +53,12 @@ public class Session extends BaseEntity {
     }
 
     // Getters & Setters
-    public String getName() { 
-        return name; 
+    public String getName() {
+        return name;
     }
 
-    public void setName(String name) { 
-        this.name = name; 
-    }
-
-    public String getStartAt() { 
-        return startAt; 
-    }
-
-    public void setStartAt(String startAt) { 
-        this.startAt = startAt; 
-    }
-
-    public String getEndAt() { 
-        return endAt; 
-    }
-
-    public void setEndAt(String endAt) { 
-        this.endAt = endAt; 
-    }
-
-    public boolean isOpen() { 
-        return isOpen; 
-    }
-
-    public void setOpen(boolean open) { 
-        isOpen = open; 
-    }
-
-    public Integer getLateAfterMinutes() { 
-        return lateAfterMinutes; 
-    }
-
-    public void setLateAfterMinutes(Integer lateAfterMinutes) { 
-        this.lateAfterMinutes = lateAfterMinutes; 
-    }
-
-    public List<Attendance> getAttendances() { 
-        return attendances; 
-    }
-
-    public void setAttendances(List<Attendance> attendances) { 
-        this.attendances = attendances; 
+    public void setName(String name) {
+        this.name = name;
     }
 
     public LocalDate getSessionDate() {
@@ -122,6 +69,38 @@ public class Session extends BaseEntity {
         this.sessionDate = sessionDate;
     }
 
+    public String getStartAt() {
+        return startAt;
+    }
+
+    public void setStartAt(String startAt) {
+        this.startAt = startAt;
+    }
+
+    public String getEndAt() {
+        return endAt;
+    }
+
+    public void setEndAt(String endAt) {
+        this.endAt = endAt;
+    }
+
+    public boolean isOpen() {
+        return isOpen;
+    }
+
+    public void setOpen(boolean open) {
+        isOpen = open;
+    }
+
+    public Integer getLateAfterMinutes() {
+        return lateAfterMinutes;
+    }
+
+    public void setLateAfterMinutes(Integer lateAfterMinutes) {
+        this.lateAfterMinutes = lateAfterMinutes;
+    }
+
     public String getLocation() {
         return location;
     }
@@ -130,36 +109,19 @@ public class Session extends BaseEntity {
         this.location = location;
     }
 
-    public Course getCourse() {
-        return course;
+    public Roster getRoster() {
+        return roster;
     }
 
-    public void setCourse(Course course) {
-        this.course = course;
+    public void setRoster(Roster roster) {
+        this.roster = roster;
     }
 
-    public List<Student> getRoster() { 
-        return roster; 
+    public List<Attendance> getAttendances() {
+        return attendances;
     }
 
-    public void setRoster(List<Student> roster) { 
-        this.roster = roster; 
-    }
-
-    // Add student to roster with duplicate check
-    public boolean addToRoster(Student student) {
-        if (student == null) {
-            return false;
-        }
-        // Check for duplicates
-        if (roster.stream().anyMatch(s -> s.getId().equals(student.getId()))) {
-            return false;
-        }
-        return roster.add(student);
-    }
-
-    // Remove student from roster
-    public boolean removeFromRoster(Long studentId) {
-        return roster.removeIf(s -> s.getId().equals(studentId));
+    public void setAttendances(List<Attendance> attendances) {
+        this.attendances = attendances;
     }
 }

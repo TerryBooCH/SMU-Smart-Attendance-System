@@ -116,7 +116,8 @@ public class StudentController {
 
     // CREATE face data for a student
     @PostMapping(value = "/{studentId}/faces", consumes = MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> uploadFace(@PathVariable String studentId, @RequestParam("file") List<MultipartFile> files) {
+    public ResponseEntity<?> uploadFace(@PathVariable String studentId,
+            @RequestParam("file") List<MultipartFile> files) {
         try {
             var dtos = faceDataService.uploadImages(studentId, files);
 

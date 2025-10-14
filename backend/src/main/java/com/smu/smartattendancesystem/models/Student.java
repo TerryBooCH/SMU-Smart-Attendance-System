@@ -8,7 +8,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -30,6 +32,9 @@ public class Student extends BaseEntity {
         orphanRemoval = true
     )
     private List<FaceData> faceData = new ArrayList<>();
+
+    @OneToOne(mappedBy = "student", fetch = FetchType.LAZY)
+    private User user;
 
     // Constructors
     public Student() {}

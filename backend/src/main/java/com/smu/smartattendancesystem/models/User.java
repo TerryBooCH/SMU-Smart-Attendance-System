@@ -1,9 +1,16 @@
 package com.smu.smartattendancesystem.models;
 
-import jakarta.persistence.*;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "user")
@@ -14,7 +21,8 @@ public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true) 
     private String email;
-
+    
+    @JsonIgnore
     @Column(nullable = false)
     private String passwordHash;
 
@@ -42,29 +50,17 @@ public class User extends BaseEntity {
     public User(String name, String email, String plainPassword, int permissionLevel, Student student) {
         this.name = name;
         this.email = email;
-        this.passwordHash = hashPassword(plainPassword);
+        this.passwordHash = hashPassword(plainPassword);  
         this.permissionLevel = permissionLevel;
         this.student = student;
     }
 
-    // Hashing method (SHA-256)
     private String hashPassword(String plainPassword) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashedBytes = md.digest(plainPassword.getBytes());
-            StringBuilder sb = new StringBuilder();
-            for (byte b : hashedBytes) {
-                sb.append(String.format("%02x", b)); // Convert to hex
-            }
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Error hashing password", e);
-        }
+        return new BCryptPasswordEncoder().encode(plainPassword); // Hash the password using BCrypt
     }
 
-    // Password verification
     public boolean checkPassword(String plainPassword) {
-        return this.passwordHash.equals(hashPassword(plainPassword));
+        return new BCryptPasswordEncoder().matches(plainPassword, this.passwordHash);
     }
 
     // Getters & Setters
@@ -112,7 +108,8 @@ public class User extends BaseEntity {
         return student != null ? student.getStudentId() : null;
     }
 
-    @JsonProperty("password") // Accept "password" from JSON as plain text
+    // Accept "password" from JSON as plain text and hash it
+    @JsonProperty("password")
     public void setPassword(String plainPassword) {
         this.passwordHash = hashPassword(plainPassword);
     }

@@ -18,8 +18,21 @@ export const studentService = {
       console.log(response.data);
       return response.data;
     } catch (error) {
-      console.error("Error creating student:", error);
-      throw error;
+      const errorData = error.response?.data || {};
+      const errorMessage =
+        errorData.message ||
+        errorData.error ||
+        error.message ||
+        "Error creating student";
+      const statusCode = error.response?.status || 500;
+      const field = errorData.field;
+
+      console.error(`Error creating student (${statusCode}):`, errorMessage);
+
+      const customError = new Error(errorMessage);
+      customError.statusCode = statusCode;
+      customError.field = field;
+      throw customError;
     }
   },
 
@@ -59,31 +72,31 @@ export const studentService = {
     }
   },
 
-uploadStudentFaceData: async (studentId, files) => {
-  try {
-    const formData = new FormData();
-    
-    files.forEach((file) => {
-      formData.append("file", file);
-    });
+  uploadStudentFaceData: async (studentId, files) => {
+    try {
+      const formData = new FormData();
 
-    const response = await apiClient.post(
-      `/api/students/${studentId}/faces`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      }
-    );
+      files.forEach((file) => {
+        formData.append("file", file);
+      });
 
-    console.log("Face data upload response:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Error uploading face data:", error);
-    throw error;
-  }
-},
+      const response = await apiClient.post(
+        `/api/students/${studentId}/faces`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      console.log("Face data upload response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error uploading face data:", error);
+      throw error;
+    }
+  },
 
   getFaceDataByStudentId: async (studentId) => {
     try {

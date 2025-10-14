@@ -1,6 +1,6 @@
 package com.smu.smartattendancesystem.controllers;
 
-import java.util.HashMap;
+import static com.smu.smartattendancesystem.utils.ResponseFormatting.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,8 +47,20 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalStateException e) {
+            // Determine whether the conflict is due to studentId or email, and include it
+            // in the field
+            String msg = e.getMessage();
+            String field = null;
+
+            // Based on the error message content in the service
+            if (msg.contains("email")) {
+                field = "email";
+            } else if (msg.contains("ID")) {
+                field = "studentId";
+            }
+
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(createErrorResponse(e.getMessage()));
+                    .body(createErrorResponse(e.getMessage(), field));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while creating student"));
@@ -155,18 +167,4 @@ public class StudentController {
         }
     }
 
-    // Helper methods for response formatting
-    private Map<String, String> createErrorResponse(String message) {
-        Map<String, String> response = new HashMap<>();
-        response.put("error", message);
-        response.put("status", "error");
-        return response;
-    }
-
-    private Map<String, String> createSuccessResponse(String message) {
-        Map<String, String> response = new HashMap<>();
-        response.put("message", message);
-        response.put("status", "success");
-        return response;
-    }
 }

@@ -64,7 +64,7 @@ public class FaceDataService {
         String relativePath = storage.save(studentId, file);
 
         // Create FaceData record, and link it to the student
-        FaceData fd = new FaceData(relativePath, null); // embedding null for now
+        FaceData fd = new FaceData(relativePath); // embedding null for now
         fd.setStudent(student);
         return faceManager.addFaceData(fd);
     }

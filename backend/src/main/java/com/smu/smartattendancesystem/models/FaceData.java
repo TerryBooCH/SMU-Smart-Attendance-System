@@ -16,25 +16,19 @@ public class FaceData extends BaseEntity {
     @Column(name = "image_path", nullable = false)
     private String imagePath; // Stores path/filename of student's face image
 
-    @Lob // Tells JPA this field may be large (BLOB)
-    private byte[] embedding; // Stores the face embedding (numerical vector, 128-512 floats, stored as byte
-                              // array)
-
     private LocalDateTime capturedAt = LocalDateTime.now();
 
     // Constructors
     public FaceData() {
     }
 
-    public FaceData(Student student, String imagePath, byte[] embedding) {
+    public FaceData(Student student, String imagePath) {
         this.student = student;
         this.imagePath = imagePath;
-        this.embedding = embedding;
     }
 
-    public FaceData(String imagePath, byte[] embedding) {
+    public FaceData(String imagePath) {
         this.imagePath = imagePath;
-        this.embedding = embedding;
     }
 
     // Getters and Setters
@@ -52,14 +46,6 @@ public class FaceData extends BaseEntity {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
-    }
-
-    public byte[] getEmbedding() {
-        return embedding;
-    }
-
-    public void setEmbedding(byte[] embedding) {
-        this.embedding = embedding;
     }
 
     public LocalDateTime getCapturedAt() {

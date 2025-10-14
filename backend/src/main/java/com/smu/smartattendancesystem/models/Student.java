@@ -1,43 +1,112 @@
 package com.smu.smartattendancesystem.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
 
 @Entity
-public class Student {
+@Table(name = "student")
+public class Student extends BaseEntity {
 
-    @Id
-    private String studentId; // Example: S12345
+    @Column(name = "student_id", nullable = false, unique = true)
+    private String studentId; // e.g. S1234567A
 
+    @Column(nullable = false)
     private String name;
-    private String classGroup; // Example: CS102
+
     private String email;
     private String phone;
 
-    // Constructors
-    public Student() {}
+    @Column(name = "class_name", nullable = false, unique = false)
+    private String className; // e.g. CS102
 
-    public Student(String studentId, String name, String classGroup, String email, String phone) {
+    // Relationships
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FaceData> faceDataList;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<StudentRoster> studentRosters = new ArrayList<>();
+
+    @OneToOne(mappedBy = "student", fetch = FetchType.LAZY)
+    private User user;
+
+    // Constructors
+    public Student() {
+    }
+
+    public Student(String studentId, String name, String email, String phone, String className) {
         this.studentId = studentId;
         this.name = name;
-        this.classGroup = classGroup;
         this.email = email;
         this.phone = phone;
+        this.className = className;
     }
 
     // Getters and Setters
-    public String getStudentId() { return studentId; }
-    public void setStudentId(String studentId) { this.studentId = studentId; }
+    public String getStudentId() {
+        return studentId;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setStudentId(String studentId) {
+        this.studentId = studentId;
+    }
 
-    public String getClassGroup() { return classGroup; }
-    public void setClassGroup(String classGroup) { this.classGroup = classGroup; }
+    public String getName() {
+        return name;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public List<FaceData> getFaceDataList() {
+        return faceDataList;
+    }
+
+    public void setFaceDataList(List<FaceData> faceDataList) {
+        this.faceDataList = faceDataList;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
 }

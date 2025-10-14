@@ -5,6 +5,11 @@
 **/target/
 
 # ----------------------
+# Student Images
+# ----------------------
+/backend/faces/
+
+# ----------------------
 # Frontend (Node.js / JavaScript) build files
 # ----------------------
 /frontend/node_modules/
@@ -44,6 +49,26 @@ Thumbs.db
 # Optional: JetBrains caches
 # ----------------------
 /out/
+
+# ----------------------
+# Ignore all binary files
+# ----------------------
+*.db
+*.db-shm
+*.db-wal
+*.exe
+*.dll
+*.so
+*.o
+*.a
+*.class
+*.jar
+*.pyc
+*.pyo
+*.bin
+*.dat
+*.lst
+*.log
 
 # ----------------------
 # Dataset files

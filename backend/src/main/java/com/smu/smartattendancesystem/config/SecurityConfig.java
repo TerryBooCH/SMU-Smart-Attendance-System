@@ -9,12 +9,13 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf().disable() // disable CSRF for testing APIs with Postman
+            .csrf(csrf -> csrf.disable()) // New lambda-style syntax
             .authorizeHttpRequests(auth -> auth
                 .anyRequest().permitAll()
             );
+
         return http.build();
     }
 }

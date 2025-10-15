@@ -1,33 +1,29 @@
 package com.smu.smartattendancesystem.models;
 
+import jakarta.persistence.*;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "student")
 public class Student extends BaseEntity {
 
-    @Column(nullable = false, unique = true)
-    private String studentId;
+    @Column(name = "student_id", nullable = false, unique = true)
+    private String studentId; // e.g. S1234567A
 
+    @Column(nullable = false)
     private String name;
+
     private String email;
     private String phone;
 
-    // Create a One-to-Many relationship with FaceData (1 student to 10-20 images)
-    @JsonIgnore
+    // Relationships
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FaceData> faceData = new ArrayList<>();
+    private List<FaceData> faceDataList;
+
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudentRoster> studentRosters = new ArrayList<>();
 
     @OneToOne(mappedBy = "student", fetch = FetchType.LAZY)
     private User user;
@@ -43,7 +39,7 @@ public class Student extends BaseEntity {
         this.phone = phone;
     }
 
-    // Getters & Setters
+    // Getters and Setters
     public String getStudentId() {
         return studentId;
     }
@@ -54,7 +50,6 @@ public class Student extends BaseEntity {
 
     public String getName() {
         return name;
-
     }
 
     public void setName(String name) {
@@ -77,11 +72,11 @@ public class Student extends BaseEntity {
         this.phone = phone;
     }
 
-    public List<FaceData> getFaceData() {
-        return faceData;
+    public List<FaceData> getFaceDataList() {
+        return faceDataList;
     }
 
-    public void setFaceData(List<FaceData> faceData) {
-        this.faceData = faceData;
+    public void setFaceDataList(List<FaceData> faceDataList) {
+        this.faceDataList = faceDataList;
     }
 }

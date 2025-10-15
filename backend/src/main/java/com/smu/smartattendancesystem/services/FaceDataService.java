@@ -58,7 +58,7 @@ public class FaceDataService {
 
         for (int i = 0; i < files.size(); i++) {
             String relativePath = storage.save(studentId, files.get(i));
-            FaceData fd = new FaceData(relativePath, null); // embedding null for now
+            FaceData fd = new FaceData(relativePath); // embedding null for now
             fd.setStudent(student);
             FaceData savedFd = faceManager.addFaceData(fd);
             dtos.add(FaceDataDTO.fromEntity(savedFd, storage));
@@ -72,6 +72,7 @@ public class FaceDataService {
     public List<FaceDataDTO> list(String studentId) {
 
         // Validate if student exists
+        @SuppressWarnings("unused")
         Student student = validateStudent(studentId);
 
         List<FaceData> faces = faceManager.listByStudentId(studentId);
@@ -86,6 +87,7 @@ public class FaceDataService {
     @Transactional
     public void delete(String studentId, Long faceDataId) throws IOException {
         // Validate if student exists
+        @SuppressWarnings("unused")
         Student student = validateStudent(studentId);
 
         // Validate if face data exists and belongs to the student

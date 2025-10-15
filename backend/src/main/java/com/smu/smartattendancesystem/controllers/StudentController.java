@@ -166,5 +166,4 @@ public class StudentController {
                     .body(createErrorResponse("An error occurred while deleting face data"));
         }
     }
-
 }

@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smu.smartattendancesystem.models.Session;
-import com.smu.smartattendancesystem.models.Student;
 import com.smu.smartattendancesystem.services.SessionService;
 
 @RestController
@@ -49,27 +48,11 @@ public class SessionController {
         sessionService.deleteSession(id);
     }
 
-    @PutMapping("/{id}/roster")
-    public Session updateRoster(@PathVariable Long id, @RequestBody List<Long> studentIds) {
-        return sessionService.updateRoster(id, studentIds);
-    }
-
-    @PostMapping("/{sessionId}/roster/students/{studentId}")
-    public Session addStudentToRoster(@PathVariable Long sessionId, @PathVariable Long studentId) {
-        return sessionService.addStudentToRoster(sessionId, studentId);
-    }
-
-    @DeleteMapping("/{sessionId}/roster/students/{studentId}")
-    public Session removeStudentFromRoster(@PathVariable Long sessionId, @PathVariable Long studentId) {
-        return sessionService.removeStudentFromRoster(sessionId, studentId);
-    }
-
-    @GetMapping("/{id}/roster")
-    public List<Student> getRoster(@PathVariable Long id) {
-        Session session = sessionService.getAllSessions().stream()
-            .filter(s -> s.getId().equals(id))
-            .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Session not found"));
-        return session.getRoster();
+    // Endpoint to link a roster to a session
+    @PutMapping("/{id}/roster/{rosterId}")
+    public Session linkRosterToSession(
+            @PathVariable Long id,
+            @PathVariable Long rosterId) {
+        return sessionService.linkRosterToSession(id, rosterId);
     }
 }

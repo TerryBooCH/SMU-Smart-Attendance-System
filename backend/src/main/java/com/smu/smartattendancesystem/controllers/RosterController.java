@@ -44,19 +44,19 @@ public class RosterController {
 
     // ✅ Add student to roster
     @PostMapping("/{rosterId}/students/{studentId}")
-    public Roster addStudentToRoster(@PathVariable Long rosterId, @PathVariable Long studentId) {
+    public Roster addStudentToRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
         return rosterService.addStudentToRoster(rosterId, studentId);
     }
 
     // ✅ Remove student from roster
     @DeleteMapping("/{rosterId}/students/{studentId}")
-    public Roster removeStudentFromRoster(@PathVariable Long rosterId, @PathVariable Long studentId) {
+    public Roster removeStudentFromRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
         return rosterService.removeStudentFromRoster(rosterId, studentId);
     }
 
     // ✅ Replace all students in a roster (bulk update)
     @PutMapping("/{rosterId}/students")
-    public Roster updateRosterStudents(@PathVariable Long rosterId, @RequestBody List<Long> studentIds) {
+    public Roster updateRosterStudents(@PathVariable Long rosterId, @RequestBody List<String> studentIds) {
         return rosterService.updateRosterStudents(rosterId, studentIds);
     }
 

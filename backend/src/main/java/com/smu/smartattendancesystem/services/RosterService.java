@@ -42,10 +42,10 @@ public class RosterService {
     }
 
     // ✅ Add student to roster
-    public Roster addStudentToRoster(Long rosterId, Long studentId) {
+    public Roster addStudentToRoster(Long rosterId, String studentId) {
         Roster roster = getRosterById(rosterId);
-        Student student = studentRepository.findById(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found with ID: " + studentId));
+        Student student = studentRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with studentId: " + studentId));
 
         boolean added = roster.addToRoster(student);
         if (!added) {
@@ -56,10 +56,12 @@ public class RosterService {
     }
 
     // ✅ Remove student from roster
-    public Roster removeStudentFromRoster(Long rosterId, Long studentId) {
+    public Roster removeStudentFromRoster(Long rosterId, String studentId) {
         Roster roster = getRosterById(rosterId);
+        Student student = studentRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found with studentId: " + studentId));
 
-        boolean removed = roster.removeFromRoster(studentId);
+        boolean removed = roster.removeFromRoster(student.getId());
         if (!removed) {
             throw new RuntimeException("Student not found in roster");
         }
@@ -68,12 +70,12 @@ public class RosterService {
     }
 
     // ✅ Update all students in roster
-    public Roster updateRosterStudents(Long rosterId, List<Long> studentIds) {
+    public Roster updateRosterStudents(Long rosterId, List<String> studentIds) {
         Roster roster = getRosterById(rosterId);
 
         roster.clearRoster();
-        for (Long studentId : studentIds) {
-            Student student = studentRepository.findById(studentId)
+        for (String studentId : studentIds) {
+            Student student = studentRepository.findByStudentId(studentId)
                     .orElseThrow(() -> new RuntimeException("Student not found: " + studentId));
             roster.addToRoster(student);
         }

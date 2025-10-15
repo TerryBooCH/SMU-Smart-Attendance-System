@@ -9,7 +9,7 @@ import java.util.List;
 public class Session extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "roster_id", nullable = false)
+    @JoinColumn(name = "roster_id", nullable = true)
     private Roster roster;
 
     @Column(name = "course_name", nullable = false)
@@ -23,7 +23,7 @@ public class Session extends BaseEntity {
     @Column(name = "is_open", nullable = false)
     private boolean isOpen = false;
 
-    private Integer lateAfterMinutes;
+    private Integer lateAfterMinutes = 15;
 
     @OneToMany(mappedBy = "session", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Attendance> attendanceList;
@@ -32,11 +32,25 @@ public class Session extends BaseEntity {
     public Session() {
     }
 
+    public Session(String courseName, LocalDateTime startAt, LocalDateTime endAt) {
+        this.courseName = courseName;
+        this.startAt = startAt;
+        this.endAt = endAt;
+    }
+
     public Session(Roster roster, String courseName, LocalDateTime startAt, LocalDateTime endAt) {
         this.roster = roster;
         this.courseName = courseName;
         this.startAt = startAt;
         this.endAt = endAt;
+    }
+
+    public Session(Roster roster, String courseName, LocalDateTime startAt, LocalDateTime endAt, Integer lateAfterMinutes) {
+        this.roster = roster;
+        this.courseName = courseName;
+        this.startAt = startAt;
+        this.endAt = endAt;
+        this.lateAfterMinutes = lateAfterMinutes;
     }
 
     // Getters and Setters

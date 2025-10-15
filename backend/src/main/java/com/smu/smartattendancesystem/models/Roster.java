@@ -1,33 +1,28 @@
 package com.smu.smartattendancesystem.models;
 
 import jakarta.persistence.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "roster")
 public class Roster extends BaseEntity {
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String name;
 
-    // Relationships
-    @ManyToMany(mappedBy = "rosters")
-    private List<Student> students = new ArrayList<>();
-
+    // Relationship: One roster -> Many student_roster entries
     @OneToMany(mappedBy = "roster", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Session> sessions = new ArrayList<>();
+    private List<StudentRoster> studentRosters = new ArrayList<>();
 
-    // Constructors
-    public Roster() {
-    }
-
+    // ✅ Constructors
+    public Roster() {}
+    
     public Roster(String name) {
         this.name = name;
     }
 
-    // Getters & Setters
+    // ✅ Getters and Setters
     public String getName() {
         return name;
     }
@@ -36,49 +31,48 @@ public class Roster extends BaseEntity {
         this.name = name;
     }
 
+    public List<StudentRoster> getStudentRosters() {
+        return studentRosters;
+    }
+
+    public void setStudentRosters(List<StudentRoster> studentRosters) {
+        this.studentRosters = studentRosters;
+    }
+
+    // ✅ Get all Students (for API use)
+    @Transient
     public List<Student> getStudents() {
-        return students;
+        return studentRosters.stream()
+                .map(StudentRoster::getStudent)
+                .collect(Collectors.toList());
     }
 
-    public void setStudents(List<Student> students) {
-        this.students = students;
-    }
-
-    public List<Session> getSessions() {
-        return sessions;
-    }
-
-    public void setSessions(List<Session> sessions) {
-        this.sessions = sessions;
-    }
-
-    // --- Custom Helper Methods ---
-    public void clearRoster() {
-        students.clear();
-    }
-
-    public void addAllStudents(List<Student> newStudents) {
-        students.clear();
-        students.addAll(newStudents);
-    }
-
+    // ✅ Add a single student to roster
     public boolean addToRoster(Student student) {
-        if (students.stream().anyMatch(s -> s.getId().equals(student.getId()))) {
-            return false; // already exists
+        boolean alreadyExists = studentRosters.stream()
+                .anyMatch(sr -> sr.getStudent().getId().equals(student.getId()));
+        if (alreadyExists) {
+            return false;
         }
-        students.add(student);
+        StudentRoster studentRoster = new StudentRoster(student, this);
+        studentRosters.add(studentRoster);
         return true;
     }
 
+    // ✅ Remove a student from roster by ID
     public boolean removeFromRoster(Long studentId) {
-        Iterator<Student> it = students.iterator();
-        while (it.hasNext()) {
-            Student s = it.next();
-            if (s.getId().equals(studentId)) {
-                it.remove();
-                return true;
-            }
+        return studentRosters.removeIf(sr -> sr.getStudent().getId().equals(studentId));
+    }
+
+    // ✅ Remove all students from this roster
+    public void clearRoster() {
+        studentRosters.clear();
+    }
+
+    // ✅ Add multiple students at once
+    public void addAllStudents(List<Student> students) {
+        for (Student student : students) {
+            addToRoster(student);
         }
-        return false;
     }
 }

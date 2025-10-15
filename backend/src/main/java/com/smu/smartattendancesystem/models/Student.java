@@ -1,6 +1,8 @@
 package com.smu.smartattendancesystem.models;
 
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -20,9 +22,8 @@ public class Student extends BaseEntity {
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FaceData> faceDataList;
 
-    @ManyToMany
-    @JoinTable(name = "student_roster", joinColumns = @JoinColumn(name = "student_id"), inverseJoinColumns = @JoinColumn(name = "roster_id"))
-    private List<Roster> rosters;
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<StudentRoster> studentRosters = new ArrayList<>();
 
     // Constructors
     public Student() {
@@ -74,13 +75,5 @@ public class Student extends BaseEntity {
 
     public void setFaceDataList(List<FaceData> faceDataList) {
         this.faceDataList = faceDataList;
-    }
-
-    public List<Roster> getRosters() {
-        return rosters;
-    }
-
-    public void setRosters(List<Roster> rosters) {
-        this.rosters = rosters;
     }
 }

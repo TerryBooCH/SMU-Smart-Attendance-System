@@ -1,7 +1,12 @@
 package com.smu.smartattendancesystem.controllers;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.smu.smartattendancesystem.models.Roster;
@@ -20,49 +25,139 @@ public class RosterController {
 
     // ✅ Create a new roster
     @PostMapping
-    public Roster createRoster(@RequestBody Roster roster) {
-        return rosterService.createRoster(roster);
+    public ResponseEntity<?> createRoster(@RequestBody Roster roster) {
+        try {
+            Roster created = rosterService.createRoster(roster);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while creating the roster"));
+        }
     }
 
     // ✅ Get all rosters
     @GetMapping
-    public List<Roster> getAllRosters() {
-        return rosterService.getAllRosters();
+    public ResponseEntity<?> getAllRosters() {
+        try {
+            List<Roster> rosters = rosterService.getAllRosters();
+            return ResponseEntity.ok(rosters);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while retrieving rosters"));
+        }
     }
 
     // ✅ Get specific roster by ID
     @GetMapping("/{id}")
-    public Roster getRosterById(@PathVariable Long id) {
-        return rosterService.getRosterById(id);
+    public ResponseEntity<?> getRosterById(@PathVariable Long id) {
+        try {
+            Roster roster = rosterService.getRosterById(id);
+            return ResponseEntity.ok(roster);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Roster not found with ID: " + id));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while retrieving the roster"));
+        }
     }
 
     // ✅ Delete roster
     @DeleteMapping("/{id}")
-    public void deleteRoster(@PathVariable Long id) {
-        rosterService.deleteRoster(id);
+    public ResponseEntity<?> deleteRoster(@PathVariable Long id) {
+        try {
+            rosterService.deleteRoster(id);
+            return ResponseEntity.ok(createSuccessResponse("Roster deleted successfully"));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Roster not found with ID: " + id));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while deleting the roster"));
+        }
     }
 
     // ✅ Add student to roster
     @PostMapping("/{rosterId}/students/{studentId}")
-    public Roster addStudentToRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
-        return rosterService.addStudentToRoster(rosterId, studentId);
+    public ResponseEntity<?> addStudentToRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
+        try {
+            Roster updated = rosterService.addStudentToRoster(rosterId, studentId);
+            return ResponseEntity.ok(updated);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while adding student to roster"));
+        }
     }
 
     // ✅ Remove student from roster
     @DeleteMapping("/{rosterId}/students/{studentId}")
-    public Roster removeStudentFromRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
-        return rosterService.removeStudentFromRoster(rosterId, studentId);
+    public ResponseEntity<?> removeStudentFromRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
+        try {
+            Roster updated = rosterService.removeStudentFromRoster(rosterId, studentId);
+            return ResponseEntity.ok(updated);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while removing student from roster"));
+        }
     }
 
     // ✅ Replace all students in a roster (bulk update)
     @PutMapping("/{rosterId}/students")
-    public Roster updateRosterStudents(@PathVariable Long rosterId, @RequestBody List<String> studentIds) {
-        return rosterService.updateRosterStudents(rosterId, studentIds);
+    public ResponseEntity<?> updateRosterStudents(@PathVariable Long rosterId, @RequestBody List<String> studentIds) {
+        try {
+            Roster updated = rosterService.updateRosterStudents(rosterId, studentIds);
+            return ResponseEntity.ok(updated);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Roster not found with ID: " + rosterId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while updating roster students"));
+        }
     }
 
     // ✅ Get all students in a roster
     @GetMapping("/{rosterId}/students")
-    public List<Student> getStudentsInRoster(@PathVariable Long rosterId) {
-        return rosterService.getRosterById(rosterId).getStudents();
+    public ResponseEntity<?> getStudentsInRoster(@PathVariable Long rosterId) {
+        try {
+            List<Student> students = rosterService.getRosterById(rosterId).getStudents();
+            return ResponseEntity.ok(students);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Roster not found with ID: " + rosterId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while retrieving students in roster"));
+        }
+    }
+
+    // ✅ Helper methods for standardized responses
+    private Map<String, String> createErrorResponse(String message) {
+        Map<String, String> response = new HashMap<>();
+        response.put("error", message);
+        response.put("status", "error");
+        return response;
+    }
+
+    private Map<String, String> createSuccessResponse(String message) {
+        Map<String, String> response = new HashMap<>();
+        response.put("message", message);
+        response.put("status", "success");
+        return response;
     }
 }

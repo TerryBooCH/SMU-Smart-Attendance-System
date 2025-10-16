@@ -70,8 +70,13 @@ public class StudentController {
 
     // READ all
     @GetMapping
-    public List<Student> getAllStudents() {
-        return studentService.getAllStudents();
+    public ResponseEntity<?> getAllStudents() {
+        try {
+            return ResponseEntity.ok(studentService.getAllStudents());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while fetching students"));
+        }
     }
 
     // READ one by studentId

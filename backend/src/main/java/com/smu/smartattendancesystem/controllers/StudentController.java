@@ -1,6 +1,5 @@
 package com.smu.smartattendancesystem.controllers;
 
-import static com.smu.smartattendancesystem.utils.ResponseFormatting.*;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +20,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.smu.smartattendancesystem.dto.StudentWithFaceDTO;
 import com.smu.smartattendancesystem.models.Student;
 import com.smu.smartattendancesystem.services.FaceDataService;
 import com.smu.smartattendancesystem.services.StudentService;
+import static com.smu.smartattendancesystem.utils.ResponseFormatting.createErrorResponse;
 
 @RestController
 @RequestMapping("/api/students")
@@ -167,12 +168,12 @@ public class StudentController {
         }
     }
 
-    // READ students by name:
+    // READ students by name, with one face data if available
     @GetMapping(params = "name") // /api/students?name=abc
     public ResponseEntity<?> searchStudentsByName(@RequestParam("name") String name) {
         try {
-            List<Student> students = studentService.searchStudentsByName(name);
-            return ResponseEntity.ok(students);
+            List<StudentWithFaceDTO> results = studentService.searchStudentsWithOneFace(name);
+            return ResponseEntity.ok(results);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest()
                     .body(createErrorResponse(e.getMessage()));

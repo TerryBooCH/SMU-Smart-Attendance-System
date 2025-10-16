@@ -1,11 +1,14 @@
 package com.smu.smartattendancesystem.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.smu.smartattendancesystem.dto.FaceDataDTO;
+import com.smu.smartattendancesystem.dto.StudentWithFaceDTO;
 import com.smu.smartattendancesystem.managers.StudentManager;
 import com.smu.smartattendancesystem.managers.UserManager;
 import com.smu.smartattendancesystem.models.Student;
@@ -16,10 +19,12 @@ public class StudentService {
 
     private final StudentManager studentManager;
     private final UserManager userManager;
+    private final FaceDataService faceDataService;
 
-    public StudentService(StudentManager studentManager, UserManager userManager) {
+    public StudentService(StudentManager studentManager, UserManager userManager, FaceDataService faceDataService) {
         this.studentManager = studentManager;
         this.userManager = userManager;
+        this.faceDataService = faceDataService;
     }
 
     public List<Student> getAllStudents() {
@@ -73,16 +78,42 @@ public class StudentService {
         studentManager.deleteStudentByStudentId(studentId);
     }
 
+    // Search students by name (partial match, case insensitive)
+    @Transactional(readOnly = true)
     public List<Student> searchStudentsByName(String name) {
-        
+
         // Validate input
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Please provide a name.");
         }
-        
+
         // Remove trailing spaces
         String query = name.trim();
 
         return studentManager.searchByName(query);
+    }
+
+    // Search students by name, and include one face data if available
+    @Transactional(readOnly = true)
+    public List<StudentWithFaceDTO> searchStudentsWithOneFace(String name) {
+
+        // Get students with matching names to the query
+        List<Student> students = searchStudentsByName(name);
+
+        // Retrieve one face data for each student if available
+        List<StudentWithFaceDTO> results = new ArrayList<>();
+
+        for (Student s : students) {
+            // Retrieve latest face data for the student
+            FaceDataDTO face = faceDataService.getLatestFaceData(s.getStudentId())
+                    .orElse(null); // returns null if no face data exists for the student
+
+            // Create the DTO object combining student and face data
+            StudentWithFaceDTO dto = StudentWithFaceDTO.from(s, face);
+
+            results.add(dto);
+        }
+
+        return results;
     }
 }

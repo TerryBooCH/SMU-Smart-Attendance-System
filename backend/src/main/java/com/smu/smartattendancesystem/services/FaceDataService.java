@@ -104,6 +104,18 @@ public class FaceDataService {
         faceManager.deleteFaceData(faceDataId);
     }
 
+    // Retrieve the latest face data for a student
+    @Transactional(readOnly = true)
+    public Optional<FaceDataDTO> getLatestFaceData(String studentId) {
+        // Validate if student exists
+        Student student = validateStudent(studentId);
+
+        Optional<FaceData> optFaceData = faceManager.getOneByStudentId(studentId);
+
+        // Convert FaceData to DTO and return it if found, if not return empty
+        return optFaceData.map(fd -> FaceDataDTO.fromEntity(fd, storage));
+    }
+
     // Convert FaceData entity to DTO to be returned to frontend
     public FaceDataDTO toDto(FaceData fd) {
         return FaceDataDTO.fromEntity(fd, storage);

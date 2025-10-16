@@ -1,7 +1,15 @@
 package com.smu.smartattendancesystem.models;
 
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "face_data")
@@ -9,8 +17,8 @@ public class FaceData extends BaseEntity {
 
     // The owning side of the Many-To-One relationship with Student
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false) // Adds a foreign key column 'student_id' linking to Student's PK
-                                                       // (id)
+    @JoinColumn(name = "student_id", nullable = false) // Adds a foreign key column 'student_id' linking to Student's PK id
+    @JsonIgnore
     private Student student;
 
     @Column(name = "image_path", nullable = false)

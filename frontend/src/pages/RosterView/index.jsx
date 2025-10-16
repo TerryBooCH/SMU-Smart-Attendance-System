@@ -23,7 +23,7 @@ const RosterView = () => {
             items={[
               { label: "Home", href: "/home" },
               { label: "Rosters", href: "/rosters" },
-              { label: selectedRoster?.name || "View Student" },
+              { label: selectedRoster?.name || "View Roster" },
             ]}
           />
         </div>

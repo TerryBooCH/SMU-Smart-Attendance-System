@@ -36,6 +36,11 @@ public class StudentManager {
         return studentRepo.findAll();
     }
 
+    // READ: Get student by name (partial query, case insensitive)
+    public List<Student> searchByName(String name) {
+        return studentRepo.findByNameContainingIgnoreCase(name);
+    }
+
     // UPDATE: Update existing student
     public Student updateStudent(String studentId, Student student) {
         return studentRepo.save(student);

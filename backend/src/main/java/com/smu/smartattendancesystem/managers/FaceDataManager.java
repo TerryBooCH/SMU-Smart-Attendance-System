@@ -40,6 +40,10 @@ public class FaceDataManager {
         return faceRepo.findByIdAndStudent_StudentId(id, studentId);
     }
 
+    public Optional<FaceData> getOneByStudentId(String studentId) {
+        return faceRepo.findFirstByStudent_StudentIdOrderByCreatedAtDesc(studentId);
+    }
+
     // UPDATE: Update face data
     // Use case: student re-registers due to image quality issues
     public FaceData updateFaceData(FaceData faceData) {

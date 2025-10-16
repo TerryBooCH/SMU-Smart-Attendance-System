@@ -1,8 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useParams } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Breadcrumb from "../../components/Breadcrumb";
+import useRoster from "../../hooks/useRoster";
 
 const RosterView = () => {
+  const { id } = useParams();
+  const { selectedRoster, loading, error, fetchRosterById } = useRoster();
+
+  useEffect(() => {
+    if (id) {
+      fetchRosterById(id);
+    }
+  }, [id]);
+
   return (
     <div className="min-h-screen flex">
       <Sidebar />
@@ -12,7 +23,7 @@ const RosterView = () => {
             items={[
               { label: "Home", href: "/home" },
               { label: "Rosters", href: "/rosters" },
-              { label:  "View Roster" },
+              { label: selectedRoster?.name || "View Student" },
             ]}
           />
         </div>

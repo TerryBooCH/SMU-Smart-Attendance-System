@@ -27,8 +27,26 @@ public class StudentService {
         this.faceDataService = faceDataService;
     }
 
-    public List<Student> getAllStudents() {
-        return studentManager.getAllStudents();
+    public List<StudentWithFaceDTO> getAllStudents() {
+
+        // Retrieve all students
+        List<Student> students = studentManager.getAllStudents();
+
+        // Retrieve one face data for each student if available
+        List<StudentWithFaceDTO> results = new ArrayList<>();
+
+        for (Student s : students) {
+            // Retrieve latest face data for the student
+            FaceDataDTO face = faceDataService.getLatestFaceData(s.getStudentId())
+                    .orElse(null); // returns null if no face data exists for the student
+
+            // Create the DTO object combining student and face data
+            StudentWithFaceDTO dto = StudentWithFaceDTO.from(s, face);
+
+            results.add(dto);
+        }
+
+        return results;
     }
 
     public Optional<Student> getStudentByStudentId(String studentId) {

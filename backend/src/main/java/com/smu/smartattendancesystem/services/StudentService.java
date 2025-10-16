@@ -72,4 +72,17 @@ public class StudentService {
     public void deleteStudent(String studentId) {
         studentManager.deleteStudentByStudentId(studentId);
     }
+
+    public List<Student> searchStudentsByName(String name) {
+        
+        // Validate input
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Please provide a name.");
+        }
+        
+        // Remove trailing spaces
+        String query = name.trim();
+
+        return studentManager.searchByName(query);
+    }
 }

@@ -1,6 +1,9 @@
 package com.smu.smartattendancesystem.repositories;
 
+import java.util.List;
+
 import com.smu.smartattendancesystem.models.Student;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -19,4 +22,7 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
 
     // Search student by name (for UI search table)
     Optional<Student> findByName(String name);
+
+    // Search student by partial name
+    List<Student> findByNameContainingIgnoreCase(String name);
 }

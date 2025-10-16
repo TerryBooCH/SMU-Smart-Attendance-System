@@ -167,4 +167,19 @@ public class StudentController {
         }
     }
 
+    // READ students by name:
+    @GetMapping(params = "name") // /api/students?name=abc
+    public ResponseEntity<?> searchStudentsByName(@RequestParam("name") String name) {
+        try {
+            List<Student> students = studentService.searchStudentsByName(name);
+            return ResponseEntity.ok(students);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while searching for students"));
+        }
+    }
+
 }

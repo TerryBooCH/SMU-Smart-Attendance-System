@@ -17,11 +17,11 @@ const StudentCard = ({ student }) => {
           <img
             src={student.face.imageBase64}
             alt={`${student.name}'s face`}
-            className="w-10 h-10 rounded-full object-cover border border-gray-300"
+            className="w-16 h-16 rounded-full object-cover border border-gray-300"
           />
         ) : (
-          <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-200 text-gray-500">
-            <User size={20} />
+          <div className="w-16 h-16 flex items-center justify-center rounded-full bg-gray-200 text-gray-500">
+            <User size={28} />
           </div>
         )}
       </td>
@@ -38,31 +38,27 @@ const StudentCard = ({ student }) => {
           {student.name || "N/A"}
         </div>
       </td>
-      
+
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-900">
-          {student.email || "N/A"}
-        </div>
+        <div className="text-sm text-gray-900">{student.email || "N/A"}</div>
       </td>
-      
+
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900">
           {student.studentId || "N/A"}
         </div>
       </td>
-      
+
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-900">
-          {student.phone || "N/A"}
-        </div>
+        <div className="text-sm text-gray-900">{student.phone || "N/A"}</div>
       </td>
-      
+
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-500">
           {formatDate(student.createdAt)}
         </div>
       </td>
-      
+
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-500">
           {formatDate(student.updatedAt)}

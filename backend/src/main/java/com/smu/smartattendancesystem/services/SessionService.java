@@ -23,7 +23,7 @@ public class SessionService {
         this.rosterManager = rosterManager;
     }
 
-    // ✅ Create session (auto-set date if missing)
+    // Create session (auto-set date if missing)
     public Session createSession(Session session) {
         if (session.getStartAt() == null) {
             session.setStartAt(LocalDateTime.now());
@@ -31,12 +31,12 @@ public class SessionService {
         return sessionManager.createSession(session);
     }
 
-    // ✅ Get all sessions
+    // Get all sessions
     public List<Session> getAllSessions() {
         return sessionManager.getAllSessions();
     }
 
-    // ✅ Open a session
+    // Open a session
     public Session openSession(Long id) {
         Session session = sessionManager.getSession(id)
                 .orElseThrow(() -> new RuntimeException("Session not found"));
@@ -44,7 +44,7 @@ public class SessionService {
         return sessionManager.updateSession(session);
     }
 
-    // ✅ Close a session
+    // Close a session
     public Session closeSession(Long id) {
         Session session = sessionManager.getSession(id)
                 .orElseThrow(() -> new RuntimeException("Session not found"));
@@ -52,7 +52,7 @@ public class SessionService {
         return sessionManager.updateSession(session);
     }
 
-    // ✅ Delete a session (cannot delete if open)
+    // Delete a session (cannot delete if open)
     public void deleteSession(Long id) {
         Session session = sessionManager.getSession(id)
                 .orElseThrow(() -> new RuntimeException("Session not found"));
@@ -62,7 +62,7 @@ public class SessionService {
         sessionManager.deleteSession(id);
     }
 
-    // ✅ Link a roster to a session
+    // Link a roster to a session
     public Session linkRosterToSession(Long sessionId, Long rosterId) {
         Optional<Session> sessionOpt = sessionManager.getSession(sessionId);
         Optional<Roster> rosterOpt = rosterManager.getRoster(rosterId);

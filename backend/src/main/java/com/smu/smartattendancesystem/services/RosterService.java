@@ -1,6 +1,7 @@
 package com.smu.smartattendancesystem.services;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
 
@@ -20,28 +21,41 @@ public class RosterService {
         this.studentRepository = studentRepository;
     }
 
-    // ✅ Create a new roster
+    // Create a new roster
     public Roster createRoster(Roster roster) {
         return rosterManager.createRoster(roster);
     }
 
-    // ✅ Get all rosters
+    // Get all rosters
     public List<Roster> getAllRosters() {
         return rosterManager.getAllRosters();
     }
 
-    // ✅ Get roster by ID
+    // Get roster by ID
     public Roster getRosterById(Long id) {
         return rosterManager.getRoster(id)
                 .orElseThrow(() -> new RuntimeException("Roster not found with ID: " + id));
     }
 
-    // ✅ Delete roster
+    // Delete roster
     public void deleteRoster(Long id) {
         rosterManager.deleteRoster(id);
     }
 
-    // ✅ Add student to roster
+    // \Update roster name by ID
+    public Roster updateRosterName(Long rosterId, String newName) {
+        if (newName == null || newName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Roster name cannot be empty");
+        }
+
+        Roster roster = rosterManager.getRoster(rosterId)
+                .orElseThrow(() -> new NoSuchElementException("Roster not found with ID: " + rosterId));
+
+        roster.setName(newName);
+        return rosterManager.updateRoster(roster);
+    }
+
+    // Add student to roster
     public Roster addStudentToRoster(Long rosterId, String studentId) {
         Roster roster = getRosterById(rosterId);
         Student student = studentRepository.findByStudentId(studentId)
@@ -55,7 +69,7 @@ public class RosterService {
         return rosterManager.updateRoster(roster);
     }
 
-    // ✅ Remove student from roster
+    // Remove student from roster
     public Roster removeStudentFromRoster(Long rosterId, String studentId) {
         Roster roster = getRosterById(rosterId);
         Student student = studentRepository.findByStudentId(studentId)
@@ -69,7 +83,7 @@ public class RosterService {
         return rosterManager.updateRoster(roster);
     }
 
-    // ✅ Update all students in roster
+    // Update all students in roster
     public Roster updateRosterStudents(Long rosterId, List<String> studentIds) {
         Roster roster = getRosterById(rosterId);
 

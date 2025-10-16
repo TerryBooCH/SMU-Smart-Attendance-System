@@ -23,7 +23,7 @@ public class RosterController {
         this.rosterService = rosterService;
     }
 
-    // ✅ Create a new roster
+    // Create a new roster
     @PostMapping
     public ResponseEntity<?> createRoster(@RequestBody Roster roster) {
         try {
@@ -41,7 +41,7 @@ public class RosterController {
         }
     }
 
-    // ✅ Get all rosters
+    // Get all rosters
     @GetMapping
     public ResponseEntity<?> getAllRosters() {
         try {
@@ -53,7 +53,7 @@ public class RosterController {
         }
     }
 
-    // ✅ Get specific roster by ID
+    // Get specific roster by ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getRosterById(@PathVariable Long id) {
         try {
@@ -68,7 +68,7 @@ public class RosterController {
         }
     }
 
-    // ✅ Delete roster
+    // Delete roster
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRoster(@PathVariable Long id) {
         try {
@@ -83,7 +83,7 @@ public class RosterController {
         }
     }
 
-    // ✅ Add student to roster
+    // Add student to roster
     @PostMapping("/{rosterId}/students/{studentId}")
     public ResponseEntity<?> addStudentToRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
         try {
@@ -101,7 +101,7 @@ public class RosterController {
         }
     }
 
-    // ✅ Remove student from roster
+    // Remove student from roster
     @DeleteMapping("/{rosterId}/students/{studentId}")
     public ResponseEntity<?> removeStudentFromRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
         try {
@@ -116,7 +116,7 @@ public class RosterController {
         }
     }
 
-    // ✅ Replace all students in a roster (bulk update)
+    // Replace all students in a roster (bulk update)
     @PutMapping("/{rosterId}/students")
     public ResponseEntity<?> updateRosterStudents(@PathVariable Long rosterId, @RequestBody List<String> studentIds) {
         try {
@@ -131,7 +131,7 @@ public class RosterController {
         }
     }
 
-    // ✅ Get all students in a roster
+    // Get all students in a roster
     @GetMapping("/{rosterId}/students")
     public ResponseEntity<?> getStudentsInRoster(@PathVariable Long rosterId) {
         try {
@@ -146,7 +146,26 @@ public class RosterController {
         }
     }
 
-    // ✅ Helper methods for standardized responses
+    // Update roster name by ID
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateRosterName(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        try {
+            String newName = request.get("name");
+            Roster updated = rosterService.updateRosterName(id, newName);
+            return ResponseEntity.ok(updated);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Roster not found with ID: " + id));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while updating roster name"));
+        }
+    }
+
+    // Helper methods for standardized responses
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> response = new HashMap<>();
         response.put("error", message);

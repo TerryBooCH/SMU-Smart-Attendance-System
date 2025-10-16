@@ -15,14 +15,14 @@ public class Roster extends BaseEntity {
     @OneToMany(mappedBy = "roster", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StudentRoster> studentRosters = new ArrayList<>();
 
-    // ✅ Constructors
+    // Constructors
     public Roster() {}
     
     public Roster(String name) {
         this.name = name;
     }
 
-    // ✅ Getters and Setters
+    // Getters and Setters
     public String getName() {
         return name;
     }
@@ -39,7 +39,7 @@ public class Roster extends BaseEntity {
         this.studentRosters = studentRosters;
     }
 
-    // ✅ Get all Students (for API use)
+    // Get all Students (for API use)
     @Transient
     public List<Student> getStudents() {
         return studentRosters.stream()
@@ -47,7 +47,7 @@ public class Roster extends BaseEntity {
                 .collect(Collectors.toList());
     }
 
-    // ✅ Add a single student to roster
+    // Add a single student to roster
     public boolean addToRoster(Student student) {
         boolean alreadyExists = studentRosters.stream()
                 .anyMatch(sr -> sr.getStudent().getId().equals(student.getId()));
@@ -59,17 +59,17 @@ public class Roster extends BaseEntity {
         return true;
     }
 
-    // ✅ Remove a student from roster by ID
+    // Remove a student from roster by ID
     public boolean removeFromRoster(Long studentId) {
         return studentRosters.removeIf(sr -> sr.getStudent().getId().equals(studentId));
     }
 
-    // ✅ Remove all students from this roster
+    // Remove all students from this roster
     public void clearRoster() {
         studentRosters.clear();
     }
 
-    // ✅ Add multiple students at once
+    // Add multiple students at once
     public void addAllStudents(List<Student> students) {
         for (Student student : students) {
             addToRoster(student);

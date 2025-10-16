@@ -1,8 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Search, X } from "lucide-react";
+import useStudent from "../../hooks/useStudent";
 
 const SearchBar = () => {
   const [searchValue, setSearchValue] = useState("");
+  const { searchStudentsByName, fetchAllStudents } = useStudent();
+
+  useEffect(() => {
+    const debounceTimer = setTimeout(() => {
+      if (searchValue.trim()) {
+        searchStudentsByName(searchValue.trim());
+      } else {
+        fetchAllStudents();
+      }
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchValue]);
 
   const handleChange = (e) => {
     const value = e.target.value;

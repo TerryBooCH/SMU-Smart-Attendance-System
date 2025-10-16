@@ -12,6 +12,19 @@ export const studentService = {
     }
   },
 
+  searchStudentsByName: async (name) => {
+    try {
+      const response = await apiClient.get("/api/students", {
+        params: { name },
+      });
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error searching students:", error);
+      throw error;
+    }
+  },
+
   createStudent: async (studentData) => {
     try {
       const response = await apiClient.post("/api/students", studentData);

@@ -1,6 +1,8 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect, use } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../assets/logo.svg";
+import KeyboardShortcutsModalButton from "./KeyboardShortcutsModalButton";
+import useSidebar from "../hooks/useSidebar";
 
 import {
   Users,
@@ -14,11 +16,13 @@ import {
   ChevronRight,
   PanelLeft,
   ArrowLeft,
+  UsersRound,
 } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const navigate = useNavigate();
+  const { collapsed: isCollapsed, toggleCollapse } = useSidebar();
 
   const navigationItems = [
     {
@@ -26,30 +30,42 @@ const Sidebar = () => {
       icon: House,
       label: "Home",
       description: "Dashboard overview",
+      shortcut: "1",
     },
     {
       path: "/sessions",
       icon: School,
       label: "Sessions",
       description: "Manage classes",
+      shortcut: "2",
+    },
+    {
+      path: "/rosters",
+      icon: UsersRound,
+      label: "Rosters",
+      description: "Roster management",
+      shortcut: "3",
     },
     {
       path: "/live-recognition",
       icon: Video,
       label: "Live Recognition",
       description: "Real-time detection",
+      shortcut: "4",
     },
     {
       path: "/students",
       icon: Users,
       label: "Students",
       description: "Student management",
+      shortcut: "5",
     },
     {
       path: "/reports",
       icon: FileText,
       label: "Reports",
       description: "Analytics & exports",
+      shortcut: "6",
     },
   ];
 
@@ -57,10 +73,42 @@ const Sidebar = () => {
     if (path === "/students") {
       return location.pathname.startsWith("/student");
     }
+    if (path === "/rosters") {
+      return location.pathname.startsWith("/roster");
+    }
     return location.pathname === path;
   };
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  // Keyboard navigation handler
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Check if Ctrl/Cmd key is pressed with a number
+      if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
+        const key = e.key;
+        const item = navigationItems.find(item => item.shortcut === key);
+        
+        if (item) {
+          e.preventDefault();
+          navigate(item.path);
+        }
+        
+        // Ctrl/Cmd + B to toggle sidebar
+        if (key === 'b' || key === 'B') {
+          e.preventDefault();
+          toggleCollapse();
+        }
+        
+        // Ctrl/Cmd + , for settings
+        if (key === ',') {
+          e.preventDefault();
+          navigate('/settings');
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [navigate, toggleCollapse]);
 
   return (
     <div
@@ -73,13 +121,13 @@ const Sidebar = () => {
         style={{ width: isCollapsed ? "80px" : "288px" }}
       >
         {/* Header / Logo section */}
-        <div className="px-4 py-2 border-b border-[#cecece] min-h-[5rem] flex items-center
-">
+        <div className="px-4 py-2 border-b border-[#cecece] min-h-[5rem] flex items-center">
           <div className="group relative flex items-center rounded-xl transition-all duration-200 p-3 w-full" >
             <div className="flex-shrink-0 w-6 flex items-center justify-center">
               <button
-                onClick={toggleSidebar}
+                onClick={toggleCollapse}
                 className="flex items-center justify-center transition-all duration-300  -m-2 cursor-pointer"
+                title="Toggle sidebar (Ctrl+B)"
               >
                 <img src={Logo} alt="AgentSoC" className="size-[43px]" />
               </button>
@@ -94,11 +142,11 @@ const Sidebar = () => {
                   <span className="font-bold text-lg transition-colors duration-200 whitespace-nowrap text-gray-900">
                     Smartend
                   </span>
-
                 </div>
                 <button
-                  onClick={toggleSidebar}
+                  onClick={toggleCollapse}
                   className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200 flex-shrink-0 cursor-pointer"
+                  title="Toggle sidebar (Ctrl+B)"
                 >
                   <PanelLeft
                     size={20}
@@ -163,36 +211,44 @@ const Sidebar = () => {
                     isCollapsed ? "max-w-0 opacity-0" : "max-w-xs opacity-100"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span
-                      className={`font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
-                        active
-                          ? "text-white"
-                          : "text-gray-900 group-hover:text-gray-900"
-                      }`}
-                    >
-                      {item.label}
-                    </span>
-                    {active && (
-                      <ChevronRight
-                        size={16}
-                        className="text-white opacity-60 flex-shrink-0"
-                      />
-                    )}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <span
+                        className={`font-medium text-sm transition-colors duration-200 whitespace-nowrap ${
+                          active
+                            ? "text-white"
+                            : "text-gray-900 group-hover:text-gray-900"
+                        }`}
+                      >
+                        {item.label}
+                      </span>
+                      <p
+                        className={`text-xs mt-0.5 transition-colors duration-200 whitespace-nowrap ${
+                          active
+                            ? "text-blue-100"
+                            : "text-gray-500 group-hover:text-gray-600"
+                        }`}
+                      >
+                        {item.description}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <kbd
+                        className={`px-1.5 py-0.5 text-[10px] font-semibold rounded border transition-colors duration-200 ${
+                          active
+                            ? "bg-white/20 border-white/30 text-white"
+                            : "bg-gray-100 border-gray-300 text-gray-600"
+                        }`}
+                      >
+                        CTRL + {item.shortcut}
+                      </kbd>
+                     
+                    </div>
                   </div>
-                  <p
-                    className={`text-xs mt-0.5 transition-colors duration-200 whitespace-nowrap ${
-                      active
-                        ? "text-blue-100"
-                        : "text-gray-500 group-hover:text-gray-600"
-                    }`}
-                  >
-                    {item.description}
-                  </p>
                 </div>
                 {isCollapsed && (
                   <div className="absolute left-16 bg-gray-900 text-white px-2 py-1 rounded-md text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                    {item.label}
+                    {item.label} (⌘{item.shortcut})
                   </div>
                 )}
               </Link>
@@ -211,6 +267,8 @@ const Sidebar = () => {
               Account
             </h3>
           </div>
+
+          <KeyboardShortcutsModalButton isCollapsed={isCollapsed} />
           <Link
             to="/settings"
             className="group flex items-center rounded-xl transition-all duration-200 text-gray-700 hover:text-gray-900 hover:bg-gray-50 p-3"
@@ -222,13 +280,18 @@ const Sidebar = () => {
                 className="text-gray-600 group-hover:text-gray-900 transition-colors duration-200"
               />
             </div>
-            <span
-              className={`font-medium text-sm ml-3 overflow-hidden transition-all duration-300 ease-in-out whitespace-nowrap ${
+            <div
+              className={`flex-1 flex items-center justify-between ml-3 overflow-hidden transition-all duration-300 ease-in-out ${
                 isCollapsed ? "max-w-0 opacity-0" : "max-w-xs opacity-100"
               }`}
             >
-              Settings
-            </span>
+              <span className="font-medium text-sm whitespace-nowrap">
+                Settings
+              </span>
+              <kbd className="px-1.5 py-0.5 text-[10px] font-semibold bg-gray-100 border border-gray-300 rounded text-gray-600">
+                CTRL + ,
+              </kbd>
+            </div>
           </Link>
           <button className="group cursor-pointer w-full flex items-center rounded-xl transition-all duration-200 text-red-600 hover:text-red-700 hover:bg-red-50 p-3">
             <div className="flex-shrink-0 w-6 flex justify-center">

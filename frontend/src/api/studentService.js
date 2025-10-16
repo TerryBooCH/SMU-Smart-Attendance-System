@@ -18,8 +18,21 @@ export const studentService = {
       console.log(response.data);
       return response.data;
     } catch (error) {
-      console.error("Error creating student:", error);
-      throw error;
+      const errorData = error.response?.data || {};
+      const errorMessage =
+        errorData.message ||
+        errorData.error ||
+        error.message ||
+        "Error creating student";
+      const statusCode = error.response?.status || 500;
+      const field = errorData.field;
+
+      console.error(`Error creating student (${statusCode}):`, errorMessage);
+
+      const customError = new Error(errorMessage);
+      customError.statusCode = statusCode;
+      customError.field = field;
+      throw customError;
     }
   },
 
@@ -59,10 +72,13 @@ export const studentService = {
     }
   },
 
-  uploadStudentFaceData: async (studentId, file) => {
+  uploadStudentFaceData: async (studentId, files) => {
     try {
       const formData = new FormData();
-      formData.append("file", file);
+
+      files.forEach((file) => {
+        formData.append("file", file);
+      });
 
       const response = await apiClient.post(
         `/api/students/${studentId}/faces`,
@@ -78,6 +94,30 @@ export const studentService = {
       return response.data;
     } catch (error) {
       console.error("Error uploading face data:", error);
+      throw error;
+    }
+  },
+
+  getFaceDataByStudentId: async (studentId) => {
+    try {
+      const response = await apiClient.get(`/api/students/${studentId}/faces`);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error getting face data:", error);
+      throw error;
+    }
+  },
+
+  deleteStudentFaceDataByFaceId: async (studentId, faceId) => {
+    try {
+      const response = await apiClient.delete(
+        `/api/students/${studentId}/faces/${faceId}`
+      );
+      console.log(response);
+      return response;
+    } catch (error) {
+      console.error("Error deleting face data:", error);
       throw error;
     }
   },

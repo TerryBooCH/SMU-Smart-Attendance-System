@@ -1,84 +1,89 @@
 package com.smu.smartattendancesystem.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "attendance")
+@Table(name = "attendance", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "session_id", "student_id" })
+})
 public class Attendance extends BaseEntity {
 
-    @ManyToOne // Many Attendance records can reference one Student
-    @JoinColumn(name = "student_id", nullable = false) // Foreign key column for 'student_id'
-    private Student student;
-
-    @ManyToOne // Many Attendance records can reference one Session
-    @JoinColumn(name = "session_id", nullable = false)// Foreign key column for 'session_id'
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "session_id", nullable = false)
     private Session session;
 
-    private String status;    // present, absent, late
-    private String method;    // manual, face-recognition
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "student_id", nullable = false)
+    private Student student;
+
+    @Column(nullable = false)
+    private String status; // PENDING | PRESENT | ABSENT | LATE
+
+    @Column(nullable = false)
+    private String method; // AUTO | MANUAL | EDGE
+
     private Double confidence;
-    private String timestamp;
+    private LocalDateTime timestamp = LocalDateTime.now();
 
     // Constructors
-    public Attendance() {} // No-argument constructor required fr JPA
+    public Attendance() {
+    }
 
-    public Attendance(Student student, Session session, String status, String method, Double confidence, String timestamp) { // Constructor to create Attendance records
-        this.student = student;
+    public Attendance(Session session, Student student, String status, String method, Double confidence) {
         this.session = session;
+        this.student = student;
         this.status = status;
         this.method = method;
         this.confidence = confidence;
-        this.timestamp = timestamp;
     }
 
-    // Getters & Setters
-    public Student getStudent() { 
-        return student; 
+    // Getters and Setters
+    public Session getSession() {
+        return session;
     }
 
-    public void setStudent(Student student) { 
-        this.student = student; 
+    public void setSession(Session session) {
+        this.session = session;
     }
 
-    public Session getSession() { 
-        return session; 
-    }
-    public void setSession(Session session) { 
-        this.session = session; 
+    public Student getStudent() {
+        return student;
     }
 
-    public String getStatus() { 
-        return status; 
+    public void setStudent(Student student) {
+        this.student = student;
     }
 
-    public void setStatus(String status) { 
-        this.status = status; 
+    public String getStatus() {
+        return status;
     }
 
-    public String getMethod() { 
-        return method; 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getMethod() {
+        return method;
     }
 
     public void setMethod(String method) {
-        this.method = method; 
+        this.method = method;
     }
 
-    public Double getConfidence() { 
-        return confidence; 
+    public Double getConfidence() {
+        return confidence;
     }
 
-    public void setConfidence(Double confidence) { 
-        this.confidence = confidence; 
+    public void setConfidence(Double confidence) {
+        this.confidence = confidence;
     }
 
-    public String getTimestamp() { 
-        return timestamp; 
+    public LocalDateTime getTimestamp() {
+        return timestamp;
     }
 
-    public void setTimestamp(String timestamp) { 
-        this.timestamp = timestamp; 
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

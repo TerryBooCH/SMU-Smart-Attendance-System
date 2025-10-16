@@ -8,7 +8,7 @@ const UploadFaceDataButton = ({ student }) => {
 
   const handleUploadFaceData = () => {
     openModal(<UploadFaceDataForm student={student} />, "Update Face Data", {
-      width: "2xl",
+      width: "3xl",
       height: "auto",
     });
   };

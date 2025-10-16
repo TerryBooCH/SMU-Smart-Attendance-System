@@ -54,14 +54,33 @@ const CreateStudentForm = () => {
     if (Object.keys(errors).length === 0) {
       try {
         setIsSubmitting(true);
-        await createStudent(trimmedValues); // Submit trimmed values
+        await createStudent(trimmedValues);
         success("Student created successfully");
         closeModal();
       } catch (error) {
         console.error("Error submitting form:", error);
-        setFormErrors({
-          submit: error.message || "Failed to create student",
-        });
+
+        const errorMessage = error.message || "Failed to create student";
+
+        if (error.statusCode === 409) {
+          if (error.field === "email") {
+            setFormErrors({
+              email:
+                "A student with this email already exists. Please use a different email.",
+              submit: "A student with this email already exists.",
+            });
+          } else if (error.field === "studentId") {
+            setFormErrors({
+              studentId:
+                "A student with this ID already exists. Please use a different Student ID.",
+              submit: "A student with this ID already exists.",
+            });
+          }
+        } else {
+          setFormErrors({
+            submit: errorMessage,
+          });
+        }
       } finally {
         setIsSubmitting(false);
       }

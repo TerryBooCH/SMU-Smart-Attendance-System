@@ -1,17 +1,16 @@
 import React, { useState } from "react";
-import { validateCreateCourseForm } from "../../utils/validateForm";
+import { validateCreateRosterForm } from "../../utils/validateForm";
 import { useModal } from "../../context/ModalContext";
 import { useToast } from "../../hooks/useToast";
-import useCourse from "../../hooks/useRoster";
+import useRoster from "../../hooks/useRoster";
 import { CircleAlert } from "lucide-react";
 
 const CreateRosterForm = () => {
   const { closeModal } = useModal();
   const { success, error } = useToast();
-  const { createCourse } = useCourse();
+  const { createRoster } = useRoster();
   const [formValues, setFormValues] = useState({
-    code: "",
-    title: "",
+    name: "",
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -37,25 +36,24 @@ const CreateRosterForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Trim all form values
+    // Trim form value
     const trimmedValues = {
-      code: formValues.code.trim(),
-      title: formValues.title.trim(),
+      name: formValues.name.trim(),
     };
 
-    const errors = validateCreateCourseForm(trimmedValues);
+    const errors = validateCreateRosterForm(trimmedValues);
     setFormErrors(errors);
 
     if (Object.keys(errors).length === 0) {
       try {
         setIsSubmitting(true);
-        await createCourse(trimmedValues);
-        success("Course created successfully");
+        await createRoster(trimmedValues);
+        success("Roster created successfully");
         closeModal();
       } catch (error) {
         console.error("Error submitting form:", error);
         setFormErrors({
-          submit: error.message || "Failed to create course",
+          submit: error.message || "Failed to create roster",
         });
       } finally {
         setIsSubmitting(false);
@@ -75,56 +73,29 @@ const CreateRosterForm = () => {
           </div>
         )}
         <div className="mb-5">
-          <div className="w-full mb-4">
+          <div className="w-full">
             <label
-              htmlFor="code"
+              htmlFor="name"
               className="block mb-2 text-sm text-gray-900 font-lexend"
             >
-              Course Code
+              Roster Name
             </label>
             <input
               type="text"
-              id="code"
-              name="code"
-              value={formValues.code}
+              id="name"
+              name="name"
+              value={formValues.name}
               onChange={handleChange}
               required
               disabled={isSubmitting}
               className={`font-lexend bg-white border text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
-                formErrors.code ? "border-red-500" : "border-[#cecece]"
+                formErrors.name ? "border-red-500" : "border-[#cecece]"
               } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
               placeholder="e.g., CS104"
             />
-            {formErrors.code && (
+            {formErrors.name && (
               <p className="mt-2 text-sm text-red-600 font-lexend">
-                {formErrors.code}
-              </p>
-            )}
-          </div>
-
-          <div className="w-full">
-            <label
-              htmlFor="title"
-              className="block mb-2 text-sm text-gray-900 font-lexend"
-            >
-              Course Title
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={formValues.title}
-              onChange={handleChange}
-              required
-              disabled={isSubmitting}
-              className={`font-lexend bg-white border text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
-                formErrors.title ? "border-red-500" : "border-[#cecece]"
-              } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
-              placeholder="Enter course title"
-            />
-            {formErrors.title && (
-              <p className="mt-2 text-sm text-red-600 font-lexend">
-                {formErrors.title}
+                {formErrors.name}
               </p>
             )}
           </div>
@@ -145,11 +116,7 @@ const CreateRosterForm = () => {
             </button>
             <button
               type="submit"
-              disabled={
-                isSubmitting ||
-                !formValues.code.trim() ||
-                !formValues.title.trim()
-              }
+              disabled={isSubmitting || !formValues.name.trim()}
               className="px-4 py-2 rounded-xl text-sm text-white flex items-center justify-center gap-2 
                       font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700 active:scale-[0.98] cursor-pointer"
             >

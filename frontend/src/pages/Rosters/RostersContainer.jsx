@@ -38,10 +38,7 @@ const RostersContainer = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Code
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Title
+                  Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created At
@@ -57,12 +54,7 @@ const RostersContainer = () => {
                   <tr key={roster.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {roster.code || "N/A"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {roster.title || "N/A"}
+                        {roster.name || "N/A"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -80,7 +72,7 @@ const RostersContainer = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan="4"
+                    colSpan="3"
                     className="px-6 py-4 text-center text-sm text-gray-500"
                   >
                     No rosters found

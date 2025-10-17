@@ -127,13 +127,20 @@ public class RosterController {
 
             Student student = newStudentRoster.getStudent();
 
-            // Return only student info
+            // Get latest face data (if available)
+            List<FaceDataDTO> faceList = faceDataService.list(studentId);
+            String latestFaceBase64 = faceList.isEmpty()
+                    ? null
+                    : faceList.get(faceList.size() - 1).getImageBase64();
+
+            // Build response
             Map<String, Object> response = new HashMap<>();
             response.put("id", student.getId());
             response.put("studentId", student.getStudentId());
             response.put("name", student.getName());
             response.put("email", student.getEmail());
             response.put("phone", student.getPhone());
+            response.put("imageBase64", latestFaceBase64);
 
             return ResponseEntity.ok(response);
 

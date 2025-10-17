@@ -5,6 +5,7 @@ const RosterContext = createContext();
 
 export const RosterProvider = ({ children }) => {
   const [rosters, setRosters] = useState([]);
+  const [selectedRoster, setSelectedRoster] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -19,6 +20,23 @@ export const RosterProvider = ({ children }) => {
     } catch (error) {
       console.error("Error fetching rosters:", error);
       setError(error.message || "Failed to fetch rosters");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchRosterById = async (rosterId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await rosterService.getRosterById(rosterId);
+      setSelectedRoster(response);
+      return response;
+    } catch (error) {
+      console.error("Error fetching roster:", error);
+      setError(error.message || "Failed to fetch roster");
       throw error;
     } finally {
       setLoading(false);
@@ -43,13 +61,75 @@ export const RosterProvider = ({ children }) => {
     }
   };
 
+  const updateRosterById = async (rosterId, rosterData) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await rosterService.updateRosterById(
+        rosterId,
+        rosterData
+      );
+
+      const updatedRoster = response.data || response.roster || response;
+
+      setRosters((prev) =>
+        prev.map((roster) =>
+          roster.id === rosterId ? updatedRoster : roster
+        )
+      );
+
+      // Update selectedRoster if it's the one being updated
+      if (selectedRoster && selectedRoster.id === rosterId) {
+        setSelectedRoster(updatedRoster);
+      }
+
+      return response;
+    } catch (error) {
+      console.error("Error updating roster:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteRosterById = async (rosterId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      await rosterService.deleteRosterById(rosterId);
+
+      setRosters((prev) =>
+        prev.filter((roster) => roster.id !== rosterId)
+      );
+
+      // Clear selectedRoster if it was deleted
+      if (selectedRoster && selectedRoster.id === rosterId) {
+        setSelectedRoster(null);
+      }
+
+      return { status: 200, message: "Roster deleted successfully" };
+    } catch (error) {
+      console.error("Error deleting roster:", error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     rosters,
+    selectedRoster,
     loading,
     error,
     setRosters,
+    setSelectedRoster,
     fetchAllRosters,
+    fetchRosterById,
     createRoster,
+    updateRosterById,
+    deleteRosterById,
   };
 
   return (

@@ -7,7 +7,7 @@ const CreateRosterButton = () => {
   const { openModal } = useModal();
 
   const handleCreateCourse = () => {
-    openModal(<CreateRosterForm />, "Create Course");
+    openModal(<CreateRosterForm />, "Create Roster");
   };
   return (
     <button

@@ -28,6 +28,23 @@ export const StudentProvider = ({ children }) => {
     }
   };
 
+  const searchStudentsByName = async (name) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await studentService.searchStudentsByName(name);
+      setStudents(response || []);
+      return response;
+    } catch (error) {
+      console.error("Error searching students:", error);
+      setError(error.message || "Failed to search students");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const fetchStudentById = async (studentId) => {
     try {
       setLoading(true);
@@ -132,45 +149,45 @@ export const StudentProvider = ({ children }) => {
     }
   };
 
-const uploadStudentFaceData = async (studentId, files) => {
-  try {
-    setLoading(true);
-    setError(null);
+  const uploadStudentFaceData = async (studentId, files) => {
+    try {
+      setLoading(true);
+      setError(null);
 
-    // Upload the files
-    const response = await studentService.uploadStudentFaceData(
-      studentId,
-      files
-    );
+      // Upload the files
+      const response = await studentService.uploadStudentFaceData(
+        studentId,
+        files
+      );
 
-    // Check for successful response
-    if (response.status === "success" || response.status === 201) {
-      console.log("Face data uploaded successfully:", response);
+      // Check for successful response
+      if (response.status === "success" || response.status === 201) {
+        console.log("Face data uploaded successfully:", response);
 
-      const uploadedDataArray = Array.isArray(response.data) 
-        ? response.data 
-        : [response.data];
+        const uploadedDataArray = Array.isArray(response.data)
+          ? response.data
+          : [response.data];
 
-      // Create face data entries matching the GET response structure
-      const newFaceDataArray = uploadedDataArray.map((uploadedData) => ({
-        id: uploadedData.id,
-        studentId: uploadedData.studentId,
-        studentName: uploadedData.studentName,
-        imageBase64: uploadedData.imageBase64,
-        createdAt: uploadedData.createdAt,
-      }));
+        // Create face data entries matching the GET response structure
+        const newFaceDataArray = uploadedDataArray.map((uploadedData) => ({
+          id: uploadedData.id,
+          studentId: uploadedData.studentId,
+          studentName: uploadedData.studentName,
+          imageBase64: uploadedData.imageBase64,
+          createdAt: uploadedData.createdAt,
+        }));
 
-      setStudentFaceData((prev) => [...prev, ...newFaceDataArray]);
+        setStudentFaceData((prev) => [...prev, ...newFaceDataArray]);
+      }
+
+      return response;
+    } catch (error) {
+      console.error("Error uploading face data:", error);
+      throw error;
+    } finally {
+      setLoading(false);
     }
-
-    return response;
-  } catch (error) {
-    console.error("Error uploading face data:", error);
-    throw error;
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const getFaceDataByStudentId = async (studentId) => {
     try {
@@ -223,6 +240,7 @@ const uploadStudentFaceData = async (studentId, files) => {
     setSelectedStudent,
     setStudentFaceData,
     fetchAllStudents,
+    searchStudentsByName,
     fetchStudentById,
     deleteStudentByStudentId,
     updateStudentByStudentId,

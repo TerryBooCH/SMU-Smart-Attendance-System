@@ -53,18 +53,6 @@ const StudentCard = ({ student }) => {
         <div className="text-sm text-gray-900">{student.phone || "N/A"}</div>
       </td>
 
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-500">
-          {formatDate(student.createdAt)}
-        </div>
-      </td>
-
-      <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-500">
-          {formatDate(student.updatedAt)}
-        </div>
-      </td>
-
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
         <div className="flex space-x-2">
           <button

@@ -99,3 +99,20 @@ export const validateCreateRosterForm = (values) => {
 
   return errors;
 };
+
+export const validateAddStudentToRosterForm = (values) => {
+  const errors = {};
+
+  if (!values.studentId || !values.studentId.trim()) {
+    errors.studentId = "Student ID is required";
+  } else {
+    const studentIdRegex = /^[A-Za-z]\d{7}$/;
+    if (!studentIdRegex.test(values.studentId.trim())) {
+      errors.studentId =
+        "Student ID must start with a letter followed by 7 numbers (e.g., S1234567)";
+    }
+  }
+
+  return errors;
+};
+

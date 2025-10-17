@@ -158,7 +158,7 @@ const CreateStudentForm = () => {
               htmlFor="email"
               className="block mb-2 text-sm text-gray-900 font-lexend"
             >
-              Email <span className="text-gray-500">(optional)</span>
+              Email <span className="text-gray-500"></span>
             </label>
             <input
               type="email"

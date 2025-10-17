@@ -133,7 +133,7 @@ const UpdateStudentDetailsForm = ({ student }) => {
                   htmlFor="email"
                   className="block mb-2 text-sm font-medium text-gray-700 font-lexend"
                 >
-                  Email <span className="text-gray-500">(optional)</span>
+                  Email <span className="text-gray-500"></span>
                 </label>
                 <input
                   type="email"

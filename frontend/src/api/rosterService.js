@@ -58,4 +58,28 @@ export const rosterService = {
       throw error;
     }
   },
+
+  getStudentsInRoster: async (rosterId) => {
+    try {
+      const response = await apiClient.get(`/api/rosters/${rosterId}/students`);
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error getting students in roster:", error);
+      throw error;
+    }
+  },
+
+  addStudentToRoster: async (rosterId, studentId) => {
+    try {
+      const response = await apiClient.post(
+        `/api/rosters/${rosterId}/students/${studentId}`
+      );
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error adding student to roster:", error);
+      throw error;
+    }
+  },
 };

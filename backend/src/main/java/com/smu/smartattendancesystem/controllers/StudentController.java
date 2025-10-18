@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE;
@@ -25,6 +24,7 @@ import com.smu.smartattendancesystem.models.Student;
 import com.smu.smartattendancesystem.services.FaceDataService;
 import com.smu.smartattendancesystem.services.StudentService;
 import static com.smu.smartattendancesystem.utils.ResponseFormatting.createErrorResponse;
+import static com.smu.smartattendancesystem.utils.ResponseFormatting.createSuccessResponse;
 
 @RestController
 @RequestMapping("/api/students")
@@ -42,7 +42,8 @@ public class StudentController {
     public ResponseEntity<?> addStudent(@RequestBody Student student) {
         try {
             // Log for debugging
-            System.out.println("=== Creating Student: " + student.getStudentId() + " | Class: " + student.getClassName() + " ===");
+            System.out.println(
+                    "=== Creating Student: " + student.getStudentId() + " | Class: " + student.getClassName() + " ===");
 
             Student createdStudent = studentService.createStudent(student);
             return ResponseEntity.status(HttpStatus.CREATED)
@@ -82,9 +83,17 @@ public class StudentController {
 
     // READ one by studentId
     @GetMapping("/{studentId}")
-    public Optional<Student> getStudent(@PathVariable String studentId) {
-        System.out.println("=== GET Student Called with ID: " + studentId + " ===");
-        return studentService.getStudentByStudentId(studentId);
+    public ResponseEntity<?> getStudent(@PathVariable String studentId) {
+        try {
+            StudentWithFaceDTO dto = studentService.getStudentByStudentId(studentId);
+            return ResponseEntity.ok(dto);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while fetching the student"));
+        }
     }
 
     // UPDATE by studentId
@@ -92,8 +101,8 @@ public class StudentController {
     public ResponseEntity<?> updateStudent(@PathVariable String studentId,
             @RequestBody Student student) {
         try {
-            Student updated = studentService.updateStudent(studentId, student);
-            return ResponseEntity.ok(updated);
+            StudentWithFaceDTO dto = studentService.updateStudent(studentId, student);
+            return ResponseEntity.ok(dto);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
@@ -113,15 +122,16 @@ public class StudentController {
     @DeleteMapping("/{studentId}")
     public ResponseEntity<?> deleteStudent(@PathVariable String studentId) {
         System.out.println("=== DELETE Student Called with ID: " + studentId + " ===");
-        Optional<Student> student = studentService.getStudentByStudentId(studentId);
-
-        if (student.isEmpty()) {
+        try {
+            studentService.deleteStudent(studentId);
+            return ResponseEntity.ok(createSuccessResponse("Student deleted successfully"));
+        } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Student not found with ID: " + studentId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while deleting the student"));
         }
-
-        studentService.deleteStudent(student.get().getStudentId());
-        return ResponseEntity.ok(Map.of("message", "Student deleted successfully"));
     }
 
     // READ face data for a student

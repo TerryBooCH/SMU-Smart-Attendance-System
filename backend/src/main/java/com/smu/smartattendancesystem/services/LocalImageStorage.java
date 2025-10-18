@@ -1,5 +1,6 @@
 package com.smu.smartattendancesystem.services;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -8,6 +9,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -166,5 +168,41 @@ public class LocalImageStorage implements ImageStorage {
         // Read and return bytes of the image to be converted to base64
         System.out.println("Reading file: " + targetPath);
         return Files.readAllBytes(targetPath);
+    }
+
+    /**
+     * Delete the entire folder for a student's face images:
+     * {faces.root}/{studentId}/
+     *
+     * @param studentId subfolder to delete
+     * @throws IOException if deletion fails unexpectedly
+     */
+    public void deleteFolder(String studentId) throws IOException {
+        // Validate parameters
+        if (studentId == null || studentId.isBlank()) {
+            throw new IllegalArgumentException("studentId is required");
+        }
+
+        // Resolve the student directory path
+        Path studentDir = root.resolve(studentId).normalize();
+
+        // Security check to prevent directory traversal attacks
+        if (!studentDir.startsWith(root)) {
+            throw new SecurityException("Invalid studentId path");
+        }
+
+        File folder = studentDir.toFile();
+
+        // If folder does not exist, do nothing
+        if (!folder.exists()) {
+            return;
+        }
+
+        // Delete the directory
+        try {
+            FileUtils.deleteDirectory(folder);
+        } catch (IOException e) {
+            throw new IOException("Failed to delete folder for student: " + studentId, e);
+        }
     }
 }

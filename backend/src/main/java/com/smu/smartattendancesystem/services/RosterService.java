@@ -57,15 +57,30 @@ public class RosterService {
 
     // Add student to roster
     public Roster addStudentToRoster(Long rosterId, String studentId) {
-        Roster roster = getRosterById(rosterId);
-        Student student = studentRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found with studentId: " + studentId));
+        // Fetch roster using RosterManager
+        Roster roster = rosterManager.getRoster(rosterId)
+                .orElseThrow(() -> new NoSuchElementException("Roster not found with ID: " + rosterId));
 
-        boolean added = roster.addToRoster(student);
-        if (!added) {
-            throw new RuntimeException("Student already in roster or invalid");
+        // Fetch student (throws NoSuchElementException if not found)
+        Student student = studentRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new NoSuchElementException("Student not found with studentId: " + studentId));
+
+        // Check if student already in roster
+        boolean alreadyInRoster = roster.getStudentRosters().stream()
+                .anyMatch(sr -> sr.getStudent().getStudentId().equals(studentId));
+        if (alreadyInRoster) {
+            throw new IllegalStateException(
+                    "Student with ID " + studentId + " is already in roster \"" + roster.getName() + "\"");
         }
 
+        // Add to roster
+        boolean added = roster.addToRoster(student);
+        if (!added) {
+            throw new IllegalStateException(
+                    "Failed to add student to roster \"" + roster.getName() + "\" — possible invalid state");
+        }
+
+        // Save and return updated roster
         return rosterManager.updateRoster(roster);
     }
 

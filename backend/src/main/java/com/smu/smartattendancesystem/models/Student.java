@@ -88,4 +88,13 @@ public class Student extends BaseEntity {
     public void setFaceDataList(List<FaceData> faceDataList) {
         this.faceDataList = faceDataList;
     }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
 }

@@ -41,6 +41,11 @@ public class StudentManager {
         return studentRepo.findByNameContainingIgnoreCase(name);
     }
 
+    // READ: Get student by email
+    public Optional<Student> getStudentByEmail(String email) {
+        return studentRepo.findByEmail(email);
+    }
+
     // UPDATE: Update existing student
     public Student updateStudent(String studentId, Student student) {
         return studentRepo.save(student);

@@ -41,6 +41,10 @@ public class StudentManager {
         return studentRepo.findByNameContainingIgnoreCase(name);
     }
 
+    // READ: Get student by email
+    public Optional<Student> getStudentByEmail(String email) {
+        return studentRepo.findByEmail(email);
+
     // Get all students in a specific class
     public List<Student> getStudentsByClassName(String className) {
         return studentRepo.findByClassNameIgnoreCase(className);

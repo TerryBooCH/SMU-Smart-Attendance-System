@@ -26,6 +26,9 @@ public class Student extends BaseEntity {
     private String email;
     private String phone;
 
+    @Column(name = "class_name", nullable = false, unique = false)
+    private String className; // e.g. CS102
+
     // Relationships
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FaceData> faceDataList;
@@ -41,11 +44,12 @@ public class Student extends BaseEntity {
     public Student() {
     }
 
-    public Student(String studentId, String name, String email, String phone) {
+    public Student(String studentId, String name, String email, String phone, String className) {
         this.studentId = studentId;
         this.name = name;
         this.email = email;
         this.phone = phone;
+        this.className = className;
     }
 
     // Getters and Setters
@@ -95,6 +99,14 @@ public class Student extends BaseEntity {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
     }
 
 }

@@ -1,19 +1,24 @@
 import React, { useState } from "react";
-import { validateCreateRosterForm } from "../../utils/validateForm";
-import { useModal } from "../../context/ModalContext";
-import { useToast } from "../../hooks/useToast";
-import useRoster from "../../hooks/useRoster";
+import { validateCreateRosterForm } from "../utils/validateForm";
+import { useModal } from "../context/ModalContext";
+import { useToast } from "../hooks/useToast";
+import useRoster from "../hooks/useRoster";
 import { CircleAlert } from "lucide-react";
 
-const CreateRosterForm = () => {
+const UpdateRosterForm = ({ roster }) => {
   const { closeModal } = useModal();
   const { success, error } = useToast();
-  const { createRoster } = useRoster();
+  const { updateRosterById } = useRoster();
   const [formValues, setFormValues] = useState({
-    name: "",
+    name: roster?.name || "",
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check if form has been modified
+  const isFormChanged = () => {
+    return formValues.name !== (roster?.name || "");
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -41,19 +46,20 @@ const CreateRosterForm = () => {
       name: formValues.name.trim(),
     };
 
+    // Validate form with trimmed values
     const errors = validateCreateRosterForm(trimmedValues);
     setFormErrors(errors);
 
     if (Object.keys(errors).length === 0) {
       try {
         setIsSubmitting(true);
-        await createRoster(trimmedValues);
-        success("Roster created successfully");
+        await updateRosterById(roster.id, trimmedValues);
+        success("Roster updated successfully");
         closeModal();
       } catch (error) {
         console.error("Error submitting form:", error);
         setFormErrors({
-          submit: error.message || "Failed to create roster",
+          submit: error.message || "Failed to update roster",
         });
       } finally {
         setIsSubmitting(false);
@@ -116,11 +122,13 @@ const CreateRosterForm = () => {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || !formValues.name.trim()}
+              disabled={
+                isSubmitting || !formValues.name.trim() || !isFormChanged()
+              }
               className="px-4 py-2 rounded-xl text-sm text-white flex items-center justify-center gap-2 
                       font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700 active:scale-[0.98] cursor-pointer"
             >
-              {isSubmitting ? "Creating..." : "Create"}
+              {isSubmitting ? "Updating..." : "Update"}
             </button>
           </div>
         </div>
@@ -129,4 +137,4 @@ const CreateRosterForm = () => {
   );
 };
 
-export default CreateRosterForm;
+export default UpdateRosterForm;

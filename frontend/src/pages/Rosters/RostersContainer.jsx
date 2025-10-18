@@ -1,10 +1,15 @@
-import React, { useEffect, useRef } from 'react';
-import useRoster from '../../hooks/useRoster';
+import React, { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Eye } from "lucide-react";
+import useRoster from "../../hooks/useRoster";
 import { formatDate } from "../../utils/dateUtils";
+import DeleteRosterButton from "../../components/DeleteRosterButton";
+import UpdateRosterButton from "../../components/UpdateRosterButton";
 
 const RostersContainer = () => {
   const { rosters, loading, error, fetchAllRosters } = useRoster();
   const hasFetched = useRef(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Only fetch once on mount
@@ -38,10 +43,10 @@ const RostersContainer = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Code
+                  Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Title
+                  Roster Size
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Created At
@@ -57,12 +62,12 @@ const RostersContainer = () => {
                   <tr key={roster.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
-                        {roster.code || "N/A"}
+                        {roster.name || "N/A"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {roster.title || "N/A"}
+                        {roster.students?.length || 0}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -72,7 +77,15 @@ const RostersContainer = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
-                        {/* Action buttons will go here */}
+                        <button
+                          onClick={() => navigate(`/roster/${roster.id}`)}
+                          className="flex items-center cursor-pointer px-2 py-2 text-black"
+                          title="View"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <UpdateRosterButton roster={roster} />
+                        <DeleteRosterButton roster={roster} />
                       </div>
                     </td>
                   </tr>

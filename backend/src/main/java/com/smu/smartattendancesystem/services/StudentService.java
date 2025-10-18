@@ -176,4 +176,18 @@ public class StudentService {
 
         return results;
     }
+
+    // Get all students in a class (with face data)
+    @Transactional(readOnly = true)
+    public List<StudentWithFaceDTO> getStudentsByClassName(String className) {
+        List<Student> students = studentManager.getStudentsByClassName(className);
+        List<StudentWithFaceDTO> results = new ArrayList<>();
+
+        for (Student s : students) {
+            FaceDataDTO face = faceDataService.getLatestFaceData(s.getStudentId()).orElse(null);
+            results.add(StudentWithFaceDTO.from(s, face));
+        }
+
+        return results;
+    }
 }

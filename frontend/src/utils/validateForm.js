@@ -1,3 +1,18 @@
+export const validateSignInForm = (values) => {
+  const errors = {};
+  if (!values.email.trim()) {
+    errors.email = "Email is required";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+    errors.email = "Enter a valid email address";
+  }
+
+  if (!values.password.trim()) {
+    errors.password = "Password is required";
+  }
+
+  return errors;
+};
+
 export const validateCreateStudentForm = (values) => {
   const errors = {};
 
@@ -73,25 +88,13 @@ export const validateUpdateStudentForm = (values) => {
   return errors;
 };
 
-export const validateCreateCourseForm = (values) => {
+export const validateCreateRosterForm = (values) => {
   const errors = {};
 
-  // Validate Course Code
-  if (!values.code || !values.code.trim()) {
-    errors.code = "Course code is required";
-  } else {
-    const courseCodeRegex = /^[A-Za-z]{2}\d{3}$/;
-    if (!courseCodeRegex.test(values.code.trim())) {
-      errors.code =
-        "Course code must be 2 letters followed by 3 numbers (e.g., CS104)";
-    }
-  }
-
-  // Validate Course Title
-  if (!values.title || !values.title.trim()) {
-    errors.title = "Course title is required";
-  } else if (values.title.trim().length < 3) {
-    errors.title = "Course title must be at least 3 characters";
+  if (!values.name || values.name.trim() === "") {
+    errors.name = "Roster name is required";
+  } else if (values.name.trim().length < 2) {
+    errors.name = "Roster name must be at least 2 characters";
   }
 
   return errors;

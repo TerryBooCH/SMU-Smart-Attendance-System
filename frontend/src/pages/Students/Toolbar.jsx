@@ -1,5 +1,6 @@
 import React from "react";
 import CreateStudentButton from "./CreateStudentButton";
+import SearchBar from "./SearchBar";
 
 
 const Toolbar = () => {
@@ -9,6 +10,9 @@ const Toolbar = () => {
         <div>
           <h1 className="text-3xl font-bold text-gray-800">Students</h1>
         </div>
+      <div className="mt-4">
+        <SearchBar />
+      </div>
         <div>
           <CreateStudentButton />
         </div>

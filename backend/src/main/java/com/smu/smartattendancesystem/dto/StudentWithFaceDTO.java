@@ -7,16 +7,18 @@ public class StudentWithFaceDTO {
     private String name;
     private String email;
     private String phone;
+    private String className;  
     private FaceDataDTO face; // can be null if no face data
 
     public StudentWithFaceDTO() {
     }
 
-    public StudentWithFaceDTO(String studentId, String name, String email, String phone, FaceDataDTO face) {
+    public StudentWithFaceDTO(String studentId, String name, String email, String phone, String className, FaceDataDTO face) {
         this.studentId = studentId;
         this.name = name;
         this.email = email;
         this.phone = phone;
+        this.className = className;
         this.face = face;
     }
 
@@ -26,7 +28,9 @@ public class StudentWithFaceDTO {
                 student.getName(),
                 student.getEmail(),
                 student.getPhone(),
-                face);
+                student.getClassName(),  
+                face
+        );
     }
 
     // Getters and setters
@@ -60,6 +64,14 @@ public class StudentWithFaceDTO {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getClassName() {
+        return className;  
+    }
+
+    public void setClassName(String className) {
+        this.className = className; 
     }
 
     public FaceDataDTO getFace() {

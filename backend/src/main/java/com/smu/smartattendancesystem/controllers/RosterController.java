@@ -1,26 +1,34 @@
 package com.smu.smartattendancesystem.controllers;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.smu.smartattendancesystem.dto.FaceDataDTO;
+import com.smu.smartattendancesystem.dto.RosterSummaryDTO;
 import com.smu.smartattendancesystem.models.Roster;
 import com.smu.smartattendancesystem.models.Student;
+import com.smu.smartattendancesystem.models.StudentRoster;
 import com.smu.smartattendancesystem.services.RosterService;
+import com.smu.smartattendancesystem.services.FaceDataService;
 
 @RestController
 @RequestMapping("/api/rosters")
 public class RosterController {
 
     private final RosterService rosterService;
+    private final FaceDataService faceDataService;
 
-    public RosterController(RosterService rosterService) {
+    public RosterController(RosterService rosterService, FaceDataService faceDataService) {
         this.rosterService = rosterService;
+        this.faceDataService = faceDataService;
     }
 
     // Create a new roster
@@ -46,7 +54,18 @@ public class RosterController {
     public ResponseEntity<?> getAllRosters() {
         try {
             List<Roster> rosters = rosterService.getAllRosters();
-            return ResponseEntity.ok(rosters);
+
+            List<RosterSummaryDTO> summaries = rosters.stream()
+                    .map(r -> new RosterSummaryDTO(
+                            r.getId(),
+                            r.getName(),
+                            r.getCreatedAt(),
+                            r.getUpdatedAt(),
+                            (r.getStudentRosters() != null) ? r.getStudentRosters().size() : 0
+                    ))
+                    .toList();
+
+            return ResponseEntity.ok(summaries);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while retrieving rosters"));
@@ -58,7 +77,14 @@ public class RosterController {
     public ResponseEntity<?> getRosterById(@PathVariable Long id) {
         try {
             Roster roster = rosterService.getRosterById(id);
-            return ResponseEntity.ok(roster);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", roster.getId());
+            response.put("name", roster.getName());
+            response.put("createdAt", roster.getCreatedAt());
+            response.put("updatedAt", roster.getUpdatedAt());
+
+            return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Roster not found with ID: " + id));
@@ -88,7 +114,33 @@ public class RosterController {
     public ResponseEntity<?> addStudentToRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
         try {
             Roster updated = rosterService.addStudentToRoster(rosterId, studentId);
-            return ResponseEntity.ok(updated);
+
+            StudentRoster newStudentRoster = updated.getStudentRosters()
+                    .stream()
+                    .filter(sr -> sr.getStudent().getStudentId().equals(studentId))
+                    .findFirst()
+                    .orElseThrow(() -> new NoSuchElementException("Student not found after adding to roster"));
+
+            Student student = newStudentRoster.getStudent();
+
+            // Get latest face data (if available)
+            List<FaceDataDTO> faceList = faceDataService.list(studentId);
+            String latestFaceBase64 = faceList.isEmpty()
+                    ? null
+                    : faceList.get(faceList.size() - 1).getImageBase64();
+
+            // Build response
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", student.getId());
+            response.put("studentId", student.getStudentId());
+            response.put("name", student.getName());
+            response.put("email", student.getEmail());
+            response.put("phone", student.getPhone());
+            response.put("studentClass", student.getClassName());
+            response.put("imageBase64", latestFaceBase64);
+
+            return ResponseEntity.ok(response);
+
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
@@ -96,6 +148,7 @@ public class RosterController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while adding student to roster"));
         }
@@ -135,12 +188,39 @@ public class RosterController {
     @GetMapping("/{rosterId}/students")
     public ResponseEntity<?> getStudentsInRoster(@PathVariable Long rosterId) {
         try {
-            List<Student> students = rosterService.getRosterById(rosterId).getStudents();
-            return ResponseEntity.ok(students);
+            Roster roster = rosterService.getRosterById(rosterId);
+            List<Student> students = roster.getStudents();
+
+            List<Map<String, Object>> response = students.stream().map(student -> {
+                Map<String, Object> studentMap = new LinkedHashMap<>();
+                studentMap.put("id", student.getId());
+                studentMap.put("createdAt", student.getCreatedAt());
+                studentMap.put("updatedAt", student.getUpdatedAt());
+                studentMap.put("studentId", student.getStudentId());
+                studentMap.put("name", student.getName());
+                studentMap.put("email", student.getEmail());
+                studentMap.put("phone", student.getPhone());
+                studentMap.put("studentClass", student.getClassName());
+
+                // Get latest face data (if any)
+                List<FaceDataDTO> faces = faceDataService.list(student.getStudentId());
+                if (!faces.isEmpty()) {
+                    FaceDataDTO latestFace = faces.get(faces.size() - 1);
+                    studentMap.put("imageBase64", latestFace.getImageBase64());
+                } else {
+                    studentMap.put("imageBase64", "");
+                }
+
+                return studentMap;
+            }).collect(Collectors.toList());
+
+            return ResponseEntity.ok(response);
+
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Roster not found with ID: " + rosterId));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while retrieving students in roster"));
         }
@@ -165,7 +245,7 @@ public class RosterController {
         }
     }
 
-    // Helper methods for standardized responses
+    // Helper methods
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> response = new HashMap<>();
         response.put("error", message);

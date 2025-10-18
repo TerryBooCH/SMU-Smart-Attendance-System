@@ -82,4 +82,17 @@ export const rosterService = {
       throw error;
     }
   },
+
+  removeStudentFromRoster: async (rosterId, studentId) => {
+    try {
+      const response = await apiClient.delete(
+        `/api/rosters/${rosterId}/students/${studentId}`
+      );
+      console.log(response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error removing student from roster:", error);
+      throw error;
+    }
+  },
 };

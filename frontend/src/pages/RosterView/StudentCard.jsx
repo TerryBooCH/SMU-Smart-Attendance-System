@@ -1,6 +1,7 @@
 import React from "react";
 import { User, IdCardLanyard, Mail, Phone, GraduationCap } from "lucide-react";
 import ViewStudentDetailsButton from "./ViewStudentDetailsButton";
+import RemoveStudentFromRosterButton from "./RemoveStudentFromRosterButton";
 
 const StudentCard = ({ student, roster, viewMode }) => {
   const isListView = viewMode === "list";
@@ -58,8 +59,12 @@ const StudentCard = ({ student, roster, viewMode }) => {
 
         {/* Actions */}
         <td className="px-6 py-4 whitespace-nowrap">
-          <div className="min-h-[32px]">
+          <div className="min-h-[32px] flex space-x-2">
             <ViewStudentDetailsButton student={student} roster={roster} />
+            <RemoveStudentFromRosterButton
+              student={student}
+              roster={roster}
+            />
           </div>
         </td>
       </tr>
@@ -142,8 +147,12 @@ const StudentCard = ({ student, roster, viewMode }) => {
           </div>
         </div>
 
-        <div className="mt-5 pt-5 border-t border-slate-100 min-h-[40px]">
+        <div className="mt-5 pt-5 border-t border-slate-100 min-h-[40px] flex space-x-2">
           <ViewStudentDetailsButton student={student} roster={roster} />
+          <RemoveStudentFromRosterButton
+              student={student}
+              roster={roster}
+            />
         </div>
       </div>
     </div>

@@ -54,6 +54,7 @@ const AddStudentToRosterForm = ({ roster }) => {
       } catch (error) {
         console.error("Error submitting form:", error);
         setFormErrors({
+          studentId: error.message || "Failed to add student to roster",
           submit: error.message || "Failed to add student to roster",
         });
       } finally {

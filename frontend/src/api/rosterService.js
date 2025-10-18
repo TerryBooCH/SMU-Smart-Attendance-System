@@ -78,8 +78,22 @@ export const rosterService = {
       console.log(response.data);
       return response.data;
     } catch (error) {
-      console.error("Error adding student to roster:", error);
-      throw error;
+      const errorData = error.response?.data || {};
+      const errorMessage =
+        errorData.message ||
+        errorData.error ||
+        error.message ||
+        "Error adding student to roster";
+      const statusCode = error.response?.status || 500;
+
+      console.error(
+        `Error adding student to roster (${statusCode}):`,
+        errorMessage
+      );
+
+      const customError = new Error(errorMessage);
+      customError.statusCode = statusCode;
+      throw customError;
     }
   },
 

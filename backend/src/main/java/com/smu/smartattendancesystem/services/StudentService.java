@@ -98,7 +98,7 @@ public class StudentService {
         }
         Student existingStudent = optStudent.get();
 
-        // Validate inputs (name, email, phone)
+        // Validate inputs (name, email, phone, class)
         if (student.getName() == null || student.getName().isBlank()) {
             throw new IllegalArgumentException("Student name cannot be empty");
         }
@@ -111,6 +111,10 @@ public class StudentService {
             throw new IllegalArgumentException("Student phone cannot be empty");
         }
 
+        if (student.getClassName() == null || student.getClassName().isBlank()) {
+            throw new IllegalArgumentException("Student class name cannot be empty");
+        }
+
         // Ensure email is not used by another student
         Optional<Student> emailOwner = studentManager.getStudentByEmail(student.getEmail());
         if (emailOwner.isPresent() && !emailOwner.get().getId().equals(existingStudent.getId())) {
@@ -121,6 +125,7 @@ public class StudentService {
         existingStudent.setName(student.getName().trim());
         existingStudent.setEmail(student.getEmail().trim());
         existingStudent.setPhone(student.getPhone().trim());
+        existingStudent.setClassName(student.getClassName().trim());
 
         Student savedStudent = studentManager.updateStudent(studentId, existingStudent);
 

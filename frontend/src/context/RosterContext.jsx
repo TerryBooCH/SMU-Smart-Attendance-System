@@ -6,6 +6,7 @@ const RosterContext = createContext();
 export const RosterProvider = ({ children }) => {
   const [rosters, setRosters] = useState([]);
   const [selectedRoster, setSelectedRoster] = useState(null);
+  const [studentsInRoster, setStudentsInRoster] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -43,6 +44,24 @@ export const RosterProvider = ({ children }) => {
     }
   };
 
+  const fetchStudentsInRoster = async (rosterId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await rosterService.getStudentsInRoster(rosterId);
+      const students = response.data || response.students || response || [];
+      setStudentsInRoster(students);
+      return students;
+    } catch (error) {
+      console.error("Error fetching students in roster:", error);
+      setError(error.message || "Failed to fetch students");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const createRoster = async (rosterData) => {
     try {
       setLoading(true);
@@ -74,9 +93,7 @@ export const RosterProvider = ({ children }) => {
       const updatedRoster = response.data || response.roster || response;
 
       setRosters((prev) =>
-        prev.map((roster) =>
-          roster.id === rosterId ? updatedRoster : roster
-        )
+        prev.map((roster) => (roster.id === rosterId ? updatedRoster : roster))
       );
 
       // Update selectedRoster if it's the one being updated
@@ -100,13 +117,16 @@ export const RosterProvider = ({ children }) => {
 
       await rosterService.deleteRosterById(rosterId);
 
-      setRosters((prev) =>
-        prev.filter((roster) => roster.id !== rosterId)
-      );
+      setRosters((prev) => prev.filter((roster) => roster.id !== rosterId));
 
       // Clear selectedRoster if it was deleted
       if (selectedRoster && selectedRoster.id === rosterId) {
         setSelectedRoster(null);
+      }
+
+      // Clear studentsInRoster if the deleted roster was selected
+      if (selectedRoster && selectedRoster.id === rosterId) {
+        setStudentsInRoster([]);
       }
 
       return { status: 200, message: "Roster deleted successfully" };
@@ -118,24 +138,81 @@ export const RosterProvider = ({ children }) => {
     }
   };
 
+  const addStudentToRoster = async (rosterId, studentId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await rosterService.addStudentToRoster(
+        rosterId,
+        studentId
+      );
+      const addedStudent = response.data || response.student || response;
+
+      // Add the student to the local studentsInRoster state
+      setStudentsInRoster((prev) => [...prev, addedStudent]);
+
+      return response;
+    } catch (error) {
+      console.error("Error adding student to roster:", error);
+      setError(error.message || "Failed to add student to roster");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeStudentFromRoster = async (rosterId, studentId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await rosterService.removeStudentFromRoster(
+        rosterId,
+        studentId
+      );
+
+      // Remove the student locally after successful API call
+      setStudentsInRoster((prev) =>
+        prev.filter((student) => student.studentId !== studentId)
+      );
+
+      return response;
+    } catch (error) {
+      console.error("Error removing student from roster:", error);
+      setError(error.message || "Failed to remove student from roster");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearStudentsInRoster = () => {
+    setStudentsInRoster([]);
+  };
+
   const value = {
     rosters,
     selectedRoster,
+    studentsInRoster,
     loading,
     error,
     setRosters,
     setSelectedRoster,
+    setStudentsInRoster,
     fetchAllRosters,
     fetchRosterById,
+    fetchStudentsInRoster,
     createRoster,
     updateRosterById,
     deleteRosterById,
+    addStudentToRoster,
+    removeStudentFromRoster,
+    clearStudentsInRoster,
   };
 
   return (
-    <RosterContext.Provider value={value}>
-      {children}
-    </RosterContext.Provider>
+    <RosterContext.Provider value={value}>{children}</RosterContext.Provider>
   );
 };
 

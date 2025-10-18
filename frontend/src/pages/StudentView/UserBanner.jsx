@@ -1,6 +1,6 @@
 import React from 'react';
 import { getInitials } from '../../utils/stringUtils';
-import { IdCardLanyard, Mail, Phone } from 'lucide-react';
+import { IdCardLanyard, Mail, Phone, GraduationCap } from 'lucide-react'; 
 
 const UserBanner = ({ student }) => {
   const studentName = student?.name || 'John Doe';
@@ -47,32 +47,32 @@ const UserBanner = ({ student }) => {
       <div className="pt-12 text-center">
         <h2 className="text-2xl font-bold text-gray-800">{studentName}</h2>
         <p className="text-gray-500 mt-1">Student Profile</p>
-        
+
         {/* Contact Information */}
-        <div className="flex items-center justify-center gap-8 mt-4 text-sm text-gray-600">
+        <div className="flex flex-wrap items-center justify-center gap-6 mt-4 text-sm text-gray-600">
           {/* Student ID */}
-          {student?.studentId && (
-            <div className="flex items-center gap-1.5">
-              <IdCardLanyard className="w-4 h-4 text-amber-500" />
-              <span>{student.studentId}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5">
+            <IdCardLanyard className="w-4 h-4 text-amber-500" />
+            <span>{student?.studentId?.trim() || "N/A"}</span>
+          </div>
+
+          {/* Class */}
+          <div className="flex items-center gap-1.5">
+            <GraduationCap className="w-4 h-4 text-purple-500" />
+            <span>{student?.className?.trim() || "N/A"}</span>
+          </div>
 
           {/* Email */}
-          {student?.email && (
-            <div className="flex items-center gap-1.5">
-              <Mail className="w-4 h-4 text-blue-500" />
-              <span>{student.email}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5">
+            <Mail className="w-4 h-4 text-blue-500" />
+            <span>{student?.email?.trim() || "N/A"}</span>
+          </div>
 
           {/* Phone */}
-          {student?.phone && (
-            <div className="flex items-center gap-1.5">
-              <Phone className="w-4 h-4 text-green-500" />
-              <span>{student.phone}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5">
+            <Phone className="w-4 h-4 text-green-500" />
+            <span>{student?.phone?.trim() || "N/A"}</span>
+          </div>
         </div>
       </div>
     </div>

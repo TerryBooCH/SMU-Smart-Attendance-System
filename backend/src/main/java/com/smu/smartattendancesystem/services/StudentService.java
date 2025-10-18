@@ -2,6 +2,7 @@ package com.smu.smartattendancesystem.services;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -88,8 +89,54 @@ public class StudentService {
         return savedStudent;
     }
 
-    public Student updateStudent(String studentId, Student updatedStudent) {
-        return studentManager.updateStudent(studentId, updatedStudent);
+    public Student updateStudent(String studentId, Student student) {
+
+        // Validate if student exists
+        Optional<Student> optStudent = studentManager.getStudentByStudentId(studentId);
+        if (optStudent.isEmpty()) {
+            throw new NoSuchElementException("Student not found: " + studentId);
+        }
+        Student existingStudent = optStudent.get();
+
+        // Validate inputs (name, email, phone, class)
+        if (student.getName() == null || student.getName().isBlank()) {
+            throw new IllegalArgumentException("Student name cannot be empty");
+        }
+
+        if (student.getEmail() == null || student.getEmail().isBlank()) {
+            throw new IllegalArgumentException("Student email cannot be empty");
+        }
+
+        if (student.getPhone() == null || student.getPhone().isBlank()) {
+            throw new IllegalArgumentException("Student phone cannot be empty");
+        }
+
+        if (student.getClassName() == null || student.getClassName().isBlank()) {
+            throw new IllegalArgumentException("Student class name cannot be empty");
+        }
+
+        // Ensure email is not used by another student
+        Optional<Student> emailOwner = studentManager.getStudentByEmail(student.getEmail());
+        if (emailOwner.isPresent() && !emailOwner.get().getId().equals(existingStudent.getId())) {
+            throw new IllegalStateException("Student with this email already exists");
+        }
+
+        // Apply updates to student
+        existingStudent.setName(student.getName().trim());
+        existingStudent.setEmail(student.getEmail().trim());
+        existingStudent.setPhone(student.getPhone().trim());
+        existingStudent.setClassName(student.getClassName().trim());
+
+        Student savedStudent = studentManager.updateStudent(studentId, existingStudent);
+
+        // Sync new username and email to linked user account
+        User user = savedStudent.getUser();
+        user.setName(savedStudent.getName());
+        user.setEmail(savedStudent.getEmail());
+
+        userManager.updateUser(user);
+
+        return savedStudent;
     }
 
     public void deleteStudent(String studentId) {
@@ -130,6 +177,20 @@ public class StudentService {
             StudentWithFaceDTO dto = StudentWithFaceDTO.from(s, face);
 
             results.add(dto);
+        }
+
+        return results;
+    }
+
+    // Get all students in a class (with face data)
+    @Transactional(readOnly = true)
+    public List<StudentWithFaceDTO> getStudentsByClassName(String className) {
+        List<Student> students = studentManager.getStudentsByClassName(className);
+        List<StudentWithFaceDTO> results = new ArrayList<>();
+
+        for (Student s : students) {
+            FaceDataDTO face = faceDataService.getLatestFaceData(s.getStudentId()).orElse(null);
+            results.add(StudentWithFaceDTO.from(s, face));
         }
 
         return results;

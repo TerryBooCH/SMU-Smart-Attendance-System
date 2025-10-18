@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState } from "react";
 import { validateUpdateStudentForm } from "../../utils/validateForm";
 import useStudent from "../../hooks/useStudent";
 import { useToast } from "../../hooks/useToast";
@@ -7,11 +7,14 @@ import { CircleAlert } from "lucide-react";
 const UpdateStudentDetailsForm = ({ student }) => {
   const { success, errror } = useToast();
   const { updateStudentByStudentId } = useStudent();
+
   const [formValues, setFormValues] = useState({
     name: student?.name || "",
     email: student?.email || "",
     phone: student?.phone || "",
+    className: student?.className || "",
   });
+
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -20,6 +23,7 @@ const UpdateStudentDetailsForm = ({ student }) => {
       name: student?.name || "",
       email: student?.email || "",
       phone: student?.phone || "",
+      className: student?.className || "",
     });
     setFormErrors({});
   };
@@ -28,23 +32,20 @@ const UpdateStudentDetailsForm = ({ student }) => {
     return (
       formValues.name !== (student?.name || "") ||
       formValues.email !== (student?.email || "") ||
-      formValues.phone !== (student?.phone || "")
+      formValues.phone !== (student?.phone || "") ||
+      formValues.className !== (student?.className || "")
     );
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const updatedValues = {
-      ...formValues,
+    setFormValues((prev) => ({
+      ...prev,
       [name]: value,
-    };
-    setFormValues(updatedValues);
+    }));
 
     if (formErrors[name]) {
-      setFormErrors({
-        ...formErrors,
-        [name]: null,
-      });
+      setFormErrors({ ...formErrors, [name]: null });
     }
   };
 
@@ -54,7 +55,8 @@ const UpdateStudentDetailsForm = ({ student }) => {
     const trimmedValues = {
       name: formValues.name.trim(),
       email: formValues.email.trim(),
-      phone: formValues.phone.trim(),
+      phone: formValues.phone.trim() || "",
+      className: formValues.className.trim(),
     };
 
     const errors = validateUpdateStudentForm(trimmedValues);
@@ -65,11 +67,19 @@ const UpdateStudentDetailsForm = ({ student }) => {
         setIsSubmitting(true);
         await updateStudentByStudentId(student.studentId, trimmedValues);
         success("Student updated successfully");
-      } catch (error) {
-        console.error("Error submitting form:", error);
-        setFormErrors({
-          submit: error.message || "Failed to update student",
-        });
+      } catch (err) {
+        if (err.statusCode === 409 || err.response?.statusCode === 409) {
+          console.error("Error submitting form:", err);
+          setFormErrors({
+            email: err.message || "A student with this email already exists.",
+            submit: err.message || "Failed to update student",
+          });
+        } else {
+          console.error("Error submitting form:", err);
+          setFormErrors({
+            submit: err.message || "Failed to update student",
+          });
+        }
       } finally {
         setIsSubmitting(false);
       }
@@ -98,7 +108,7 @@ const UpdateStudentDetailsForm = ({ student }) => {
 
           {/* Input fields */}
           <div className="flex flex-col gap-5">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
               {/* Name */}
               <div>
                 <label
@@ -133,7 +143,7 @@ const UpdateStudentDetailsForm = ({ student }) => {
                   htmlFor="email"
                   className="block mb-2 text-sm font-medium text-gray-700 font-lexend"
                 >
-                  Email <span className="text-gray-500">(optional)</span>
+                  Email
                 </label>
                 <input
                   type="email"
@@ -141,6 +151,7 @@ const UpdateStudentDetailsForm = ({ student }) => {
                   name="email"
                   value={formValues.email}
                   onChange={handleChange}
+                  required 
                   disabled={isSubmitting}
                   placeholder="student@example.com"
                   className={`font-lexend w-full px-4 py-2.5 border text-sm rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
@@ -150,6 +161,33 @@ const UpdateStudentDetailsForm = ({ student }) => {
                 {formErrors.email && (
                   <p className="mt-2 text-sm text-red-600 font-lexend">
                     {formErrors.email}
+                  </p>
+                )}
+              </div>
+
+              {/* Class */}
+              <div>
+                <label
+                  htmlFor="className"
+                  className="block mb-2 text-sm font-medium text-gray-700 font-lexend"
+                >
+                  Class
+                </label>
+                <input
+                  type="text"
+                  id="className"
+                  name="className"
+                  value={formValues.className}
+                  onChange={handleChange}
+                  disabled={isSubmitting}
+                  placeholder="e.g., AB123"
+                  className={`font-lexend w-full px-4 py-2.5 border text-sm rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
+                    formErrors.className ? "border-red-500" : "border-[#d4d4d4]"
+                  } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+                />
+                {formErrors.className && (
+                  <p className="mt-2 text-sm text-red-600 font-lexend">
+                    {formErrors.className}
                   </p>
                 )}
               </div>
@@ -169,7 +207,7 @@ const UpdateStudentDetailsForm = ({ student }) => {
                   value={formValues.phone}
                   onChange={handleChange}
                   disabled={isSubmitting}
-                  placeholder="+65 1234 5678"
+                  placeholder="12345678"
                   className={`font-lexend w-full px-4 py-2.5 border text-sm rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${
                     formErrors.phone ? "border-red-500" : "border-[#d4d4d4]"
                   } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}

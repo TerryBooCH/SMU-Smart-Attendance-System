@@ -41,6 +41,9 @@ public class StudentController {
     @PostMapping
     public ResponseEntity<?> addStudent(@RequestBody Student student) {
         try {
+            // Log for debugging
+            System.out.println("=== Creating Student: " + student.getStudentId() + " | Class: " + student.getClassName() + " ===");
+
             Student createdStudent = studentService.createStudent(student);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(createdStudent);
@@ -48,12 +51,9 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalStateException e) {
-            // Determine whether the conflict is due to studentId or email, and include it
-            // in the field
             String msg = e.getMessage();
             String field = null;
 
-            // Based on the error message content in the service
             if (msg.contains("email")) {
                 field = "email";
             } else if (msg.contains("ID")) {
@@ -63,6 +63,7 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage(), field));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while creating student"));
         }
@@ -88,34 +89,39 @@ public class StudentController {
 
     // UPDATE by studentId
     @PutMapping("/{studentId}")
-    public Student updateStudent(@PathVariable String studentId, @RequestBody Student student) {
-        System.out.println("=== UPDATE Student Called with ID: " + studentId + " ===");
-        Optional<Student> existingStudentOpt = studentService.getStudentByStudentId(studentId);
-
-        if (existingStudentOpt.isEmpty()) {
-            throw new RuntimeException("Student not found with ID: " + studentId);
+    public ResponseEntity<?> updateStudent(@PathVariable String studentId,
+            @RequestBody Student student) {
+        try {
+            Student updated = studentService.updateStudent(studentId, student);
+            return ResponseEntity.ok(updated);
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while updating the student"));
         }
-
-        Student existingStudent = existingStudentOpt.get();
-        existingStudent.setName(student.getName());
-        existingStudent.setEmail(student.getEmail());
-        existingStudent.setPhone(student.getPhone());
-
-        return studentService.updateStudent(studentId, existingStudent);
     }
 
     // DELETE by studentId
     @DeleteMapping("/{studentId}")
-    public String deleteStudent(@PathVariable String studentId) {
+    public ResponseEntity<?> deleteStudent(@PathVariable String studentId) {
         System.out.println("=== DELETE Student Called with ID: " + studentId + " ===");
         Optional<Student> student = studentService.getStudentByStudentId(studentId);
 
         if (student.isEmpty()) {
-            throw new RuntimeException("Student not found with ID: " + studentId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse("Student not found with ID: " + studentId));
         }
 
         studentService.deleteStudent(student.get().getStudentId());
-        return "Student deleted successfully";
+        return ResponseEntity.ok(Map.of("message", "Student deleted successfully"));
     }
 
     // READ face data for a student
@@ -139,7 +145,6 @@ public class StudentController {
         try {
             var dtos = faceDataService.uploadImages(studentId, files);
 
-            // Custom response
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("message", "Face data uploaded successfully");
             response.put("status", "success");
@@ -153,6 +158,7 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while uploading face data"));
         }
@@ -173,8 +179,8 @@ public class StudentController {
         }
     }
 
-    // READ students by name, with one face data if available
-    @GetMapping(params = "name") // /api/students?name=abc
+    // READ students by name (for search bar)
+    @GetMapping(params = "name")
     public ResponseEntity<?> searchStudentsByName(@RequestParam("name") String name) {
         try {
             List<StudentWithFaceDTO> results = studentService.searchStudentsWithOneFace(name);
@@ -187,5 +193,4 @@ public class StudentController {
                     .body(createErrorResponse("An error occurred while searching for students"));
         }
     }
-
 }

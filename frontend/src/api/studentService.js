@@ -69,8 +69,19 @@ export const studentService = {
       console.log(response);
       return response;
     } catch (error) {
-      console.error("Error updating student:", error);
-      throw error;
+      const errorData = error.response?.data || {};
+      const errorMessage =
+        errorData.message ||
+        errorData.error ||
+        error.message ||
+        "Error updating student";
+      const statusCode = error.response?.status || 500;
+
+      console.error(`Error updating student (${statusCode}):`, errorMessage);
+
+      const customError = new Error(errorMessage);
+      customError.statusCode = statusCode;
+      throw customError;
     }
   },
 

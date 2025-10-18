@@ -24,6 +24,7 @@ public class User extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", referencedColumnName = "id")
+    @JsonIgnore
     private Student student;
 
     // ─────────────────────────────────────────────

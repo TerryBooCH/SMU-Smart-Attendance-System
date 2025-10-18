@@ -16,14 +16,14 @@ export const validateSignInForm = (values) => {
 export const validateCreateStudentForm = (values) => {
   const errors = {};
 
-  // Validate Student ID
+  // Validate Student ID (1 uppercase letter + 7 digits)
   if (!values.studentId || !values.studentId.trim()) {
     errors.studentId = "Student ID is required";
   } else {
-    const studentIdRegex = /^[A-Za-z]\d{7}$/;
+    const studentIdRegex = /^[A-Z]\d{7}$/; // uppercase only
     if (!studentIdRegex.test(values.studentId.trim())) {
       errors.studentId =
-        "Student ID must start with a letter followed by 7 numbers (e.g., S1234567)";
+        "Student ID must start with a capital letter followed by 7 numbers (e.g., S1234567)";
     }
   }
 
@@ -32,6 +32,17 @@ export const validateCreateStudentForm = (values) => {
     errors.name = "Name is required";
   } else if (values.name.trim().length < 2) {
     errors.name = "Name must be at least 2 characters";
+  }
+
+  // Validate Class (2 letters + 3 digits)
+  if (!values.className || !values.className.trim()) {
+    errors.className = "Class is required";
+  } else {
+    const classRegex = /^[A-Za-z]{2}\d{3}$/;
+    if (!classRegex.test(values.className.trim())) {
+      errors.className =
+        "Class must start with 2 letters followed by 3 numbers (e.g., AB123)";
+    }
   }
 
   // Validate Email (optional, but must be valid if provided)
@@ -45,7 +56,6 @@ export const validateCreateStudentForm = (values) => {
   // Validate Phone (optional, but must be exactly 8 digits if provided)
   if (values.phone && values.phone.trim()) {
     const phoneValue = values.phone.trim();
-    // Check if phone contains only digits
     if (!/^\d+$/.test(phoneValue)) {
       errors.phone = "Phone number must contain only numbers";
     } else if (phoneValue.length !== 8) {
@@ -115,4 +125,3 @@ export const validateAddStudentToRosterForm = (values) => {
 
   return errors;
 };
-

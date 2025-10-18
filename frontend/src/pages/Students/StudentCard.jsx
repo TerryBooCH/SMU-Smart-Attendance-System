@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, User } from "lucide-react";
-import { formatDate } from "../../utils/dateUtils";
 import { getInitials } from "../../utils/stringUtils";
 import DeleteStudentButton from "../../components/DeleteStudentButton";
 import UpdateStudentButton from "../../components/UpdateStudentButton";
@@ -33,26 +32,34 @@ const StudentCard = ({ student }) => {
         </div>
       </td>
 
+      {/* Name */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm font-medium text-gray-900">
           {student.name || "N/A"}
         </div>
       </td>
 
+      {/* Email */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900">{student.email || "N/A"}</div>
       </td>
 
+      {/* Student ID */}
       <td className="px-6 py-4 whitespace-nowrap">
-        <div className="text-sm text-gray-900">
-          {student.studentId || "N/A"}
-        </div>
+        <div className="text-sm text-gray-900">{student.studentId || "N/A"}</div>
       </td>
 
+      {/* Class */}
+      <td className="px-6 py-4 whitespace-nowrap">
+        <div className="text-sm text-gray-900">{student.className || "N/A"}</div>
+      </td>
+
+      {/* Phone */}
       <td className="px-6 py-4 whitespace-nowrap">
         <div className="text-sm text-gray-900">{student.phone || "N/A"}</div>
       </td>
 
+      {/* Actions */}
       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
         <div className="flex space-x-2">
           <button

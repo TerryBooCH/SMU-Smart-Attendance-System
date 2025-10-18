@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState } from "react";
 import { validateCreateStudentForm } from "../../utils/validateForm";
 import { useModal } from "../../context/ModalContext";
 import { useToast } from "../../hooks/useToast";
@@ -7,13 +7,14 @@ import { CircleAlert } from "lucide-react";
 
 const CreateStudentForm = () => {
   const { closeModal } = useModal();
-  const { success, errror } = useToast();
+  const { success, error } = useToast();
   const { createStudent } = useStudent();
   const [formValues, setFormValues] = useState({
     studentId: "",
     name: "",
     email: "",
     phone: "",
+    className: "", // ✅ added
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,7 +28,6 @@ const CreateStudentForm = () => {
 
     setFormValues(updatedValues);
 
-    // Clear error for this field when user starts typing
     if (formErrors[name]) {
       setFormErrors({
         ...formErrors,
@@ -39,15 +39,14 @@ const CreateStudentForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Trim all form values before validation
     const trimmedValues = {
       studentId: formValues.studentId.trim(),
       name: formValues.name.trim(),
       email: formValues.email.trim(),
       phone: formValues.phone.trim(),
+      className: formValues.className.trim(), 
     };
 
-    // Validate form with trimmed values
     const errors = validateCreateStudentForm(trimmedValues);
     setFormErrors(errors);
 
@@ -57,19 +56,18 @@ const CreateStudentForm = () => {
         await createStudent(trimmedValues);
         success("Student created successfully");
         closeModal();
-      } catch (error) {
-        console.error("Error submitting form:", error);
+      } catch (err) {
+        console.error("Error submitting form:", err);
+        const errorMessage = err.message || "Failed to create student";
 
-        const errorMessage = error.message || "Failed to create student";
-
-        if (error.statusCode === 409) {
-          if (error.field === "email") {
+        if (err.statusCode === 409) {
+          if (err.field === "email") {
             setFormErrors({
               email:
                 "A student with this email already exists. Please use a different email.",
               submit: "A student with this email already exists.",
             });
-          } else if (error.field === "studentId") {
+          } else if (err.field === "studentId") {
             setFormErrors({
               studentId:
                 "A student with this ID already exists. Please use a different Student ID.",
@@ -77,9 +75,7 @@ const CreateStudentForm = () => {
             });
           }
         } else {
-          setFormErrors({
-            submit: errorMessage,
-          });
+          setFormErrors({ submit: errorMessage });
         }
       } finally {
         setIsSubmitting(false);
@@ -98,7 +94,9 @@ const CreateStudentForm = () => {
             </p>
           </div>
         )}
+
         <div className="mb-5">
+          {/* Student ID */}
           <div className="w-full mb-4">
             <label
               htmlFor="studentId"
@@ -126,6 +124,7 @@ const CreateStudentForm = () => {
             )}
           </div>
 
+          {/* Name */}
           <div className="w-full mb-4">
             <label
               htmlFor="name"
@@ -153,12 +152,13 @@ const CreateStudentForm = () => {
             )}
           </div>
 
+          {/* Email */}
           <div className="w-full mb-4">
             <label
               htmlFor="email"
               className="block mb-2 text-sm text-gray-900 font-lexend"
             >
-              Email <span className="text-gray-500"></span>
+              Email
             </label>
             <input
               type="email"
@@ -179,6 +179,33 @@ const CreateStudentForm = () => {
             )}
           </div>
 
+          <div className="w-full mb-4">
+            <label
+              htmlFor="className"
+              className="block mb-2 text-sm text-gray-900 font-lexend"
+            >
+              Class
+            </label>
+            <input
+              type="text"
+              id="className"
+              name="className"
+              value={formValues.className}
+              onChange={handleChange}
+              disabled={isSubmitting}
+              className={`font-lexend bg-white border border-[#cecece] text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
+                formErrors.className ? "border-red-500" : "border-gray-300"
+              } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+              placeholder="e.g., CS102"
+            />
+            {formErrors.className && (
+              <p className="mt-2 text-sm text-red-600 font-lexend">
+                {formErrors.className}
+              </p>
+            )}
+          </div>
+
+          {/* Phone */}
           <div className="w-full">
             <label
               htmlFor="phone"
@@ -206,16 +233,17 @@ const CreateStudentForm = () => {
           </div>
         </div>
 
+        {/* Buttons */}
         <div className="flex items-center justify-end">
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
+              onClick={closeModal}
+              disabled={isSubmitting}
               className="px-4 py-2 text-sm rounded-xl border border-gray-300 text-gray-700 cursor-pointer
                       hover:bg-gray-100 active:scale-[0.98] 
                       transition-all duration-200 disabled:opacity-50 
                       disabled:cursor-not-allowed font-medium"
-              onClick={closeModal}
-              disabled={isSubmitting}
             >
               Cancel
             </button>

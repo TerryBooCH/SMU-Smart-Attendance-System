@@ -41,6 +41,11 @@ public class StudentManager {
         return studentRepo.findByNameContainingIgnoreCase(name);
     }
 
+    // Get all students in a specific class
+    public List<Student> getStudentsByClassName(String className) {
+        return studentRepo.findByClassNameIgnoreCase(className);
+    }
+
     // UPDATE: Update existing student
     public Student updateStudent(String studentId, Student student) {
         return studentRepo.save(student);

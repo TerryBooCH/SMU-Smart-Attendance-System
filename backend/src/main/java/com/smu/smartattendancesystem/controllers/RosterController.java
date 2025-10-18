@@ -55,7 +55,6 @@ public class RosterController {
         try {
             List<Roster> rosters = rosterService.getAllRosters();
 
-            // Convert to summary DTOs
             List<RosterSummaryDTO> summaries = rosters.stream()
                     .map(r -> new RosterSummaryDTO(
                             r.getId(),
@@ -79,7 +78,6 @@ public class RosterController {
         try {
             Roster roster = rosterService.getRosterById(id);
 
-            // Only include essential details
             Map<String, Object> response = new HashMap<>();
             response.put("id", roster.getId());
             response.put("name", roster.getName());
@@ -87,7 +85,6 @@ public class RosterController {
             response.put("updatedAt", roster.getUpdatedAt());
 
             return ResponseEntity.ok(response);
-
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Roster not found with ID: " + id));
@@ -118,7 +115,6 @@ public class RosterController {
         try {
             Roster updated = rosterService.addStudentToRoster(rosterId, studentId);
 
-            // Find the student that was just added
             StudentRoster newStudentRoster = updated.getStudentRosters()
                     .stream()
                     .filter(sr -> sr.getStudent().getStudentId().equals(studentId))
@@ -140,6 +136,7 @@ public class RosterController {
             response.put("name", student.getName());
             response.put("email", student.getEmail());
             response.put("phone", student.getPhone());
+            response.put("studentClass", student.getClassName());
             response.put("imageBase64", latestFaceBase64);
 
             return ResponseEntity.ok(response);
@@ -151,6 +148,7 @@ public class RosterController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while adding student to roster"));
         }
@@ -193,7 +191,6 @@ public class RosterController {
             Roster roster = rosterService.getRosterById(rosterId);
             List<Student> students = roster.getStudents();
 
-            // Convert to DTOs with latest face data
             List<Map<String, Object>> response = students.stream().map(student -> {
                 Map<String, Object> studentMap = new LinkedHashMap<>();
                 studentMap.put("id", student.getId());
@@ -203,11 +200,12 @@ public class RosterController {
                 studentMap.put("name", student.getName());
                 studentMap.put("email", student.getEmail());
                 studentMap.put("phone", student.getPhone());
+                studentMap.put("studentClass", student.getClassName());
 
                 // Get latest face data (if any)
                 List<FaceDataDTO> faces = faceDataService.list(student.getStudentId());
                 if (!faces.isEmpty()) {
-                    FaceDataDTO latestFace = faces.get(faces.size() - 1); // last added
+                    FaceDataDTO latestFace = faces.get(faces.size() - 1);
                     studentMap.put("imageBase64", latestFace.getImageBase64());
                 } else {
                     studentMap.put("imageBase64", "");
@@ -222,6 +220,7 @@ public class RosterController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Roster not found with ID: " + rosterId));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while retrieving students in roster"));
         }
@@ -246,7 +245,7 @@ public class RosterController {
         }
     }
 
-    // Helper methods for standardized responses
+    // Helper methods
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> response = new HashMap<>();
         response.put("error", message);

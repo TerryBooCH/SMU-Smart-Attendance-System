@@ -93,6 +93,14 @@ public class Student extends BaseEntity {
         this.faceDataList = faceDataList;
     }
 
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
     public String getClassName() {
         return className;
     }
@@ -100,4 +108,5 @@ public class Student extends BaseEntity {
     public void setClassName(String className) {
         this.className = className;
     }
+
 }

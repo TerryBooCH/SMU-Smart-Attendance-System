@@ -89,23 +89,24 @@ public class StudentController {
 
     // UPDATE by studentId
     @PutMapping("/{studentId}")
-    public ResponseEntity<?> updateStudent(@PathVariable String studentId, @RequestBody Student student) {
-        System.out.println("=== UPDATE Student Called with ID: " + studentId + " ===");
-        Optional<Student> existingStudentOpt = studentService.getStudentByStudentId(studentId);
-
-        if (existingStudentOpt.isEmpty()) {
+    public ResponseEntity<?> updateStudent(@PathVariable String studentId,
+            @RequestBody Student student) {
+        try {
+            Student updated = studentService.updateStudent(studentId, student);
+            return ResponseEntity.ok(updated);
+        } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(createErrorResponse("Student not found with ID: " + studentId));
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while updating the student"));
         }
-
-        Student existingStudent = existingStudentOpt.get();
-        existingStudent.setName(student.getName());
-        existingStudent.setEmail(student.getEmail());
-        existingStudent.setPhone(student.getPhone());
-        existingStudent.setClassName(student.getClassName()); // ✅ handle new field
-
-        Student updatedStudent = studentService.updateStudent(studentId, existingStudent);
-        return ResponseEntity.ok(updatedStudent);
     }
 
     // DELETE by studentId

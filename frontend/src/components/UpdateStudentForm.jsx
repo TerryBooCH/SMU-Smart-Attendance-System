@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect, useContext } from "react";
+import React, { useState } from "react";
+import { CircleAlert } from "lucide-react";
 import { validateUpdateStudentForm } from "../utils/validateForm";
 import { useModal } from "../context/ModalContext";
 import { useToast } from "../hooks/useToast";
@@ -6,13 +7,16 @@ import useStudent from "../hooks/useStudent";
 
 const UpdateStudentForm = ({ student }) => {
   const { closeModal } = useModal();
-  const { success, errror } = useToast();
+  const { success, error } = useToast();
   const { updateStudentByStudentId } = useStudent();
+
   const [formValues, setFormValues] = useState({
     name: student?.name || "",
     email: student?.email || "",
     phone: student?.phone || "",
+    className: student?.className || "",
   });
+
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -21,39 +25,34 @@ const UpdateStudentForm = ({ student }) => {
     return (
       formValues.name !== (student?.name || "") ||
       formValues.email !== (student?.email || "") ||
-      formValues.phone !== (student?.phone || "")
+      formValues.phone !== (student?.phone || "") ||
+      formValues.className !== (student?.className || "")
     );
   };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    const updatedValues = {
-      ...formValues,
+    setFormValues((prev) => ({
+      ...prev,
       [name]: value,
-    };
+    }));
 
-    setFormValues(updatedValues);
-
-    // Clear error for this field when user starts typing
     if (formErrors[name]) {
-      setFormErrors({
-        ...formErrors,
-        [name]: null,
-      });
+      setFormErrors((prev) => ({ ...prev, [name]: null }));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Trim all form values before validation
+    // ✅ Always include all fields, even empty
     const trimmedValues = {
       name: formValues.name.trim(),
       email: formValues.email.trim(),
-      phone: formValues.phone.trim(),
+      phone: formValues.phone.trim() || "",
+      className: formValues.className.trim(),
     };
 
-    // Validate form with trimmed values
     const errors = validateUpdateStudentForm(trimmedValues);
     setFormErrors(errors);
 
@@ -63,11 +62,19 @@ const UpdateStudentForm = ({ student }) => {
         await updateStudentByStudentId(student.studentId, trimmedValues);
         success("Student updated successfully");
         closeModal();
-      } catch (error) {
-        console.error("Error submitting form:", error);
-        setFormErrors({
-          submit: error.message || "Failed to update student",
-        });
+      } catch (err) {
+        if (err.statusCode === 409 || err.response?.statusCode === 409) {
+          console.error("Error submitting form:", err);
+          setFormErrors({
+            email: err.message || "A student with this email already exists.",
+            submit: err.message || "Failed to update student",
+          });
+        } else {
+          console.error("Error submitting form:", err);
+          setFormErrors({
+            submit: err.message || "Failed to update student",
+          });
+        }
       } finally {
         setIsSubmitting(false);
       }
@@ -77,15 +84,18 @@ const UpdateStudentForm = ({ student }) => {
   return (
     <div>
       <form className="w-full" onSubmit={handleSubmit}>
+        {/* Error banner */}
         {formErrors.submit && (
           <div className="mb-5 border-red-400 bg-red-50 border rounded-md p-4 flex items-center justify-center py-6 gap-3">
             <CircleAlert size={20} color="red" strokeWidth={1.4} />
-            <p className=" text-sm text-red-600 font-lexend">
+            <p className="text-sm text-red-600 font-lexend">
               {formErrors.submit}
             </p>
           </div>
         )}
+
         <div className="mb-5">
+          {/* Name */}
           <div className="w-full mb-4">
             <label
               htmlFor="name"
@@ -113,12 +123,13 @@ const UpdateStudentForm = ({ student }) => {
             )}
           </div>
 
+          {/* Email (✅ now required) */}
           <div className="w-full mb-4">
             <label
               htmlFor="email"
               className="block mb-2 text-sm text-gray-900 font-lexend"
             >
-              Email <span className="text-gray-500">(optional)</span>
+              Email
             </label>
             <input
               type="email"
@@ -126,6 +137,7 @@ const UpdateStudentForm = ({ student }) => {
               name="email"
               value={formValues.email}
               onChange={handleChange}
+              required
               disabled={isSubmitting}
               className={`font-lexend bg-white border border-[#cecece] text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
                 formErrors.email ? "border-red-500" : "border-gray-300"
@@ -139,6 +151,35 @@ const UpdateStudentForm = ({ student }) => {
             )}
           </div>
 
+          {/* Class */}
+          <div className="w-full mb-4">
+            <label
+              htmlFor="className"
+              className="block mb-2 text-sm text-gray-900 font-lexend"
+            >
+              Class
+            </label>
+            <input
+              type="text"
+              id="className"
+              name="className"
+              value={formValues.className}
+              onChange={handleChange}
+              required
+              disabled={isSubmitting}
+              placeholder="e.g., AB123"
+              className={`font-lexend bg-white border border-[#cecece] text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
+                formErrors.className ? "border-red-500" : "border-gray-300"
+              } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+            />
+            {formErrors.className && (
+              <p className="mt-2 text-sm text-red-600 font-lexend">
+                {formErrors.className}
+              </p>
+            )}
+          </div>
+
+          {/* Phone (optional, but always included in payload) */}
           <div className="w-full">
             <label
               htmlFor="phone"
@@ -153,10 +194,10 @@ const UpdateStudentForm = ({ student }) => {
               value={formValues.phone}
               onChange={handleChange}
               disabled={isSubmitting}
+              placeholder="12345678"
               className={`font-lexend bg-white border border-[#cecece] text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
                 formErrors.phone ? "border-red-500" : "border-gray-300"
               } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
-              placeholder="+65 1234 5678"
             />
             {formErrors.phone && (
               <p className="mt-2 text-sm text-red-600 font-lexend">
@@ -166,6 +207,7 @@ const UpdateStudentForm = ({ student }) => {
           </div>
         </div>
 
+        {/* Footer buttons */}
         <div className="flex items-center justify-end">
           <div className="flex items-center justify-between gap-3">
             <button

@@ -78,6 +78,10 @@ const RosterStudentsContainer = ({ roster, students = [] }) => {
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
                         Phone
                       </th>
+                      {/* ✅ New Class Column */}
+                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                        Class
+                      </th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-24">
                         Actions
                       </th>

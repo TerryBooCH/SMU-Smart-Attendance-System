@@ -14,7 +14,7 @@ const CreateStudentForm = () => {
     name: "",
     email: "",
     phone: "",
-    className: "", // ✅ added
+    className: "", 
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);

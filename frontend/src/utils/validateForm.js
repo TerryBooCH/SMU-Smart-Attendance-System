@@ -34,7 +34,7 @@ export const validateCreateStudentForm = (values) => {
     errors.name = "Name must be at least 2 characters";
   }
 
-  // Validate Class (2 letters + 3 digits)
+  // ✅ Validate Class (2 letters + 3 digits)
   if (!values.className || !values.className.trim()) {
     errors.className = "Class is required";
   } else {
@@ -45,15 +45,16 @@ export const validateCreateStudentForm = (values) => {
     }
   }
 
-  // Validate Email (optional, but must be valid if provided)
-  if (values.email && values.email.trim()) {
+  if (!values.email || !values.email.trim()) {
+    errors.email = "Email is required";
+  } else {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(values.email.trim())) {
-      errors.email = "Email is invalid";
+      errors.email = "Enter a valid email address";
     }
   }
 
-  // Validate Phone (optional, but must be exactly 8 digits if provided)
+  // Validate Phone (optional, must be exactly 8 digits if provided)
   if (values.phone && values.phone.trim()) {
     const phoneValue = values.phone.trim();
     if (!/^\d+$/.test(phoneValue)) {
@@ -66,28 +67,41 @@ export const validateCreateStudentForm = (values) => {
   return errors;
 };
 
+
 export const validateUpdateStudentForm = (values) => {
   const errors = {};
 
-  // Validate Name
+  // Name (required)
   if (!values.name || !values.name.trim()) {
     errors.name = "Name is required";
   } else if (values.name.trim().length < 2) {
     errors.name = "Name must be at least 2 characters";
   }
 
-  // Validate Email
-  if (values.email && values.email.trim()) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(values.email.trim())) {
-      errors.email = "Email is invalid";
+  // Class (required)
+  if (!values.className || !values.className.trim()) {
+    errors.className = "Class is required";
+  } else {
+    const classRegex = /^[A-Za-z]{2}\d{3}$/;
+    if (!classRegex.test(values.className.trim())) {
+      errors.className =
+        "Class must start with 2 letters followed by 3 numbers (e.g., AB123)";
     }
   }
 
-  // Validate Phone
+  // Email (now required)
+  if (!values.email || !values.email.trim()) {
+    errors.email = "Email is required";
+  } else {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(values.email.trim())) {
+      errors.email = "Enter a valid email address";
+    }
+  }
+
+  // Phone (optional but must be 8 digits if provided)
   if (values.phone && values.phone.trim()) {
     const phoneValue = values.phone.trim();
-    // Check if phone contains only digits
     if (!/^\d+$/.test(phoneValue)) {
       errors.phone = "Phone number must contain only numbers";
     } else if (phoneValue.length !== 8) {
@@ -97,6 +111,8 @@ export const validateUpdateStudentForm = (values) => {
 
   return errors;
 };
+
+
 
 export const validateCreateRosterForm = (values) => {
   const errors = {};

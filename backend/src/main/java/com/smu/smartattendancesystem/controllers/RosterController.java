@@ -142,15 +142,27 @@ public class RosterController {
             return ResponseEntity.ok(response);
 
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(createErrorResponse(e.getMessage()));
+            String msg = e.getMessage().toLowerCase();
+
+            if (msg.contains("roster")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(createErrorResponse("Roster not found with ID: " + rosterId));
+            } else if (msg.contains("student")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(createErrorResponse("Student not found with ID: " + studentId));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(createErrorResponse("Resource not found: " + e.getMessage()));
+            }
+
         } catch (IllegalStateException e) {
+            // Likely means student already in roster
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(createErrorResponse(e.getMessage()));
+                    .body(createErrorResponse("Student with ID " + studentId + " is already in this roster"));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while adding student to roster"));
+                    .body(createErrorResponse("An unexpected error occurred while adding student to roster"));
         }
     }
 
@@ -232,7 +244,15 @@ public class RosterController {
         try {
             String newName = request.get("name");
             Roster updated = rosterService.updateRosterName(id, newName);
-            return ResponseEntity.ok(updated);
+
+            // Build the same style response as getRosterById
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", updated.getId());
+            response.put("name", updated.getName());
+            response.put("createdAt", updated.getCreatedAt());
+            response.put("updatedAt", updated.getUpdatedAt());
+
+            return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Roster not found with ID: " + id));

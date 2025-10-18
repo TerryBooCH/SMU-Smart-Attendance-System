@@ -128,11 +128,17 @@ public class StudentService {
         // Phone is optional, so only if its provided, then check if its in a valid
         // format
         String phone = student.getPhone();
-        if (phone != null && !phone.isBlank()) {
-            if (!phone.matches("^\\d{8}$")) {
-                throw new IllegalArgumentException("Phone number must be exactly 8 digits (e.g., 81234567)");
-            } 
-            existingStudent.setPhone(phone.trim());
+        if (phone != null) {
+            if (phone.isBlank()) {
+                // If an empty string is provided, treat it as null
+                existingStudent.setPhone(null);
+            } else {
+                // Validate format (must be exactly 8 digits)
+                if (!phone.matches("^\\d{8}$")) {
+                    throw new IllegalArgumentException("Phone number must be exactly 8 digits (e.g., 81234567)");
+                }
+                existingStudent.setPhone(phone.trim());
+            }
         }
 
         // Ensure email is not used by another student

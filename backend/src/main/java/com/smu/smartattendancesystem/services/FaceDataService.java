@@ -118,6 +118,16 @@ public class FaceDataService {
         return optFaceData.map(fd -> FaceDataDTO.fromEntity(fd, storage));
     }
 
+    // Delete all face data belonging to the student
+    public void deleteAllImagesByStudentId(String studentId) {
+        validateStudent(studentId);
+        try {
+            storage.deleteFolder(studentId);
+        } catch (IOException e) {
+            System.err.println("Failed to delete folder for " + studentId + ": " + e.getMessage());
+        }
+    }
+
     // Convert FaceData entity to DTO to be returned to frontend
     public FaceDataDTO toDto(FaceData fd) {
         return FaceDataDTO.fromEntity(fd, storage);

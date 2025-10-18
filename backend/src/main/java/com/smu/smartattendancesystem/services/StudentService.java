@@ -50,8 +50,22 @@ public class StudentService {
         return results;
     }
 
-    public Optional<Student> getStudentByStudentId(String studentId) {
-        return studentManager.getStudentByStudentId(studentId);
+    public StudentWithFaceDTO getStudentByStudentId(String studentId) {
+
+        // Retrieve student by studentId
+        Optional<Student> optStudent = studentManager.getStudentByStudentId(studentId);
+        if (optStudent.isEmpty()) {
+            throw new NoSuchElementException("Student not found: " + studentId);
+        }
+
+        Student student = optStudent.get();
+
+        // Retrieve latest face data for a student
+        FaceDataDTO face = faceDataService.getLatestFaceData(student.getStudentId())
+                .orElse(null);
+
+        // Create and return the DTO object combining student and face data
+        return StudentWithFaceDTO.from(student, face);
     }
 
     @Transactional
@@ -65,7 +79,7 @@ public class StudentService {
         }
 
         // Check for duplicates
-        if (getStudentByStudentId(student.getStudentId()).isPresent()) {
+        if (studentManager.getStudentByStudentId(student.getStudentId()).isPresent()) {
             throw new IllegalStateException("Student already exists with ID: " + student.getStudentId());
         }
         if (userManager.getUserByEmail(student.getEmail()).isPresent()) {
@@ -89,7 +103,7 @@ public class StudentService {
         return savedStudent;
     }
 
-    public Student updateStudent(String studentId, Student student) {
+    public StudentWithFaceDTO updateStudent(String studentId, Student student) {
 
         // Validate if student exists
         Optional<Student> optStudent = studentManager.getStudentByStudentId(studentId);
@@ -98,7 +112,7 @@ public class StudentService {
         }
         Student existingStudent = optStudent.get();
 
-        // Validate inputs (name, email, phone, class)
+        // Validate inputs (name, email, class)
         if (student.getName() == null || student.getName().isBlank()) {
             throw new IllegalArgumentException("Student name cannot be empty");
         }
@@ -107,12 +121,18 @@ public class StudentService {
             throw new IllegalArgumentException("Student email cannot be empty");
         }
 
-        if (student.getPhone() == null || student.getPhone().isBlank()) {
-            throw new IllegalArgumentException("Student phone cannot be empty");
-        }
-
         if (student.getClassName() == null || student.getClassName().isBlank()) {
             throw new IllegalArgumentException("Student class name cannot be empty");
+        }
+
+        // Phone is optional, so only if its provided, then check if its in a valid
+        // format
+        String phone = student.getPhone();
+        if (phone != null && !phone.isBlank()) {
+            if (!phone.matches("^\\d{8}$")) {
+                throw new IllegalArgumentException("Phone number must be exactly 8 digits (e.g., 81234567)");
+            } 
+            existingStudent.setPhone(phone.trim());
         }
 
         // Ensure email is not used by another student
@@ -124,7 +144,6 @@ public class StudentService {
         // Apply updates to student
         existingStudent.setName(student.getName().trim());
         existingStudent.setEmail(student.getEmail().trim());
-        existingStudent.setPhone(student.getPhone().trim());
         existingStudent.setClassName(student.getClassName().trim());
 
         Student savedStudent = studentManager.updateStudent(studentId, existingStudent);
@@ -136,11 +155,29 @@ public class StudentService {
 
         userManager.updateUser(user);
 
-        return savedStudent;
+        // Create and return the DTO object combining student and face data
+        FaceDataDTO face = faceDataService.getLatestFaceData(savedStudent.getStudentId())
+                .orElse(null);
+        return StudentWithFaceDTO.from(savedStudent, face);
     }
 
     public void deleteStudent(String studentId) {
-        studentManager.deleteStudentByStudentId(studentId);
+
+        // Validate if student exists
+        Optional<Student> optStudent = studentManager.getStudentByStudentId(studentId);
+        if (optStudent.isEmpty()) {
+            throw new NoSuchElementException("Student not found: " + studentId);
+        }
+        Student existingStudent = optStudent.get();
+
+        // Delete face data tied to the student
+        faceDataService.deleteAllImagesByStudentId(studentId);
+
+        // Delete user account tied to the student
+        userManager.deleteUser(existingStudent.getId());
+
+        // Delete student account
+        studentManager.deleteStudentByStudentId(existingStudent.getStudentId());
     }
 
     // Search students by name (partial match, case insensitive)

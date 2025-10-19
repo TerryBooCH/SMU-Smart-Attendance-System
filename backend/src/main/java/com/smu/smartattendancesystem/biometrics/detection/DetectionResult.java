@@ -4,6 +4,7 @@ import java.util.List;
 import org.opencv.core.MatOfRect2d;
 import org.opencv.core.Rect;
 import org.opencv.core.Rect2d;
+import com.smu.smartattendancesystem.dto.DetectionResultDTO;
 
 public class DetectionResult implements Comparable<DetectionResult>{
     private final Rect2d bbox;
@@ -76,5 +77,9 @@ public class DetectionResult implements Comparable<DetectionResult>{
                 .map(DetectionResult::getBbox)
                 .toArray(Rect2d[]::new);
         return new MatOfRect2d(rects);
+    }
+
+    public DetectionResultDTO toDTO() {
+        return new DetectionResultDTO(bbox.x, bbox.y, bbox.width, bbox.height, score);
     }
 }

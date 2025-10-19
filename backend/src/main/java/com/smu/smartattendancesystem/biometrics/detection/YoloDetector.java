@@ -56,7 +56,7 @@ public class YoloDetector extends BaseDetector {
         int dx = (imageSize - newW) / 2;
         int dy = (imageSize - newH) / 2;
 
-        Rect roi = new Rect(dx, dy, newW, newW);
+        Rect roi = new Rect(dx, dy, newW, newH);
         resized.copyTo(blob.submat(roi));
         
         blob = Dnn.blobFromImage(blob, 1/255.0, new Size(imageSize, imageSize), new Scalar(0, 0, 0), true);

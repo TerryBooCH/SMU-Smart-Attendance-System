@@ -21,12 +21,10 @@ public class BiometricService {
     private final CascadeDetector lbpDetector = new CascadeDetector("src/main/resources/weights/lbpcascade_frontalface_improved.xml");
     private final YoloDetector yoloDetector = new YoloDetector("src/main/resources/weights/yolov8n-face.onnx", 640);
 
-    public List<DetectionResultDTO> detect(MultipartFile image, Map<String, String> body) throws IOException {
-        String type = body.get("type");
-
+    public List<DetectionResultDTO> detect(MultipartFile image, String type) throws IOException {
         if (image == null) throw new IllegalArgumentException("No image provided.");
 
-        if (type == null) throw new IllegalArgumentException("Missing 'type' field.");
+        if (type == null  || type.equals("")) throw new IllegalArgumentException("Missing 'type' field.");
         type = type.toLowerCase();
 
         List<String> allowedDetectors = List.of("haar", "lbp", "yolo");

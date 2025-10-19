@@ -24,9 +24,9 @@ public class BiometricController {
     }
     
     @PostMapping("/detect")
-    public ResponseEntity<?> detect(@RequestParam("image") MultipartFile image, @RequestParam Map<String, String> body) {
+    public ResponseEntity<?> detect(@RequestParam("image") MultipartFile image, @RequestParam("type") String type) {
         try {
-            List<DetectionResultDTO> results = this.biometricService.detect(image, body);
+            List<DetectionResultDTO> results = this.biometricService.detect(image, type);
             return ResponseEntity.ok(results);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -37,5 +37,4 @@ public class BiometricController {
                     .body(createErrorResponse("An error occurred while detecting."));
         }
     }
-    
 }

@@ -28,6 +28,14 @@ public class SessionService {
         if (session.getStartAt() == null) {
             session.setStartAt(LocalDateTime.now());
         }
+
+        // Load full roster entity if provided
+        if (session.getRoster() != null && session.getRoster().getId() != null) {
+            Roster roster = rosterManager.getRoster(session.getRoster().getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Roster not found"));
+            session.setRoster(roster);
+        }
+
         return sessionManager.createSession(session);
     }
 

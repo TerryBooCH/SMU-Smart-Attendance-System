@@ -25,8 +25,21 @@ public class SessionController {
     }
 
     @PostMapping
-    public Session createSession(@RequestBody Session session) {
-        return sessionService.createSession(session);
+    public SessionDTO createSession(@RequestBody Session session) {
+        Session savedSession = sessionService.createSession(session);
+
+        return new SessionDTO(
+            savedSession.getId(),
+            savedSession.getCreatedAt(),
+            savedSession.getUpdatedAt(),
+            savedSession.getCourseName(),
+            savedSession.getStartAt(),
+            savedSession.getEndAt(),
+            savedSession.isOpen(),
+            savedSession.getLateAfterMinutes(),
+            savedSession.getRoster() != null ? savedSession.getRoster().getId() : null,
+            savedSession.getRoster() != null ? savedSession.getRoster().getName() : null
+        );
     }
 
     @GetMapping

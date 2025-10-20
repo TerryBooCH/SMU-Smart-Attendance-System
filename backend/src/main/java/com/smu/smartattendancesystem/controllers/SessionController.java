@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.smu.smartattendancesystem.dto.SessionDTO;
 import com.smu.smartattendancesystem.models.Session;
 import com.smu.smartattendancesystem.services.SessionService;
 
@@ -29,8 +30,21 @@ public class SessionController {
     }
 
     @GetMapping
-    public List<Session> getAllSessions() {
-        return sessionService.getAllSessions();
+    public List<SessionDTO> getAllSessions() {
+        return sessionService.getAllSessions().stream()
+            .map(session -> new SessionDTO(
+                session.getId(),
+                session.getCreatedAt(),
+                session.getUpdatedAt(),
+                session.getCourseName(),
+                session.getStartAt(),
+                session.getEndAt(),
+                session.isOpen(),
+                session.getLateAfterMinutes(),
+                session.getRoster() != null ? session.getRoster().getId() : null,
+                session.getRoster() != null ? session.getRoster().getName() : null
+            ))
+            .toList();
     }
 
     @PutMapping("/{id}/open")

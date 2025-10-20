@@ -187,6 +187,41 @@ export const RosterProvider = ({ children }) => {
     }
   };
 
+    const importStudentsToRosterFromCsv = async (file) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await rosterService.importStudentsToRosterFromCsv(file);
+      const { rosters: importedRosters = [] } = response;
+
+      // Update rosters in state (merge or append)
+      if (importedRosters.length > 0) {
+        setRosters((prev) => {
+          const updated = [...prev];
+          importedRosters.forEach((r) => {
+            const index = updated.findIndex((x) => x.id === r.id);
+            if (index !== -1) {
+              updated[index] = { ...updated[index], ...r };
+            } else {
+              updated.push(r);
+            }
+          });
+          return updated;
+        });
+      }
+
+      // Return full response so UI can display importedCount, errorCount, errors
+      return response;
+    } catch (error) {
+      console.error("Error importing students to roster:", error);
+      setError(error.message || "Failed to import students to roster");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const clearStudentsInRoster = () => {
     setStudentsInRoster([]);
   };
@@ -209,6 +244,7 @@ export const RosterProvider = ({ children }) => {
     addStudentToRoster,
     removeStudentFromRoster,
     clearStudentsInRoster,
+    importStudentsToRosterFromCsv
   };
 
   return (

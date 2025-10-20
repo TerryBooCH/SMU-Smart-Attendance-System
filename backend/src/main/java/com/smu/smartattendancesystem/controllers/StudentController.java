@@ -25,6 +25,7 @@ import com.smu.smartattendancesystem.services.FaceDataService;
 import com.smu.smartattendancesystem.services.StudentService;
 import static com.smu.smartattendancesystem.utils.ResponseFormatting.createErrorResponse;
 import static com.smu.smartattendancesystem.utils.ResponseFormatting.createSuccessResponse;
+import com.smu.smartattendancesystem.utils.LoggerFacade;
 
 @RestController
 @RequestMapping("/api/students")
@@ -41,17 +42,19 @@ public class StudentController {
     @PostMapping
     public ResponseEntity<?> addStudent(@RequestBody Student student) {
         try {
-            // Log for debugging
             System.out.println(
                     "=== Creating Student: " + student.getStudentId() + " | Class: " + student.getClassName() + " ===");
 
             Student createdStudent = studentService.createStudent(student);
+            LoggerFacade.info("Enrolled Student " + createdStudent.getStudentId() + ".");
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(createdStudent);
         } catch (IllegalArgumentException e) {
+            LoggerFacade.warning("Failed to create student: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalStateException e) {
+            LoggerFacade.warning("Conflict while creating student: " + e.getMessage());
             String msg = e.getMessage();
             String field = null;
 
@@ -64,6 +67,7 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage(), field));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while creating student: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while creating student"));
@@ -74,8 +78,10 @@ public class StudentController {
     @GetMapping
     public ResponseEntity<?> getAllStudents() {
         try {
+            LoggerFacade.info("Fetched all students.");
             return ResponseEntity.ok(studentService.getAllStudents());
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while fetching students: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while fetching students"));
         }
@@ -86,11 +92,14 @@ public class StudentController {
     public ResponseEntity<?> getStudent(@PathVariable String studentId) {
         try {
             StudentWithFaceDTO dto = studentService.getStudentByStudentId(studentId);
+            LoggerFacade.info("Fetched Student " + studentId + ".");
             return ResponseEntity.ok(dto);
         } catch (NoSuchElementException e) {
+            LoggerFacade.warning("Student not found: " + studentId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while fetching student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while fetching the student"));
         }
@@ -102,17 +111,22 @@ public class StudentController {
             @RequestBody Student student) {
         try {
             StudentWithFaceDTO dto = studentService.updateStudent(studentId, student);
+            LoggerFacade.info("Updated Student " + studentId + ".");
             return ResponseEntity.ok(dto);
         } catch (NoSuchElementException e) {
+            LoggerFacade.warning("Failed to update — Student not found: " + studentId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalArgumentException e) {
+            LoggerFacade.warning("Invalid update for Student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalStateException e) {
+            LoggerFacade.warning("Conflict while updating Student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while updating student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while updating the student"));
         }
@@ -124,11 +138,14 @@ public class StudentController {
         System.out.println("=== DELETE Student Called with ID: " + studentId + " ===");
         try {
             studentService.deleteStudent(studentId);
+            LoggerFacade.info("Deleted Student " + studentId + ".");
             return ResponseEntity.ok(createSuccessResponse("Student deleted successfully"));
         } catch (NoSuchElementException e) {
+            LoggerFacade.warning("Failed to delete — Student not found: " + studentId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Student not found with ID: " + studentId));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while deleting student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while deleting the student"));
         }
@@ -138,11 +155,14 @@ public class StudentController {
     @GetMapping("/{studentId}/faces")
     public ResponseEntity<?> listFaces(@PathVariable String studentId) {
         try {
+            LoggerFacade.info("Listed face data for Student " + studentId + ".");
             return ResponseEntity.ok(faceDataService.list(studentId));
         } catch (NoSuchElementException e) {
+            LoggerFacade.warning("Failed to list faces — Student not found: " + studentId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while listing faces for Student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while listing face data"));
         }
@@ -160,14 +180,18 @@ public class StudentController {
             response.put("status", "success");
             response.put("data", dtos);
 
+            LoggerFacade.info("Uploaded " + files.size() + " face images for Student " + studentId + ".");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (NoSuchElementException e) {
+            LoggerFacade.warning("Failed to upload faces — Student not found: " + studentId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalArgumentException | IllegalStateException e) {
+            LoggerFacade.warning("Failed to upload faces for Student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while uploading faces for Student " + studentId + ": " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while uploading face data"));
@@ -179,11 +203,14 @@ public class StudentController {
     public ResponseEntity<?> deleteFace(@PathVariable String studentId, @PathVariable Long faceDataId) {
         try {
             faceDataService.delete(studentId, faceDataId);
+            LoggerFacade.info("Deleted face data (ID: " + faceDataId + ") for Student " + studentId + ".");
             return ResponseEntity.noContent().build();
         } catch (NoSuchElementException e) {
+            LoggerFacade.warning("Failed to delete face data (ID: " + faceDataId + ") — Student not found: " + studentId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while deleting face data (ID: " + faceDataId + ") for Student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while deleting face data"));
         }
@@ -194,11 +221,14 @@ public class StudentController {
     public ResponseEntity<?> searchStudentsByName(@RequestParam("name") String name) {
         try {
             List<StudentWithFaceDTO> results = studentService.searchStudentsWithOneFace(name);
+            LoggerFacade.info("Searched students by name: " + name + ".");
             return ResponseEntity.ok(results);
         } catch (IllegalArgumentException e) {
+            LoggerFacade.warning("Invalid search query: " + e.getMessage());
             return ResponseEntity.badRequest()
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while searching for students by name (" + name + "): " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while searching for students"));
         }

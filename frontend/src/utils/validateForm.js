@@ -141,3 +141,52 @@ export const validateAddStudentToRosterForm = (values) => {
 
   return errors;
 };
+
+export const validateCreateSessionForm = (values) => {
+  const errors = {};
+
+  // Course name
+  if (!values.courseName?.trim()) {
+    errors.courseName = "Course name is required";
+  }
+
+  // Roster selection
+  if (!values.rosterId) {
+    errors.rosterId = "Roster is required";
+  }
+
+  // Start time validation
+  if (!values.startAt) {
+    errors.startAt = "Start time is required";
+  } else {
+    const startTime = new Date(values.startAt);
+    const now = new Date();
+
+    if (startTime < now) {
+      errors.startAt = "Start time cannot be in the past";
+    }
+  }
+
+  // End time validation
+  if (!values.endAt) {
+    errors.endAt = "End time is required";
+  } else if (
+    values.startAt &&
+    new Date(values.startAt) >= new Date(values.endAt)
+  ) {
+    errors.endAt = "End time must be after start time";
+  }
+
+  // Late-after minutes
+  if (
+    values.lateAfterMinutes === undefined ||
+    values.lateAfterMinutes === null ||
+    values.lateAfterMinutes < 0
+  ) {
+    errors.lateAfterMinutes = "Late after minutes must be a positive number";
+  }
+
+  return errors;
+};
+
+

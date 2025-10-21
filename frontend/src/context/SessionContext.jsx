@@ -25,12 +25,32 @@ export const SessionProvider = ({ children }) => {
     }
   };
 
+  const createSession = async (sessionData) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await sessionService.createSession(sessionData);
+      const newSession = response.data || response.session || response;
+      setSessions((prev) => [...prev, newSession]);
+
+      return newSession;
+    } catch (error) {
+      console.error("Error creating session:", error);
+      setError(error.message || "Failed to create session");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     sessions,
     loading,
     error,
     setSessions,
     fetchAllSessions,
+    createSession,
   };
 
   return (

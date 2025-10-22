@@ -69,3 +69,9 @@ Thumbs.db
 *.dat
 *.lst
 *.log
+
+# ----------------------
+# Dataset files
+# ----------------------
+
+dataset*/

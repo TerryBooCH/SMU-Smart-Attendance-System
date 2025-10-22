@@ -59,19 +59,20 @@
             <version>6.6.26.Final</version>
         </dependency>
         
-        <!-- Computer Vision - JavaCV and OpenCV -->
+        <!-- Computer Vision - OpenCV -->
         <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>javacv-platform</artifactId>
-            <version>${javacv.version}</version>
+            <groupId>org.openpnp</groupId>
+            <artifactId>opencv</artifactId>
+            <version>4.9.0-0</version>
         </dependency>
-        
+
+        <!-- PCA/Machine learning for Eigenfaces - Smile -->
         <dependency>
-            <groupId>org.bytedeco</groupId>
-            <artifactId>opencv-platform</artifactId>
-            <version>${opencv.version}</version>
+            <groupId>com.github.haifengl</groupId>
+            <artifactId>smile-core</artifactId>
+            <version>4.4.2</version>
         </dependency>
-        
+
         <!-- File upload handling -->
         <dependency>
             <groupId>commons-fileupload</groupId>

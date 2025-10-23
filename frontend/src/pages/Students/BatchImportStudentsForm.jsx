@@ -195,52 +195,108 @@ const BatchImportStudentsForm = () => {
         </>
       )}
 
-      {/* === Step 2: Show Results === */}
+ {/* === Step 2: Show Results === */}
       {result && (
-        <div className="w-full border border-gray-200 rounded-2xl p-4 bg-gray-50 animate-fadeIn">
-          <div className="flex items-center gap-2 mb-3">
-            <CheckCircle2 className="w-5 h-5 text-green-600" />
-            <h3 className="font-semibold text-gray-800">Import Summary</h3>
-          </div>
+        <div className="w-full space-y-4 animate-fadeIn">
+          {/* Success Header */}
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6">
+            <div className="flex items-start gap-3">
+              <div className="bg-green-100 rounded-full p-2">
+                <CheckCircle2 className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                  Import Complete!
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Your CSV file has been processed successfully
+                </p>
+              </div>
+            </div>
 
-          <div className="text-sm text-gray-700 mb-2">
-            <p>✅ Imported: <strong>{result.importedCount}</strong></p>
-            <p>⚠️ Errors: <strong>{result.errorCount}</strong></p>
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 gap-3 mt-4">
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-green-100">
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">
+                  Imported
+                </p>
+                <p className="text-2xl font-bold text-green-600">
+                  {result.importedCount}
+                </p>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-100">
+                <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">
+                  Errors
+                </p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {result.errorCount}
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Imported Students */}
           {result.students?.length > 0 && (
-            <div className="mt-3">
-              <p className="text-sm font-medium text-gray-800 mb-1">Imported Students:</p>
-              <ul className="text-sm bg-white border border-gray-200 rounded-lg divide-y divide-gray-100 max-h-40 overflow-y-auto">
+            <div className="bg-white border border-gray-200 rounded-2xl p-5">
+              <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                Successfully Imported ({result.students.length})
+              </h4>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
                 {result.students.map((s, i) => (
-                  <li key={i} className="px-3 py-2 flex justify-between">
-                    <span>{s.studentId} — {s.name}</span>
-                    <span className="text-gray-500">{s.className}</span>
-                  </li>
+                  <div
+                    key={i}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors duration-150"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-semibold text-blue-600">
+                        {s.name.charAt(0)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{s.name}</p>
+                        <p className="text-xs text-gray-500">{s.studentId}</p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-medium text-gray-600 bg-gray-200 px-3 py-1 rounded-full">
+                      {s.className}
+                    </span>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
 
           {/* Errors */}
           {result.errors?.length > 0 && (
-            <div className="mt-3">
-              <p className="text-sm font-medium text-red-700 mb-1">Errors:</p>
-              <ul className="text-sm bg-red-50 border border-red-300 rounded-lg divide-y divide-red-200 max-h-40 overflow-y-auto">
+            <div className="bg-white border border-red-200 rounded-2xl p-5">
+              <h4 className="text-sm font-semibold text-red-900 mb-3 flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+                Failed to Import ({result.errors.length})
+              </h4>
+              <div className="space-y-2 max-h-48 overflow-y-auto">
                 {result.errors.map((err, i) => (
-                  <li key={i} className="px-3 py-2">
-                    Line {err.line}: <span className="font-medium">{err.reason}</span>
-                  </li>
+                  <div
+                    key={i}
+                    className="flex items-start gap-3 p-3 bg-red-50 rounded-xl border border-red-100"
+                  >
+                    <CircleAlert className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-red-900">
+                        Line {err.line}
+                      </p>
+                      <p className="text-sm text-red-700 mt-0.5">{err.reason}</p>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
 
-          <div className="flex justify-end mt-4">
+          {/* Done Button */}
+          <div className="flex justify-end pt-2">
             <button
               onClick={handleDone}
-              className="px-4 py-2 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 active:scale-[0.98] transition-all duration-200"
+              className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow"
             >
               Done
             </button>

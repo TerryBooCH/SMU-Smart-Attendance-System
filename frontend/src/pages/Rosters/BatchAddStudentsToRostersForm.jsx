@@ -1,5 +1,11 @@
 import React, { useState, useCallback, useRef } from "react";
-import { UploadCloud, X, Loader2, CheckCircle2, CircleAlert } from "lucide-react";
+import {
+  UploadCloud,
+  X,
+  Loader2,
+  CheckCircle2,
+  CircleAlert,
+} from "lucide-react";
 import { useModal } from "../../hooks/useModal";
 import useRoster from "../../hooks/useRoster";
 import useToast from "../../hooks/useToast";
@@ -16,32 +22,38 @@ const BatchAddStudentsToRostersForm = () => {
   const { closeModal } = useModal();
 
   // --- Drag & Drop handlers ---
-  const handleDrag = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (loading) return;
+  const handleDrag = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (loading) return;
 
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
+      if (e.type === "dragenter" || e.type === "dragover") {
+        setDragActive(true);
+      } else if (e.type === "dragleave") {
+        setDragActive(false);
+      }
+    },
+    [loading]
+  );
+
+  const handleDrop = useCallback(
+    (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (loading) return;
       setDragActive(false);
-    }
-  }, [loading]);
 
-  const handleDrop = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (loading) return;
-    setDragActive(false);
-
-    const droppedFile = e.dataTransfer.files?.[0];
-    if (droppedFile && droppedFile.name.endsWith(".csv")) {
-      setFile(droppedFile);
-      setInlineError("");
-    } else {
-      setInlineError("Please upload a valid CSV file.");
-    }
-  }, [loading]);
+      const droppedFile = e.dataTransfer.files?.[0];
+      if (droppedFile && droppedFile.name.endsWith(".csv")) {
+        setFile(droppedFile);
+        setInlineError("");
+      } else {
+        setInlineError("Please upload a valid CSV file.");
+      }
+    },
+    [loading]
+  );
 
   // --- File input handlers ---
   const handleFileChange = (e) => {
@@ -68,7 +80,9 @@ const BatchAddStudentsToRostersForm = () => {
     try {
       const response = await importStudentsToRosterFromCsv(file);
       setResult(response);
-      success(`${response.importedCount || 0} student(s) processed successfully!`);
+      success(
+        `${response.importedCount || 0} student(s) processed successfully!`
+      );
     } catch (err) {
       console.error("Error importing roster students:", err);
       setInlineError(err.message || "Failed to import students to roster.");
@@ -81,56 +95,81 @@ const BatchAddStudentsToRostersForm = () => {
   // === After Upload: Show only summary ===
   if (result) {
     return (
-      <div className="flex flex-col items-center gap-6 py-4 font-lexend">
-        <div className="w-full bg-gray-50 border border-gray-200 rounded-xl p-4 text-sm">
-          <div className="flex items-center gap-2 mb-2">
-            <CheckCircle2 className="w-5 h-5 text-green-500" />
-            <span className="font-medium text-gray-800">
-              Import Summary
-            </span>
+      <div className="w-full space-y-4 py-4 font-lexend animate-fadeIn">
+        {/* Success Header */}
+        <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6">
+          <div className="flex items-start gap-3">
+            <div className="bg-green-100 rounded-full p-2">
+              <CheckCircle2 className="w-6 h-6 text-green-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                Import Complete!
+              </h3>
+              <p className="text-sm text-gray-600">
+                {result.rosters?.[0]?.name
+                  ? `Roster: ${result.rosters[0].name}`
+                  : "Your CSV has been processed successfully."}
+              </p>
+            </div>
           </div>
 
-          {result.rosters?.[0]?.name && (
-            <p className="text-gray-700 mb-2">
-              📘 Roster: <strong>{result.rosters[0].name}</strong>
-            </p>
-          )}
-
-          <p className="text-gray-700 mb-2">
-            ✅ Imported: <strong>{result.importedCount}</strong> student(s)
-          </p>
-          <p className="text-gray-700 mb-3">
-            ⚠️ Errors: <strong>{result.errorCount}</strong>
-          </p>
-
-          {result.errors?.length > 0 && (
-            <div className="border border-red-200 bg-red-50 rounded-lg p-2 max-h-40 overflow-y-auto">
-              <table className="w-full text-xs text-red-800">
-                <thead>
-                  <tr className="border-b border-red-200">
-                    <th className="text-left py-1 px-2 w-12">Line</th>
-                    <th className="text-left py-1 px-2">Reason</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {result.errors.map((err, i) => (
-                    <tr key={i} className="border-b border-red-100">
-                      <td className="py-1 px-2">{err.line}</td>
-                      <td className="py-1 px-2">{err.reason}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-3 mt-4">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-green-100">
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">
+                Imported
+              </p>
+              <p className="text-2xl font-bold text-green-600">
+                {result.importedCount || 0}
+              </p>
             </div>
-          )}
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl p-4 border border-gray-100">
+              <p className="text-xs text-gray-500 font-medium uppercase tracking-wide mb-1">
+                Errors
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {result.errorCount || 0}
+              </p>
+            </div>
+          </div>
         </div>
 
-        <button
-          onClick={handleDone}
-          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition-all duration-200"
-        >
-          Done
-        </button>
+        {/* Errors */}
+        {result.errors?.length > 0 && (
+          <div className="bg-white border border-red-200 rounded-2xl p-5">
+            <h4 className="text-sm font-semibold text-red-900 mb-3 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
+              Failed to Import ({result.errors.length})
+            </h4>
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {result.errors.map((err, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-3 p-3 bg-red-50 rounded-xl border border-red-100"
+                >
+                  <CircleAlert className="w-4 h-4 text-red-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-red-900">
+                      Line {err.line}
+                    </p>
+                    <p className="text-sm text-red-700 mt-0.5">{err.reason}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Done Button */}
+        <div className="flex justify-end pt-2">
+          <button
+            onClick={handleDone}
+            className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow"
+          >
+            Done
+          </button>
+        </div>
       </div>
     );
   }

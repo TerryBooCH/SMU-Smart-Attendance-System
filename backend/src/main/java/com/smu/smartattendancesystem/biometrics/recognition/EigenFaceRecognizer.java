@@ -1,5 +1,6 @@
 package com.smu.smartattendancesystem.biometrics.recognition;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.*;
 import java.util.*;
 import org.opencv.core.*;
@@ -28,10 +29,15 @@ public class EigenFaceRecognizer extends BaseRecognizer {
         this(pca, metric, 64);
     }
 
-    public static EigenFaceRecognizer fromConfig(Path jsonPath, BaseMetric metric) throws IOException{
+    public static EigenFaceRecognizer fromConfig(String path, BaseMetric metric) {
         ObjectMapper mapper = new ObjectMapper();
-
-        Map<String, Object> config = mapper.readValue(jsonPath.toFile(), new TypeReference<Map<String, Object>>() {});
+        Map<String, Object> config;
+        
+        try {
+            config = mapper.readValue(basePath.resolve(path).toFile(), new TypeReference<Map<String, Object>>() {});
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
 
         int image_size = ((Number) config.get("img_size")).intValue();
 

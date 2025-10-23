@@ -8,17 +8,21 @@ import org.springframework.stereotype.Service;
 import com.smu.smartattendancesystem.managers.RosterManager;
 import com.smu.smartattendancesystem.models.Roster;
 import com.smu.smartattendancesystem.models.Student;
+import com.smu.smartattendancesystem.models.Session;
 import com.smu.smartattendancesystem.repositories.StudentRepository;
+import com.smu.smartattendancesystem.repositories.SessionRepository;
 
 @Service
 public class RosterService {
 
     private final RosterManager rosterManager;
     private final StudentRepository studentRepository;
+    private final SessionRepository sessionRepository;
 
-    public RosterService(RosterManager rosterManager, StudentRepository studentRepository) {
+    public RosterService(RosterManager rosterManager, StudentRepository studentRepository, SessionRepository sessionRepository) {
         this.rosterManager = rosterManager;
         this.studentRepository = studentRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     // Create a new roster
@@ -110,5 +114,9 @@ public class RosterService {
         }
 
         return rosterManager.updateRoster(roster);
+    }
+
+    public List<Session> getSessionsForRoster(Long rosterId) {
+        return sessionRepository.findByRosterId(rosterId);
     }
 }

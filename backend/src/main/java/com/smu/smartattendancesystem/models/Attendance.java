@@ -21,7 +21,7 @@ public class Attendance extends BaseEntity {
     private String status; // PENDING | PRESENT | ABSENT | LATE
 
     @Column(nullable = false)
-    private String method; // AUTO | MANUAL | EDGE
+    private String method; // AUTO | MANUAL | NOT MARKED
 
     private Double confidence;
     private LocalDateTime timestamp = LocalDateTime.now();

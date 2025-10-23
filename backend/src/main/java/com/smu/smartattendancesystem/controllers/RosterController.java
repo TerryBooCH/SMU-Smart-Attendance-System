@@ -13,8 +13,12 @@ import org.springframework.web.bind.annotation.*;
 
 import com.smu.smartattendancesystem.dto.FaceDataDTO;
 import com.smu.smartattendancesystem.dto.RosterSummaryDTO;
+import com.smu.smartattendancesystem.managers.AttendanceManager;
+import com.smu.smartattendancesystem.managers.SessionManager;
+import com.smu.smartattendancesystem.models.Attendance;
 import com.smu.smartattendancesystem.models.Roster;
 import com.smu.smartattendancesystem.models.Student;
+import com.smu.smartattendancesystem.models.Session;
 import com.smu.smartattendancesystem.models.StudentRoster;
 import com.smu.smartattendancesystem.services.RosterService;
 import com.smu.smartattendancesystem.services.FaceDataService;
@@ -25,10 +29,14 @@ public class RosterController {
 
     private final RosterService rosterService;
     private final FaceDataService faceDataService;
+    private final AttendanceManager attendanceManager;
+    private final SessionManager sessionManager; 
 
-    public RosterController(RosterService rosterService, FaceDataService faceDataService) {
+    public RosterController(RosterService rosterService, FaceDataService faceDataService, AttendanceManager attendanceManager, SessionManager sessionManager) {
         this.rosterService = rosterService;
         this.faceDataService = faceDataService;
+        this.attendanceManager = attendanceManager; 
+        this.sessionManager = sessionManager;
     }
 
     // Create a new roster
@@ -113,6 +121,7 @@ public class RosterController {
     @PostMapping("/{rosterId}/students/{studentId}")
     public ResponseEntity<?> addStudentToRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
         try {
+            // Step 1: Add student to roster
             Roster updated = rosterService.addStudentToRoster(rosterId, studentId);
 
             StudentRoster newStudentRoster = updated.getStudentRosters()
@@ -123,13 +132,21 @@ public class RosterController {
 
             Student student = newStudentRoster.getStudent();
 
-            // Get latest face data (if available)
+            // Step 2: ✅ Auto-create attendance records for all sessions linked to this roster
+            List<Session> linkedSessions = sessionManager.getSessionsByRosterId(rosterId);
+            if (!linkedSessions.isEmpty()) {
+                List<Attendance> attendances = linkedSessions.stream()
+                        .map(session -> new Attendance(session, student, "PENDING", "NOT MARKED", null))
+                        .toList();
+                attendanceManager.saveAll(attendances);
+            }
+
+            // Step 3: Prepare response
             List<FaceDataDTO> faceList = faceDataService.list(studentId);
             String latestFaceBase64 = faceList.isEmpty()
                     ? null
                     : faceList.get(faceList.size() - 1).getImageBase64();
 
-            // Build response
             Map<String, Object> response = new HashMap<>();
             response.put("id", student.getId());
             response.put("studentId", student.getStudentId());
@@ -156,7 +173,6 @@ public class RosterController {
             }
 
         } catch (IllegalStateException e) {
-            // Likely means student already in roster
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse("Student with ID " + studentId + " is already in this roster"));
         } catch (Exception e) {

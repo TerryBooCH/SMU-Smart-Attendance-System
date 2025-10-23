@@ -1,9 +1,7 @@
 package com.smu.smartattendancesystem.biometrics.detection;
-import java.util.List;
 
-import org.opencv.core.MatOfRect2d;
-import org.opencv.core.Rect;
-import org.opencv.core.Rect2d;
+import java.util.List;
+import org.opencv.core.*;
 import com.smu.smartattendancesystem.dto.DetectionResultDTO;
 
 public class DetectionResult implements Comparable<DetectionResult>{

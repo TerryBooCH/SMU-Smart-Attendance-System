@@ -44,6 +44,26 @@ export const SessionProvider = ({ children }) => {
     }
   };
 
+  const deleteSessionById = async (sessionId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      await sessionService.deleteSessionById(sessionId);
+
+      // Remove deleted session from state
+      setSessions((prev) => prev.filter((session) => session.id !== sessionId));
+
+      return { status: 200, message: "Session deleted successfully" };
+    } catch (error) {
+      console.error("Error deleting session:", error);
+      setError(error.message || "Failed to delete session");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     sessions,
     loading,
@@ -51,6 +71,7 @@ export const SessionProvider = ({ children }) => {
     setSessions,
     fetchAllSessions,
     createSession,
+    deleteSessionById,
   };
 
   return (

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useSession from "../../hooks/useSession";
 import { Eye } from "lucide-react";
 import { formatDateTime } from "../../utils/dateUtils";
+import DeleteSessionButton from "../../components/DeleteSessionButton";
 
 const SessionsContainer = () => {
   const { sessions, loading, error, fetchAllSessions } = useSession();
@@ -137,13 +138,16 @@ const SessionsContainer = () => {
 
                     {/* Actions */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => navigate(`/session/${session.id}`)}
-                        className="flex items-center cursor-pointer px-2 py-2 text-black hover:text-blue-600 transition-colors"
-                        title="View"
-                      >
-                        <Eye size={16} />
-                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => navigate(`/session/${session.id}`)}
+                          className="flex items-center cursor-pointer px-2 py-2 text-black hover:text-blue-600 transition-colors"
+                          title="View"
+                        >
+                          <Eye size={16} />
+                        </button>
+                        <DeleteSessionButton session={session} />
+                      </div>
                     </td>
                   </tr>
                 ))

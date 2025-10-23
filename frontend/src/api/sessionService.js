@@ -33,4 +33,25 @@ export const sessionService = {
       throw customError;
     }
   },
+
+  deleteSessionById: async (sessionId) => {
+    try {
+      const response = await apiClient.delete(`/api/sessions/${sessionId}`);
+      console.log("Deleted session:", response);
+      return response;
+    } catch (error) {
+      console.error("Error deleting session:", error);
+      const errorData = error.response?.data || {};
+      const errorMessage =
+        errorData.message ||
+        errorData.error ||
+        error.message ||
+        "Error deleting session";
+      const statusCode = error.response?.status || 500;
+
+      const customError = new Error(errorMessage);
+      customError.statusCode = statusCode;
+      throw customError;
+    }
+  },
 };

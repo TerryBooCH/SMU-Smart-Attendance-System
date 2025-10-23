@@ -1,20 +1,20 @@
-import React from "react";
-import Sidebar from "../../components/Sidebar";
+import React, { useState } from "react";
+import AttendanceRecordSidebar from "./AttendanceRecordSidebar";
 import Breadcrumb from "../../components/Breadcrumb";
+import MainRecognitionScreen from "./MainRecognitionScreen";
+import ControlBar from "./ControlBar";
 
 const LiveRecognition = () => {
+  const [isCameraOn, setIsCameraOn] = useState(true);
   return (
     <div className="min-h-screen flex">
-      <Sidebar />
-
-      <main className="h-screen w-full bg-[#fafafa] ">
-        <Breadcrumb
-          items={[
-            { label: "Home", href: "/home" },
-            { label: "Live Recognition" },
-          ]}
-        />
+      <main className="h-screen w-full bg-[#fafafa] flex flex-col">
+        <div className="p-4 flex flex-col overflow-hidden">
+          <MainRecognitionScreen isCameraOn={isCameraOn} />
+        </div>
+        <ControlBar isCameraOn={isCameraOn} setIsCameraOn={setIsCameraOn} />
       </main>
+      <AttendanceRecordSidebar />
     </div>
   );
 };

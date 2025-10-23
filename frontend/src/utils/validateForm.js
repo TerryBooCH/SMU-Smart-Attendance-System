@@ -34,7 +34,7 @@ export const validateCreateStudentForm = (values) => {
     errors.name = "Name must be at least 2 characters";
   }
 
-  // ✅ Validate Class (2 letters + 3 digits)
+  // Validate Class (2 letters + 3 digits)
   if (!values.className || !values.className.trim()) {
     errors.className = "Class is required";
   } else {

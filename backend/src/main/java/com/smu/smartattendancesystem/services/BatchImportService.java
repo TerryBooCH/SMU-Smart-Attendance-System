@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +26,12 @@ import com.smu.smartattendancesystem.repositories.StudentRepository;
 @Service
 public class BatchImportService {
 
+    // Validation patterns
+    private static final Pattern STUDENT_ID_PATTERN = Pattern.compile("^[A-Z]\\d{7}$");
+    private static final Pattern CLASS_NAME_PATTERN = Pattern.compile("^[A-Za-z]{2}\\d{3}$");
+    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
+    private static final Pattern PHONE_PATTERN = Pattern.compile("^\\d{8}$");
+
     @Autowired
     private StudentRepository studentRepository;
 
@@ -36,6 +43,51 @@ public class BatchImportService {
 
     @Autowired
     private FaceDataService faceDataService;
+
+    // Validates student fields according to the defined patterns
+    private List<String> validateStudentFields(String studentId, String name, String email, 
+                                                 String phone, String className) {
+        List<String> validationErrors = new ArrayList<>();
+
+        // Validate Student ID
+        if (studentId == null || studentId.isEmpty()) {
+            validationErrors.add("Student ID is required");
+        } else if (!STUDENT_ID_PATTERN.matcher(studentId).matches()) {
+            validationErrors.add("Student ID must start with a capital letter followed by 7 numbers (e.g., S1234567)");
+        }
+
+        // Validate Name
+        if (name == null || name.isEmpty()) {
+            validationErrors.add("Name is required");
+        } else if (name.length() < 2) {
+            validationErrors.add("Name must be at least 2 characters");
+        }
+
+        // Validate Email
+        if (email == null || email.isEmpty()) {
+            validationErrors.add("Email is required");
+        } else if (!EMAIL_PATTERN.matcher(email).matches()) {
+            validationErrors.add("Enter a valid email address");
+        }
+
+        // Validate Phone (optional, but must be 8 digits if provided)
+        if (phone != null && !phone.isEmpty()) {
+            if (!phone.matches("^\\d+$")) {
+                validationErrors.add("Phone number must contain only numbers");
+            } else if (!PHONE_PATTERN.matcher(phone).matches()) {
+                validationErrors.add("Phone number must be exactly 8 digits");
+            }
+        }
+
+        // Validate Class Name
+        if (className == null || className.isEmpty()) {
+            validationErrors.add("Class is required");
+        } else if (!CLASS_NAME_PATTERN.matcher(className).matches()) {
+            validationErrors.add("Class must start with 2 letters followed by 3 numbers (e.g., AB123)");
+        }
+
+        return validationErrors;
+    }
 
     public Map<String, Object> importStudentsFromCsv(MultipartFile file) {
         List<StudentWithFaceDTO> importedStudents = new ArrayList<>();
@@ -70,6 +122,17 @@ public class BatchImportService {
                 String phone = parts[3].trim();
                 String className = parts[4].trim();
 
+                // Validate fields
+                List<String> validationErrors = validateStudentFields(studentId, name, email, phone, className);
+                if (!validationErrors.isEmpty()) {
+                    Map<String, Object> error = new LinkedHashMap<>();
+                    error.put("line", lineNumber);
+                    error.put("data", line);
+                    error.put("reason", "Validation failed: " + String.join(", ", validationErrors));
+                    errors.add(error);
+                    continue;
+                }
+
                 // Check for duplicates
                 if (studentRepository.findByStudentId(studentId).isPresent()) {
                     Map<String, Object> error = new LinkedHashMap<>();
@@ -88,7 +151,7 @@ public class BatchImportService {
                     errors.add(error);
                     continue;
                 }
-
+                
                 try {
                     Student student = new Student(studentId, name, email, phone, className);
                     Student savedStudent = studentService.createStudent(student);
@@ -99,7 +162,13 @@ public class BatchImportService {
                     StudentWithFaceDTO dto = StudentWithFaceDTO.from(savedStudent, face);
                     importedStudents.add(dto);
 
-                } catch (Exception e) {
+                } catch (IllegalArgumentException | IllegalStateException e) {
+                    Map<String, Object> error = new LinkedHashMap<>();
+                    error.put("line", lineNumber);
+                    error.put("data", line);
+                    error.put("reason", "Invalid student data: " + e.getMessage());
+                    errors.add(error);
+                } catch (RuntimeException e) {
                     Map<String, Object> error = new LinkedHashMap<>();
                     error.put("line", lineNumber);
                     error.put("data", line);
@@ -166,9 +235,20 @@ public class BatchImportService {
                     continue;
                 }
 
-                Long rosterId;
+                // Validate Student ID format
+                if (!STUDENT_ID_PATTERN.matcher(studentId).matches()) {
+                    Map<String, Object> error = new LinkedHashMap<>();
+                    error.put("line", lineNumber);
+                    error.put("data", line);
+                    error.put("reason", "Invalid student ID format: " + studentId + 
+                             " (must start with a capital letter followed by 7 numbers, e.g., S1234567)");
+                    errors.add(error);
+                    continue;
+                }
+
+                final Long rosterId;
                 try {
-                    rosterId = Long.parseLong(rosterIdRaw);
+                    rosterId = Long.valueOf(rosterIdRaw);
                 } catch (NumberFormatException nfe) {
                     Map<String, Object> error = new LinkedHashMap<>();
                     error.put("line", lineNumber);

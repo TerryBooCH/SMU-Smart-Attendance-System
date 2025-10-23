@@ -3,18 +3,21 @@ import java.nio.file.*;
 import java.util.*;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
+import com.smu.smartattendancesystem.biometrics.metrics.*;
+import com.smu.smartattendancesystem.biometrics.detection.DetectionResult;
 
 public abstract class BaseRecognizer {
     static { nu.pattern.OpenCV.loadLocally(); }
     protected static final Path basePath = Paths.get(System.getProperty("user.dir"));
     protected int image_size;
+    protected BaseMetric metric;
 
     public BaseRecognizer(int image_size) {
         this.image_size = image_size;
     }
 
     // Returns the index of the face has the highest similarity with
-    public int recognize(Mat face, List<Mat> dataset, double threshold) {
+    public int recognize(Mat face, List<Mat> dataset) {
         List<Double> scores = computeScore(face, dataset);
         int bestIndex = 0;
         for (int i = 1; i < scores.size(); i++) {
@@ -100,4 +103,12 @@ public abstract class BaseRecognizer {
         }
         return flat;
     }
+
+    public BaseMetric getMetric() {
+		return metric;
+	}
+
+	public void setMetric(BaseMetric metric) {
+		this.metric = metric;
+	}
 }

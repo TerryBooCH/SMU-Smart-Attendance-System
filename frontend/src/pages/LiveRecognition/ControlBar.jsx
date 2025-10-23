@@ -1,37 +1,19 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import ManageCameraButton from "./ManageCameraButton";
 import TimeDateDisplay from "../../components/TimeDateDisplay";
 import EndSessionRecognitionButton from "./EndSessionRecognitionButton";
+import ToggleInfoButton from "./ToggleInfoButton";
+import ToggleNotificationButton from "./ToggleNotificationButton";
+import ToggleAttendanceFieldButton from "./ToggleAttendanceFieldButton";
 
-const ControlBar = ({ isCameraOn, setIsCameraOn }) => {
-  const [dateTime, setDateTime] = useState("");
-
-  useEffect(() => {
-    const updateTime = () => {
-      const now = new Date();
-      const options = { weekday: "short", day: "2-digit", month: "short" };
-      const formattedDate = now.toLocaleDateString("en-GB", options);
-      const formattedTime = now.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      });
-      setDateTime(`${formattedDate} · ${formattedTime}`);
-    };
-
-    updateTime();
-    const interval = setInterval(updateTime, 60000);
-    return () => clearInterval(interval);
-  }, []);
-
+const ControlBar = ({ isCameraOn, setIsCameraOn, activeSidebar, setActiveSidebar }) => {
   return (
-    <div className="bg-white px-4 py-3 border-t border-gray-200">
+    <div className="px-4 py-3">
       <div className="flex items-center justify-between">
         {/* Left: Date & Time */}
-        <div className="text-sm text-gray-600 font-medium">
-                    <TimeDateDisplay dateTime={dateTime} />
+        <div className="text-medium text-gray-600 font-medium">
+          <TimeDateDisplay />
         </div>
-
 
         {/* Center: Camera + End Session */}
         <div className="flex justify-center items-center gap-4 flex-1">
@@ -42,8 +24,21 @@ const ControlBar = ({ isCameraOn, setIsCameraOn }) => {
           <EndSessionRecognitionButton />
         </div>
 
-        {/* Right: Empty spacer for symmetry */}
-        <div className="w-[120px]" />
+        {/* Right: Info + Notification + Attendance buttons */}
+        <div className="flex items-center gap-3">
+          <ToggleInfoButton
+            activeSidebar={activeSidebar}
+            setActiveSidebar={setActiveSidebar}
+          />
+          <ToggleNotificationButton
+            activeSidebar={activeSidebar}
+            setActiveSidebar={setActiveSidebar}
+          />
+          <ToggleAttendanceFieldButton
+            activeSidebar={activeSidebar}
+            setActiveSidebar={setActiveSidebar}
+          />
+        </div>
       </div>
     </div>
   );

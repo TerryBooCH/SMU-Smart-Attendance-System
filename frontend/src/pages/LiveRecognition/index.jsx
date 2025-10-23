@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import AttendanceRecordSidebar from "./AttendanceRecordSidebar";
+import LiveRecognitionSidebar from "./LiveRecognitionSidebar";
 import Breadcrumb from "../../components/Breadcrumb";
 import MainRecognitionScreen from "./MainRecognitionScreen";
 import ControlBar from "./ControlBar";
@@ -9,12 +9,12 @@ const LiveRecognition = () => {
   return (
     <div className="min-h-screen flex">
       <main className="h-screen w-full bg-[#fafafa] flex flex-col">
-        <div className="p-4 flex flex-col overflow-hidden">
+        <div className="px-4 py-3 flex flex-col overflow-hidden">
           <MainRecognitionScreen isCameraOn={isCameraOn} />
         </div>
         <ControlBar isCameraOn={isCameraOn} setIsCameraOn={setIsCameraOn} />
       </main>
-      <AttendanceRecordSidebar />
+      <LiveRecognitionSidebar />
     </div>
   );
 };

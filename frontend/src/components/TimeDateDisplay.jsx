@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect } from "react";
 
 const TimeDateDisplay = () => {
   const [dateTime, setDateTime] = useState("");
@@ -20,9 +20,7 @@ const TimeDateDisplay = () => {
     const interval = setInterval(updateTime, 60000); // update every minute
     return () => clearInterval(interval);
   }, []);
-  return (
-     <div className="text-sm text-gray-600 font-medium">{dateTime}</div>
-  )
-}
+  return <div>{dateTime}</div>;
+};
 
-export default TimeDateDisplay
+export default TimeDateDisplay;

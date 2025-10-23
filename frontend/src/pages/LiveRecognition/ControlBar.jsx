@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ManageCameraButton from "./ManageCameraButton";
-import TimeDateDisplay from "./TimeDateDisplay";
+import TimeDateDisplay from "../../components/TimeDateDisplay";
+import EndSessionRecognitionButton from "./EndSessionRecognitionButton";
 
 const ControlBar = ({ isCameraOn, setIsCameraOn }) => {
   const [dateTime, setDateTime] = useState("");
@@ -19,21 +20,30 @@ const ControlBar = ({ isCameraOn, setIsCameraOn }) => {
     };
 
     updateTime();
-    const interval = setInterval(updateTime, 60000); 
+    const interval = setInterval(updateTime, 60000);
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="bg-white px-4 py-2">
+    <div className="bg-white px-4 py-3 border-t border-gray-200">
       <div className="flex items-center justify-between">
-        <TimeDateDisplay />
+        {/* Left: Date & Time */}
+        <div className="text-sm text-gray-600 font-medium">
+                    <TimeDateDisplay dateTime={dateTime} />
+        </div>
 
-        <div className="flex-1 flex justify-center">
+
+        {/* Center: Camera + End Session */}
+        <div className="flex justify-center items-center gap-4 flex-1">
           <ManageCameraButton
             isCameraOn={isCameraOn}
             setIsCameraOn={setIsCameraOn}
           />
+          <EndSessionRecognitionButton />
         </div>
+
+        {/* Right: Empty spacer for symmetry */}
+        <div className="w-[120px]" />
       </div>
     </div>
   );

@@ -51,14 +51,14 @@ const StudentsContainer = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Student ID
                 </th>
+
+                {/* ✅ New Column */}
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Class
+                </th>
+
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Phone
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created At
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Updated At
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -74,7 +74,7 @@ const StudentsContainer = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan="9"
+                    colSpan="10" // increased colSpan to match new column count
                     className="px-6 py-4 text-center text-sm text-gray-500"
                   >
                     No students found

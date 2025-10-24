@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Breadcrumb from "../../components/Breadcrumb";
 import UserBanner from "./UserBanner";
@@ -11,6 +11,7 @@ import DeleteStudentContainer from "./DeleteStudentContainer";
 
 const StudentView = () => {
   const { id } = useParams();
+  const location = useLocation();
   const {
     selectedStudent,
     studentFaceData,
@@ -27,19 +28,37 @@ const StudentView = () => {
     }
   }, [id]);
 
+  // Determine breadcrumb items based on where user came from
+  const getBreadcrumbItems = () => {
+    const from = location.state?.from;
+    
+    if (from === 'rosters') {
+      return [
+        { label: "Home", href: "/home" },
+        { label: "Rosters", href: "/rosters" },
+        ...(location.state?.rosterName 
+          ? [{ label: location.state.rosterName, href: `/roster/${location.state.rosterId}` }]
+          : []
+        ),
+        { label: selectedStudent?.name || "View Student" },
+      ];
+    }
+    
+    // Default breadcrumb
+    return [
+      { label: "Home", href: "/home" },
+      { label: "Students", href: "/students" },
+      { label: selectedStudent?.name || "View Student" },
+    ];
+  };
+
   // Shared layout for loading/error states
   const renderLayout = (content) => (
     <div className="min-h-screen flex">
       <Sidebar />
       <main className="flex flex-col h-screen w-full bg-[#fafafa] overflow-hidden">
         <div className="sticky top-0 z-20 ">
-          <Breadcrumb
-            items={[
-              { label: "Home", href: "/home" },
-              { label: "Students", href: "/students" },
-              { label: selectedStudent?.name || "View Student" },
-            ]}
-          />
+          <Breadcrumb items={getBreadcrumbItems()} />
         </div>
 
         <div className="flex-1 overflow-y-auto">{content}</div>

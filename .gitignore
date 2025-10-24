@@ -41,6 +41,7 @@
 .DS_Store
 Thumbs.db
 *.log
+*.lck
 *.tmp
 *.swp
 *~
@@ -69,3 +70,9 @@ Thumbs.db
 *.dat
 *.lst
 *.log
+
+# ----------------------
+# Dataset files
+# ----------------------
+
+dataset*/

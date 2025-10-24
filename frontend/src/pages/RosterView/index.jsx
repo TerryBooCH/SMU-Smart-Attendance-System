@@ -3,14 +3,18 @@ import { useParams } from "react-router-dom";
 import Sidebar from "../../components/Sidebar";
 import Breadcrumb from "../../components/Breadcrumb";
 import useRoster from "../../hooks/useRoster";
+import RosterHeader from "./RosterHeader";
+import Toolbar from "./Toolbar";
+import RosterStudentsContainer from "./RosterStudentsContainer";
 
 const RosterView = () => {
   const { id } = useParams();
-  const { selectedRoster, loading, error, fetchRosterById } = useRoster();
+  const { selectedRoster,studentsInRoster, loading, error, fetchRosterById, fetchStudentsInRoster } = useRoster();
 
   useEffect(() => {
     if (id) {
       fetchRosterById(id);
+      fetchStudentsInRoster(id);
     }
   }, [id]);
 
@@ -28,7 +32,11 @@ const RosterView = () => {
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto"></div>
+        <div className="flex-1 overflow-y-auto">
+          <RosterHeader roster={selectedRoster} />
+          <Toolbar roster={selectedRoster} />
+          <RosterStudentsContainer roster={selectedRoster} students={studentsInRoster} />
+        </div>
       </main>
     </div>
   );

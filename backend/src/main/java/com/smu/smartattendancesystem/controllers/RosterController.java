@@ -13,8 +13,12 @@ import org.springframework.web.bind.annotation.*;
 
 import com.smu.smartattendancesystem.dto.FaceDataDTO;
 import com.smu.smartattendancesystem.dto.RosterSummaryDTO;
+import com.smu.smartattendancesystem.managers.AttendanceManager;
+import com.smu.smartattendancesystem.managers.SessionManager;
+import com.smu.smartattendancesystem.models.Attendance;
 import com.smu.smartattendancesystem.models.Roster;
 import com.smu.smartattendancesystem.models.Student;
+import com.smu.smartattendancesystem.models.Session;
 import com.smu.smartattendancesystem.models.StudentRoster;
 import com.smu.smartattendancesystem.services.RosterService;
 import com.smu.smartattendancesystem.services.FaceDataService;
@@ -25,10 +29,14 @@ public class RosterController {
 
     private final RosterService rosterService;
     private final FaceDataService faceDataService;
+    private final AttendanceManager attendanceManager;
+    private final SessionManager sessionManager; 
 
-    public RosterController(RosterService rosterService, FaceDataService faceDataService) {
+    public RosterController(RosterService rosterService, FaceDataService faceDataService, AttendanceManager attendanceManager, SessionManager sessionManager) {
         this.rosterService = rosterService;
         this.faceDataService = faceDataService;
+        this.attendanceManager = attendanceManager; 
+        this.sessionManager = sessionManager;
     }
 
     // Create a new roster
@@ -113,6 +121,7 @@ public class RosterController {
     @PostMapping("/{rosterId}/students/{studentId}")
     public ResponseEntity<?> addStudentToRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
         try {
+            // Step 1: Add student to roster
             Roster updated = rosterService.addStudentToRoster(rosterId, studentId);
 
             StudentRoster newStudentRoster = updated.getStudentRosters()
@@ -123,13 +132,21 @@ public class RosterController {
 
             Student student = newStudentRoster.getStudent();
 
-            // Get latest face data (if available)
+            // Step 2: ✅ Auto-create attendance records for all sessions linked to this roster
+            List<Session> linkedSessions = sessionManager.getSessionsByRosterId(rosterId);
+            if (!linkedSessions.isEmpty()) {
+                List<Attendance> attendances = linkedSessions.stream()
+                        .map(session -> new Attendance(session, student, "PENDING", "NOT MARKED", null))
+                        .toList();
+                attendanceManager.saveAll(attendances);
+            }
+
+            // Step 3: Prepare response
             List<FaceDataDTO> faceList = faceDataService.list(studentId);
             String latestFaceBase64 = faceList.isEmpty()
                     ? null
                     : faceList.get(faceList.size() - 1).getImageBase64();
 
-            // Build response
             Map<String, Object> response = new HashMap<>();
             response.put("id", student.getId());
             response.put("studentId", student.getStudentId());
@@ -142,15 +159,26 @@ public class RosterController {
             return ResponseEntity.ok(response);
 
         } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(createErrorResponse(e.getMessage()));
+            String msg = e.getMessage().toLowerCase();
+
+            if (msg.contains("roster")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(createErrorResponse("Roster not found with ID: " + rosterId));
+            } else if (msg.contains("student")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(createErrorResponse("Student not found with ID: " + studentId));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(createErrorResponse("Resource not found: " + e.getMessage()));
+            }
+
         } catch (IllegalStateException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(createErrorResponse(e.getMessage()));
+                    .body(createErrorResponse("Student with ID " + studentId + " is already in this roster"));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while adding student to roster"));
+                    .body(createErrorResponse("An unexpected error occurred while adding student to roster"));
         }
     }
 
@@ -232,7 +260,15 @@ public class RosterController {
         try {
             String newName = request.get("name");
             Roster updated = rosterService.updateRosterName(id, newName);
-            return ResponseEntity.ok(updated);
+
+            // Build the same style response as getRosterById
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", updated.getId());
+            response.put("name", updated.getName());
+            response.put("createdAt", updated.getCreatedAt());
+            response.put("updatedAt", updated.getUpdatedAt());
+
+            return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Roster not found with ID: " + id));

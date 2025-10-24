@@ -110,6 +110,7 @@ public class FaceDataService {
     @Transactional(readOnly = true)
     public Optional<FaceDataDTO> getLatestFaceData(String studentId) {
         // Validate if student exists
+        @SuppressWarnings("unused")
         Student student = validateStudent(studentId);
 
         Optional<FaceData> optFaceData = faceManager.getOneByStudentId(studentId);

@@ -41,6 +41,10 @@ function App() {
                       <Route path="/rosters" element={<Rosters />} />
                       <Route path="/roster/:id" element={<RosterView />} />
                       <Route path="/sessions" element={<Sessions />} />
+                      <Route
+                        path="/sessions/:id/live-recognition"
+                        element={<LiveRecognition />}
+                      />
                       <Route path="/reports" element={<Reports />} />
                       <Route
                         path="/live-recognition"

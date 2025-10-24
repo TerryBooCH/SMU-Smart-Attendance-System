@@ -8,17 +8,21 @@ import org.springframework.stereotype.Service;
 import com.smu.smartattendancesystem.managers.RosterManager;
 import com.smu.smartattendancesystem.models.Roster;
 import com.smu.smartattendancesystem.models.Student;
+import com.smu.smartattendancesystem.models.Session;
 import com.smu.smartattendancesystem.repositories.StudentRepository;
+import com.smu.smartattendancesystem.repositories.SessionRepository;
 
 @Service
 public class RosterService {
 
     private final RosterManager rosterManager;
     private final StudentRepository studentRepository;
+    private final SessionRepository sessionRepository;
 
-    public RosterService(RosterManager rosterManager, StudentRepository studentRepository) {
+    public RosterService(RosterManager rosterManager, StudentRepository studentRepository, SessionRepository sessionRepository) {
         this.rosterManager = rosterManager;
         this.studentRepository = studentRepository;
+        this.sessionRepository = sessionRepository;
     }
 
     // Create a new roster
@@ -57,15 +61,30 @@ public class RosterService {
 
     // Add student to roster
     public Roster addStudentToRoster(Long rosterId, String studentId) {
-        Roster roster = getRosterById(rosterId);
-        Student student = studentRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found with studentId: " + studentId));
+        // Fetch roster using RosterManager
+        Roster roster = rosterManager.getRoster(rosterId)
+                .orElseThrow(() -> new NoSuchElementException("Roster not found with ID: " + rosterId));
 
-        boolean added = roster.addToRoster(student);
-        if (!added) {
-            throw new RuntimeException("Student already in roster or invalid");
+        // Fetch student (throws NoSuchElementException if not found)
+        Student student = studentRepository.findByStudentId(studentId)
+                .orElseThrow(() -> new NoSuchElementException("Student not found with studentId: " + studentId));
+
+        // Check if student already in roster
+        boolean alreadyInRoster = roster.getStudentRosters().stream()
+                .anyMatch(sr -> sr.getStudent().getStudentId().equals(studentId));
+        if (alreadyInRoster) {
+            throw new IllegalStateException(
+                    "Student with ID " + studentId + " is already in roster \"" + roster.getName() + "\"");
         }
 
+        // Add to roster
+        boolean added = roster.addToRoster(student);
+        if (!added) {
+            throw new IllegalStateException(
+                    "Failed to add student to roster \"" + roster.getName() + "\" — possible invalid state");
+        }
+
+        // Save and return updated roster
         return rosterManager.updateRoster(roster);
     }
 
@@ -95,5 +114,9 @@ public class RosterService {
         }
 
         return rosterManager.updateRoster(roster);
+    }
+
+    public List<Session> getSessionsForRoster(Long rosterId) {
+        return sessionRepository.findByRosterId(rosterId);
     }
 }

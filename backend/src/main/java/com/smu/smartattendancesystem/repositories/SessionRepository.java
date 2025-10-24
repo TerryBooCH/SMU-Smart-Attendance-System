@@ -16,4 +16,7 @@ public interface SessionRepository extends JpaRepository<Session, Long> {
 
     // Find sessions on a specific date
     List<Session> findByStartAt(LocalDate date);
+
+    
+    List<Session> findByRosterId(Long rosterId);
 }

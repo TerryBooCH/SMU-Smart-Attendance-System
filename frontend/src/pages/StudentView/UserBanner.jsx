@@ -1,10 +1,11 @@
 import React from 'react';
 import { getInitials } from '../../utils/stringUtils';
-import { IdCardLanyard, Mail, Phone } from 'lucide-react';
+import { IdCardLanyard, Mail, Phone, GraduationCap } from 'lucide-react'; 
 
 const UserBanner = ({ student }) => {
   const studentName = student?.name || 'John Doe';
   const initials = getInitials(studentName);
+  const faceImage = student?.face?.imageBase64;
 
   return (
     <div className="p-6">
@@ -31,13 +32,21 @@ const UserBanner = ({ student }) => {
           </div>
         </div>
 
-        {/* Profile Picture (Initials) */}
+        {/* Profile Picture */}
         <div className="absolute left-1/2 -translate-x-1/2 -bottom-8">
           <div className="relative">
             <div className="w-32 h-32 rounded-full border-4 border-white bg-white shadow-xl overflow-hidden flex items-center justify-center">
-              <div className="w-full h-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                <span className="text-4xl font-semibold text-white">{initials}</span>
-              </div>
+              {faceImage ? (
+                <img
+                  src={faceImage}
+                  alt={studentName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                  <span className="text-4xl font-semibold text-white">{initials}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -47,32 +56,32 @@ const UserBanner = ({ student }) => {
       <div className="pt-12 text-center">
         <h2 className="text-2xl font-bold text-gray-800">{studentName}</h2>
         <p className="text-gray-500 mt-1">Student Profile</p>
-        
+
         {/* Contact Information */}
-        <div className="flex items-center justify-center gap-8 mt-4 text-sm text-gray-600">
+        <div className="flex flex-wrap items-center justify-center gap-6 mt-4 text-sm text-gray-600">
           {/* Student ID */}
-          {student?.studentId && (
-            <div className="flex items-center gap-1.5">
-              <IdCardLanyard className="w-4 h-4 text-amber-500" />
-              <span>{student.studentId}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5">
+            <IdCardLanyard className="w-4 h-4 text-amber-500" />
+            <span>{student?.studentId?.trim() || "N/A"}</span>
+          </div>
+
+          {/* Class */}
+          <div className="flex items-center gap-1.5">
+            <GraduationCap className="w-4 h-4 text-purple-500" />
+            <span>{student?.className?.trim() || "N/A"}</span>
+          </div>
 
           {/* Email */}
-          {student?.email && (
-            <div className="flex items-center gap-1.5">
-              <Mail className="w-4 h-4 text-blue-500" />
-              <span>{student.email}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5">
+            <Mail className="w-4 h-4 text-blue-500" />
+            <span>{student?.email?.trim() || "N/A"}</span>
+          </div>
 
           {/* Phone */}
-          {student?.phone && (
-            <div className="flex items-center gap-1.5">
-              <Phone className="w-4 h-4 text-green-500" />
-              <span>{student.phone}</span>
-            </div>
-          )}
+          <div className="flex items-center gap-1.5">
+            <Phone className="w-4 h-4 text-green-500" />
+            <span>{student?.phone?.trim() || "N/A"}</span>
+          </div>
         </div>
       </div>
     </div>

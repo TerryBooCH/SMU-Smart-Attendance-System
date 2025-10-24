@@ -1,5 +1,6 @@
 import React from "react";
 import CreateStudentButton from "./CreateStudentButton";
+import BatchImportStudentsButton from "./BatchImportStudentsButton";
 import SearchBar from "./SearchBar";
 
 
@@ -13,7 +14,8 @@ const Toolbar = () => {
       <div className="mt-4">
         <SearchBar />
       </div>
-        <div>
+        <div className="flex items-center gap-3">
+          <BatchImportStudentsButton />
           <CreateStudentButton />
         </div>
       </div>

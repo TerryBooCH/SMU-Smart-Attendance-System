@@ -20,6 +20,29 @@ export const formatDateTime = (dateString) => {
   });
 };
 
+export const formatTime = (dateString) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleTimeString("en-SG", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+export const calculateDuration = (start, end) => {
+  if (!start || !end) return "N/A";
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const durationMs = endDate - startDate;
+  const hours = Math.floor(durationMs / (1000 * 60 * 60));
+  const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+  
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  return `${minutes}m`;
+};
+
 export const getRelativeTime = (dateString) => {
   if (!dateString) return "N/A";
   const date = new Date(dateString);

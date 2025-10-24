@@ -12,6 +12,28 @@ export const sessionService = {
     }
   },
 
+  getSessionById: async (sessionId) => {
+    try {
+      const response = await apiClient.get(`/api/sessions/${sessionId}`);
+      console.log("Fetched session:", response.data);
+      return response.data;
+    } catch (error) {
+      const errorData = error.response?.data || {};
+      const errorMessage =
+        errorData.message ||
+        errorData.error ||
+        error.message ||
+        "Error fetching session";
+      const statusCode = error.response?.status || 500;
+
+      console.error(`Error fetching session (${statusCode}):`, errorMessage);
+
+      const customError = new Error(errorMessage);
+      customError.statusCode = statusCode;
+      throw customError;
+    }
+  },
+
   createSession: async (sessionData) => {
     try {
       const response = await apiClient.post("/api/sessions", sessionData);

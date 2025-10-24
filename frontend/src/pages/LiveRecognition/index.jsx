@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { useParams } from "react-router-dom";
 import LiveRecognitionSidebar from "./LiveRecognitionSidebar";
 import Breadcrumb from "../../components/Breadcrumb";
 import MainRecognitionScreen from "./MainRecognitionScreen";
 import ControlBar from "./ControlBar";
 
 const LiveRecognition = () => {
+  const { id } = useParams();
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [activeSidebar, setActiveSidebar] = useState(null); // can be: 'info', 'notifications', 'attendance', or null
 
@@ -23,6 +25,7 @@ const LiveRecognition = () => {
       </main>
 
       <LiveRecognitionSidebar
+        id={id}
         activeSidebar={activeSidebar}
         setActiveSidebar={setActiveSidebar}
       />

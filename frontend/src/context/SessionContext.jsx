@@ -5,9 +5,11 @@ const SessionContext = createContext();
 
 export const SessionProvider = ({ children }) => {
   const [sessions, setSessions] = useState([]);
+  const [selectedSession, setSelectedSession] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Fetch all sessions
   const fetchAllSessions = async () => {
     try {
       setLoading(true);
@@ -25,6 +27,24 @@ export const SessionProvider = ({ children }) => {
     }
   };
 
+  const fetchSessionById = async (sessionId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await sessionService.getSessionById(sessionId);
+      setSelectedSession(response);
+      return response;
+    } catch (error) {
+      console.error("Error fetching session:", error);
+      setError(error.message || "Failed to fetch session");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Create a new session
   const createSession = async (sessionData) => {
     try {
       setLoading(true);
@@ -44,6 +64,7 @@ export const SessionProvider = ({ children }) => {
     }
   };
 
+  // Delete a session by ID
   const deleteSessionById = async (sessionId) => {
     try {
       setLoading(true);
@@ -51,8 +72,13 @@ export const SessionProvider = ({ children }) => {
 
       await sessionService.deleteSessionById(sessionId);
 
-      // Remove deleted session from state
+      // Remove deleted session from local state
       setSessions((prev) => prev.filter((session) => session.id !== sessionId));
+
+      // Clear selectedSession if it was deleted
+      if (selectedSession && selectedSession.id === sessionId) {
+        setSelectedSession(null);
+      }
 
       return { status: 200, message: "Session deleted successfully" };
     } catch (error) {
@@ -66,10 +92,13 @@ export const SessionProvider = ({ children }) => {
 
   const value = {
     sessions,
+    selectedSession,
     loading,
     error,
     setSessions,
+    setSelectedSession,
     fetchAllSessions,
+    fetchSessionById, // ✅ added to context value
     createSession,
     deleteSessionById,
   };

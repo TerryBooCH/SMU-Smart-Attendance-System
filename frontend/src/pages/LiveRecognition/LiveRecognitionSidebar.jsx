@@ -1,7 +1,29 @@
-import React from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { X } from "lucide-react";
+import InfoContent from "./InfoContent";
+import NotificationContent from "./NotificationContent";
+import AttendanceFieldContent from "./AttendanceFieldContent";
+import useSession from "../../hooks/useSession";
 
-const LiveRecognitionSidebar = ({ activeSidebar, setActiveSidebar }) => {
+const LiveRecognitionSidebar = ({ id, activeSidebar, setActiveSidebar }) => {
+  const { fetchSessionById, loading, error } = useSession();
+  const [sessionData, setSessionData] = useState(null);
+  const hasFetched = useRef(false);
+
+  useEffect(() => {
+    if (activeSidebar === "info" && id && !hasFetched.current) {
+      hasFetched.current = true;
+      fetchSessionById(id)
+        .then((data) => {
+          setSessionData(data);
+        })
+        .catch((err) => {
+          console.error("Failed to fetch session:", err);
+          hasFetched.current = false; // Allow retry on error
+        });
+    }
+  }, [activeSidebar, id]); 
+
   if (!activeSidebar) return null;
 
   const sidebarTitleMap = {
@@ -29,9 +51,20 @@ const LiveRecognitionSidebar = ({ activeSidebar, setActiveSidebar }) => {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 text-sm text-gray-700">
-          {activeSidebar === "info" && <p>Details and insights will appear here.</p>}
-          {activeSidebar === "notifications" && <p>Your recent notifications.</p>}
-          {activeSidebar === "attendance" && <p>Attendance information and controls.</p>}
+          {activeSidebar === "info" && (
+            <>
+              {loading && <p>Loading session data...</p>}
+              {error && <p className="text-red-500">Error: {error}</p>}
+              {!loading && !error && sessionData && (
+                <InfoContent sessionData={sessionData} />
+              )}
+              {!loading && !error && !sessionData && (
+                <p>No session data available.</p>
+              )}
+            </>
+          )}
+          {activeSidebar === "notifications" && <NotificationContent />}
+          {activeSidebar === "attendance" && <AttendanceFieldContent />}
         </div>
       </nav>
     </div>

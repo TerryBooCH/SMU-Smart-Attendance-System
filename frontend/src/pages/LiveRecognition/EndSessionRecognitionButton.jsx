@@ -1,12 +1,28 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { Power } from "lucide-react";
+import useToast from "../../hooks/useToast";
+import useSession from "../../hooks/useSession";
 
-const EndSessionRecognitionButton = () => {
+const EndSessionRecognitionButton = ({ id }) => {
   const navigate = useNavigate();
+  const { closeSession } = useSession();
+  const { success, error } = useToast();
 
-  const handleClick = () => {
-    navigate("/sessions");
+  const handleClick = async () => {
+    if (!id) {
+      error("No session ID provided.");
+      return;
+    }
+
+    try {
+      await closeSession(id);
+      success("Session closed successfully.");
+      navigate("/sessions");
+    } catch (err) {
+      console.error("Error closing session:", err);
+      error(`Failed to close session: ${err.message || "Unknown error"}`);
+    }
   };
 
   return (

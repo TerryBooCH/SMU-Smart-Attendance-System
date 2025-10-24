@@ -76,4 +76,46 @@ export const sessionService = {
       throw customError;
     }
   },
+
+    openSession: async (sessionId) => {
+    try {
+      const response = await apiClient.put(`/api/sessions/${sessionId}/open`);
+      console.log("Opened session:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error opening session:", error);
+      const errorData = error.response?.data || {};
+      const errorMessage =
+        errorData.message ||
+        errorData.error ||
+        error.message ||
+        "Error opening session";
+      const statusCode = error.response?.status || 500;
+
+      const customError = new Error(errorMessage);
+      customError.statusCode = statusCode;
+      throw customError;
+    }
+  },
+
+  closeSession: async (sessionId) => {
+    try {
+      const response = await apiClient.put(`/api/sessions/${sessionId}/close`);
+      console.log("Closed session:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error closing session:", error);
+      const errorData = error.response?.data || {};
+      const errorMessage =
+        errorData.message ||
+        errorData.error ||
+        error.message ||
+        "Error closing session";
+      const statusCode = error.response?.status || 500;
+
+      const customError = new Error(errorMessage);
+      customError.statusCode = statusCode;
+      throw customError;
+    }
+  },
 };

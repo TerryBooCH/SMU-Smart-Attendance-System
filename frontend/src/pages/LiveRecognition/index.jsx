@@ -17,6 +17,7 @@ const LiveRecognition = () => {
           <MainRecognitionScreen isCameraOn={isCameraOn} />
         </div>
         <ControlBar
+          id={id}
           isCameraOn={isCameraOn}
           setIsCameraOn={setIsCameraOn}
           activeSidebar={activeSidebar}

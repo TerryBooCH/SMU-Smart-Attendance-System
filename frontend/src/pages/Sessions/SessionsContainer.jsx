@@ -4,6 +4,7 @@ import useSession from "../../hooks/useSession";
 import { Eye } from "lucide-react";
 import { formatDateTime } from "../../utils/dateUtils";
 import DeleteSessionButton from "../../components/DeleteSessionButton";
+import OpenSessionButton from "../../components/OpenSessionButton";
 
 const SessionsContainer = () => {
   const { sessions, loading, error, fetchAllSessions } = useSession();
@@ -67,6 +68,10 @@ const SessionsContainer = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
+                {/* New column */}
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Open Session
+                </th>
               </tr>
             </thead>
 
@@ -74,42 +79,31 @@ const SessionsContainer = () => {
               {sessions && sessions.length > 0 ? (
                 sessions.map((session) => (
                   <tr key={session.id} className="hover:bg-gray-50">
-                    {/* Course Name */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900 font-medium">
                         {session.courseName || "N/A"}
                       </div>
                     </td>
-
-                    {/* Roster Name */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {session.rosterName || "Unnamed Roster"}
                       </div>
                     </td>
-
-                    {/* Start At */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-600">
                         {formatDateTime(session.startAt)}
                       </div>
                     </td>
-
-                    {/* End At */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-600">
                         {formatDateTime(session.endAt)}
                       </div>
                     </td>
-
-                    {/* Late After */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
                         {session.lateAfterMinutes ?? "—"}
                       </div>
                     </td>
-
-                    {/* Status */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
@@ -121,22 +115,16 @@ const SessionsContainer = () => {
                         {session.open ? "Open" : "Closed"}
                       </span>
                     </td>
-
-                    {/* Created At */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
                         {formatDateTime(session.createdAt)}
                       </div>
                     </td>
-
-                    {/* Updated At */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
                         {formatDateTime(session.updatedAt)}
                       </div>
                     </td>
-
-                    {/* Actions */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
@@ -149,12 +137,16 @@ const SessionsContainer = () => {
                         <DeleteSessionButton session={session} />
                       </div>
                     </td>
+                    {/* Placeholder for your button */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <OpenSessionButton session={session} />
+                    </td>
                   </tr>
                 ))
               ) : (
                 <tr>
                   <td
-                    colSpan="9"
+                    colSpan="10"
                     className="px-6 py-4 text-center text-sm text-gray-500"
                   >
                     No sessions found

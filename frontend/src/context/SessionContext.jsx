@@ -27,6 +27,7 @@ export const SessionProvider = ({ children }) => {
     }
   };
 
+  // Fetch a specific session by ID
   const fetchSessionById = async (sessionId) => {
     try {
       setLoading(true);
@@ -90,6 +91,60 @@ export const SessionProvider = ({ children }) => {
     }
   };
 
+  // 🔹 Open a session
+  const openSession = async (sessionId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const updatedSession = await sessionService.openSession(sessionId);
+
+      // Update local state
+      setSessions((prev) =>
+        prev.map((s) => (s.id === sessionId ? updatedSession : s))
+      );
+
+      if (selectedSession?.id === sessionId) {
+        setSelectedSession(updatedSession);
+      }
+
+      return updatedSession;
+    } catch (error) {
+      console.error("Error opening session:", error);
+      setError(error.message || "Failed to open session");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔹 Close a session
+  const closeSession = async (sessionId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const updatedSession = await sessionService.closeSession(sessionId);
+
+      // Update local state
+      setSessions((prev) =>
+        prev.map((s) => (s.id === sessionId ? updatedSession : s))
+      );
+
+      if (selectedSession?.id === sessionId) {
+        setSelectedSession(updatedSession);
+      }
+
+      return updatedSession;
+    } catch (error) {
+      console.error("Error closing session:", error);
+      setError(error.message || "Failed to close session");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     sessions,
     selectedSession,
@@ -98,9 +153,11 @@ export const SessionProvider = ({ children }) => {
     setSessions,
     setSelectedSession,
     fetchAllSessions,
-    fetchSessionById, // ✅ added to context value
+    fetchSessionById,
     createSession,
     deleteSessionById,
+    openSession, // ✅ newly added
+    closeSession, // ✅ newly added
   };
 
   return (

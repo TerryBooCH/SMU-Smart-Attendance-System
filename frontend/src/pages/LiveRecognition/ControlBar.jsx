@@ -6,7 +6,7 @@ import ToggleInfoButton from "./ToggleInfoButton";
 import ToggleNotificationButton from "./ToggleNotificationButton";
 import ToggleAttendanceFieldButton from "./ToggleAttendanceFieldButton";
 
-const ControlBar = ({ isCameraOn, setIsCameraOn, activeSidebar, setActiveSidebar }) => {
+const ControlBar = ({ id, isCameraOn, setIsCameraOn, activeSidebar, setActiveSidebar }) => {
   return (
     <div className="px-4 py-3">
       <div className="flex items-center justify-between">
@@ -21,7 +21,7 @@ const ControlBar = ({ isCameraOn, setIsCameraOn, activeSidebar, setActiveSidebar
             isCameraOn={isCameraOn}
             setIsCameraOn={setIsCameraOn}
           />
-          <EndSessionRecognitionButton />
+          <EndSessionRecognitionButton id={id} />
         </div>
 
         {/* Right: Info + Notification + Attendance buttons */}

@@ -103,6 +103,25 @@ public class StudentService {
         return savedStudent;
     }
 
+    // Initialize user accounts for the students populated in the DB
+    @Transactional
+    public void initUserAccounts() {
+        // Retrieve all students from the database
+        List<Student> students = studentManager.getAllStudents();
+
+        for (Student s : students) {
+            String defPassword = s.getStudentId(); // Set default password to studentId
+            User newUser = new User(
+                    s.getName(),
+                    s.getEmail(),
+                    defPassword,
+                    0,
+                    s);
+            newUser.setStudent(s); // Link user to student
+            userManager.createUser(newUser); // Save user to database
+        }
+    }
+
     public StudentWithFaceDTO updateStudent(String studentId, Student student) {
 
         // Validate if student exists

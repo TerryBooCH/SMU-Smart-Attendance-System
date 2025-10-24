@@ -1,7 +1,7 @@
 package com.smu.smartattendancesystem.services;
 
-import java.util.Optional;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -48,8 +48,12 @@ public class UserService {
         Map<String, Object> userInfo = Map.of(
                 "name", user.getName(),
                 "email", user.getEmail(),
-                "permissionLevel", user.getPermissionLevel(),
-                "studentId", user.getLinkedStudentId());
+                "permissionLevel", user.getPermissionLevel());
+
+        String linkedStudentId = user.getLinkedStudentId(); // may be null for TA/Professor
+        if (linkedStudentId != null && !linkedStudentId.isBlank()) {
+            userInfo.put("studentId", linkedStudentId);
+        }
 
         return new LoginResponse(token, jwtService.getExpirationMs(), "Bearer", userInfo);
     }

@@ -77,6 +77,9 @@ const Sidebar = () => {
     if (path === "/rosters") {
       return location.pathname.startsWith("/roster");
     }
+    if (path === "/sessions") {
+      return location.pathname.startsWith("/session");
+    }
     return location.pathname === path;
   };
 

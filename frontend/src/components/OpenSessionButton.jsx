@@ -16,7 +16,7 @@ const OpenSessionButton = ({ session }) => {
       const updatedSession = await openSession(session.id);
       success(`"${updatedSession.courseName || session.courseName}" opened successfully!`);
 
-      navigate(`/sessions/${session.id}/live-recognition`);
+      navigate(`/session/${session.id}/live-recognition`);
     } catch (err) {
       console.error("Error opening session:", err);
       error(`Failed to open session: ${err.message || "Unknown error"}`);

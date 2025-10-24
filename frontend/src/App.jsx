@@ -14,6 +14,7 @@ import SignIn from "./pages/SignIn";
 import Students from "./pages/Students";
 import StudentView from "./pages/StudentView";
 import Sessions from "./pages/Sessions";
+import SessionView from "./pages/SessionView";
 import Rosters from "./pages/Rosters";
 import RosterView from "./pages/RosterView";
 import Reports from "./pages/Reports";
@@ -42,7 +43,11 @@ function App() {
                       <Route path="/roster/:id" element={<RosterView />} />
                       <Route path="/sessions" element={<Sessions />} />
                       <Route
-                        path="/sessions/:id/live-recognition"
+                        path="/session/:id/"
+                        element={<SessionView />}
+                      />
+                      <Route
+                        path="/session/:id/live-recognition"
                         element={<LiveRecognition />}
                       />
                       <Route path="/reports" element={<Reports />} />

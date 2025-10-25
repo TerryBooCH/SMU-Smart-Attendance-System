@@ -17,6 +17,7 @@ import com.smu.smartattendancesystem.models.Attendance;
 import com.smu.smartattendancesystem.models.Roster;
 import com.smu.smartattendancesystem.models.Session;
 import com.smu.smartattendancesystem.models.Student;
+import com.smu.smartattendancesystem.utils.LoggerFacade;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -67,21 +68,27 @@ public class SessionController {
                             .toList();
 
                     attendanceManager.saveAll(attendances);
+                    LoggerFacade.info("Initialized attendance for " + students.size() + " students in session " + savedSession.getId() + ".");
                 }
             }
 
+            LoggerFacade.info("Created Session " + savedSession.getId() + " titled: " + savedSession.getCourseName());
             return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(savedSession));
 
         } catch (EntityNotFoundException e) {
+            LoggerFacade.warning("Failed to create session: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalArgumentException e) {
+            LoggerFacade.warning("Invalid session creation request: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (DataIntegrityViolationException e) {
+            LoggerFacade.warning("Data integrity violation while creating session: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse("Database constraint violated"));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while creating session: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An unexpected error occurred while creating the session"));
@@ -97,8 +104,10 @@ public class SessionController {
                     .map(this::toDTO)
                     .toList();
 
+            LoggerFacade.info("Fetched all sessions. Total count: " + sessions.size());
             return ResponseEntity.ok(sessions);
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while fetching all sessions: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while retrieving sessions"));
@@ -112,11 +121,14 @@ public class SessionController {
             Session session = sessionManager.getSession(id)
                     .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
 
+            LoggerFacade.info("Fetched Session " + id + ".");
             return ResponseEntity.ok(toDTO(session));
         } catch (EntityNotFoundException e) {
+            LoggerFacade.warning("Session not found: " + id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while fetching session " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while retrieving the session"));
         }
@@ -135,14 +147,18 @@ public class SessionController {
 
             session.setOpen(true);
             Session updated = sessionManager.updateSession(session);
+            LoggerFacade.info("Opened Session " + id + ".");
             return ResponseEntity.ok(toDTO(updated));
         } catch (EntityNotFoundException e) {
+            LoggerFacade.warning("Failed to open — Session not found: " + id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalStateException e) {
+            LoggerFacade.warning("Conflict while opening Session " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while opening session " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while opening the session"));
         }
@@ -161,14 +177,18 @@ public class SessionController {
 
             session.setOpen(false);
             Session updated = sessionManager.updateSession(session);
+            LoggerFacade.info("Closed Session " + id + ".");
             return ResponseEntity.ok(toDTO(updated));
         } catch (EntityNotFoundException e) {
+            LoggerFacade.warning("Failed to close — Session not found: " + id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalStateException e) {
+            LoggerFacade.warning("Conflict while closing Session " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while closing session " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while closing the session"));
         }
@@ -186,14 +206,18 @@ public class SessionController {
             }
 
             sessionManager.deleteSession(id);
+            LoggerFacade.info("Deleted Session " + id + ".");
             return ResponseEntity.ok(createSuccessResponse("Session deleted successfully"));
         } catch (EntityNotFoundException e) {
+            LoggerFacade.warning("Failed to delete — Session not found: " + id);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalStateException e) {
+            LoggerFacade.warning("Conflict while deleting Session " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while deleting session " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while deleting the session"));
         }
@@ -224,12 +248,15 @@ public class SessionController {
                 attendanceManager.saveAll(attendances);
             }
 
+            LoggerFacade.info("Linked Roster " + rosterId + " to Session " + id + ".");
             return ResponseEntity.ok(toDTO(updatedSession));
 
         } catch (EntityNotFoundException e) {
+            LoggerFacade.warning("Failed to link roster — " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade.severe("Unexpected error while linking roster " + rosterId + " to session " + id + ": " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while linking roster to session"));

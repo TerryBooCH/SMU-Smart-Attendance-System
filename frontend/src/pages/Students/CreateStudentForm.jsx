@@ -3,7 +3,8 @@ import { validateCreateStudentForm } from "../../utils/validateForm";
 import { useModal } from "../../context/ModalContext";
 import { useToast } from "../../hooks/useToast";
 import useStudent from "../../hooks/useStudent";
-import { CircleAlert } from "lucide-react";
+import { CircleAlert, Info } from "lucide-react";
+import Tooltip from "../../components/ToolTip";
 
 const CreateStudentForm = () => {
   const { closeModal } = useModal();
@@ -14,7 +15,7 @@ const CreateStudentForm = () => {
     name: "",
     email: "",
     phone: "",
-    className: "", 
+    className: "",
   });
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +45,7 @@ const CreateStudentForm = () => {
       name: formValues.name.trim(),
       email: formValues.email.trim(),
       phone: formValues.phone.trim(),
-      className: formValues.className.trim(), 
+      className: formValues.className.trim(),
     };
 
     const errors = validateCreateStudentForm(trimmedValues);
@@ -98,12 +99,24 @@ const CreateStudentForm = () => {
         <div className="mb-5">
           {/* Student ID */}
           <div className="w-full mb-4">
-            <label
-              htmlFor="studentId"
-              className="block mb-2 text-sm text-gray-900 font-lexend"
-            >
-              Student ID
-            </label>
+            <div className="flex items-center gap-2 mb-2">
+              <label
+                htmlFor="studentId"
+                className="text-sm text-gray-900 font-lexend"
+              >
+                Student ID
+              </label>
+              <div className="cursor-pointer">
+                <Tooltip
+                  className="text-gray-900"
+                  content="Once created, the Student ID cannot be updated."
+                  position="right"
+                >
+                  <Info size={16} />
+                </Tooltip>
+              </div>
+            </div>
+
             <input
               type="text"
               id="studentId"
@@ -179,6 +192,7 @@ const CreateStudentForm = () => {
             )}
           </div>
 
+          {/* Class */}
           <div className="w-full mb-4">
             <label
               htmlFor="className"

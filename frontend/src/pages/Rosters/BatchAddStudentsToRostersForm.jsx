@@ -9,6 +9,7 @@ import {
 import { useModal } from "../../hooks/useModal";
 import useRoster from "../../hooks/useRoster";
 import useToast from "../../hooks/useToast";
+import CsvHint from "./CsvHint";
 
 const BatchAddStudentsToRostersForm = () => {
   const [file, setFile] = useState(null);
@@ -165,7 +166,7 @@ const BatchAddStudentsToRostersForm = () => {
         <div className="flex justify-end pt-2">
           <button
             onClick={handleDone}
-            className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow"
+            className="cursor-pointer px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow"
           >
             Done
           </button>
@@ -177,6 +178,7 @@ const BatchAddStudentsToRostersForm = () => {
   // === Default Upload View ===
   return (
     <div className="flex flex-col items-center gap-6 py-4 font-lexend">
+      <CsvHint />
       {/* Drag & Drop Zone */}
       <div
         onDragEnter={handleDrag}

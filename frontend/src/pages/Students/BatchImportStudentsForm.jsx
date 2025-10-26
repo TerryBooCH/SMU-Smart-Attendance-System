@@ -3,6 +3,8 @@ import { UploadCloud, Loader2, X, CircleAlert, CheckCircle2 } from "lucide-react
 import useStudent from "../../hooks/useStudent";
 import useToast from "../../hooks/useToast";
 import { useModal } from "../../hooks/useModal";
+import Tooltip from "../../components/ToolTip";
+import CsvHint from "./CsvHint";
 
 const BatchImportStudentsForm = () => {
   const [file, setFile] = useState(null);
@@ -105,6 +107,7 @@ const BatchImportStudentsForm = () => {
       {/* === Step 1: Upload Zone (hidden after success) === */}
       {!result && (
         <>
+         <CsvHint />
           <div
             onDragEnter={handleDrag}
             onDragLeave={handleDrag}
@@ -126,6 +129,7 @@ const BatchImportStudentsForm = () => {
                 browse
               </label>
             </p>
+            
             <input
               id="csvInput"
               ref={fileInputRef}
@@ -296,7 +300,7 @@ const BatchImportStudentsForm = () => {
           <div className="flex justify-end pt-2">
             <button
               onClick={handleDone}
-              className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow"
+              className="cursor-pointer px-6 py-2.5 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:scale-[0.98] transition-all duration-200 shadow-sm hover:shadow"
             >
               Done
             </button>

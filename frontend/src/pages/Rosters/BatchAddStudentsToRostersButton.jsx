@@ -7,7 +7,7 @@ const BatchAddStudentsToRostersButton = () => {
   const { openModal } = useModal();
 
   const handleBatchAddStudentsToRosters = () => {
-    openModal(<BatchAddStudentsToRostersForm />, "Bacth Add Students To Rosters", { width: "2xl", height: "auto" });
+    openModal(<BatchAddStudentsToRostersForm />, "Batch Add Students To Rosters", { width: "2xl", height: "auto" });
   };
   return (
     <button

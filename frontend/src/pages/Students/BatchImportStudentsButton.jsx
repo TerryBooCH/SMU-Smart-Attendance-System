@@ -7,7 +7,7 @@ const BatchImportStudentsButton = () => {
   const { openModal } = useModal();
 
   const handleBatchImportStudents = () => {
-    openModal(<BatchImportStudentsForm />, "Bacth Import Student", { width: "2xl", height: "auto" });
+    openModal(<BatchImportStudentsForm />, "Batch Import Student", { width: "2xl", height: "auto" });
   };
 
   return (

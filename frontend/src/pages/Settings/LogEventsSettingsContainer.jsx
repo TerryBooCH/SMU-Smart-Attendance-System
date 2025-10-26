@@ -1,5 +1,6 @@
 import React from "react";
 import Tooltip from "../../components/ToolTip";
+import DownloadLogFileButton from "./DownloadLogFileButton";
 import { Info } from "lucide-react";
 
 const LogEventsSettingsContainer = () => {
@@ -36,9 +37,9 @@ const LogEventsSettingsContainer = () => {
           </div>
 
           {/* Right side: placeholder for button */}
-          <div className="w-[160px] flex justify-end">
-            <div className="w-full h-10 border border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-400 text-sm">
-              [Download Button]
+          <div className=" flex justify-end">
+            <div >
+              <DownloadLogFileButton />
             </div>
           </div>
         </div>

@@ -1,17 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { validateCreateSessionForm } from "../../utils/validateForm";
 import useSession from "../../hooks/useSession";
-import useRoster from "../../hooks/useRoster";
+import { rosterService } from "../../api/rosterService";
 import { useModal } from "../../context/ModalContext";
 import { useToast } from "../../hooks/useToast";
 import { CircleAlert } from "lucide-react";
+import Dropdown from "../../components/Dropdown";
+import Tooltip from "../../components/ToolTip";
 
 const CreateSessionForm = () => {
   const { createSession } = useSession();
-  const { rosters, fetchAllRosters } = useRoster();
   const hasFetched = useRef(false);
   const { closeModal } = useModal();
   const { success, error } = useToast();
+
+  const [rosters, setRosters] = useState([]);
+  const [isLoadingRosters, setIsLoadingRosters] = useState(false);
 
   const [formValues, setFormValues] = useState({
     courseName: "",
@@ -25,18 +29,29 @@ const CreateSessionForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Only fetch once on mount
-    if (!hasFetched.current) {
-      fetchAllRosters();
-      hasFetched.current = true;
-    }
-  }, [fetchAllRosters]);
+    const fetchRosters = async () => {
+      if (hasFetched.current) return;
+
+      try {
+        setIsLoadingRosters(true);
+        const data = await rosterService.getAllRosters();
+        setRosters(data);
+        hasFetched.current = true;
+      } catch (err) {
+        console.error("Error fetching rosters:", err);
+        error("Failed to load rosters");
+      } finally {
+        setIsLoadingRosters(false);
+      }
+    };
+
+    fetchRosters();
+  }, [error]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
 
-    // Clear errors for this field when editing
     if (formErrors[name]) {
       setFormErrors((prev) => ({ ...prev, [name]: null }));
     }
@@ -103,9 +118,10 @@ const CreateSessionForm = () => {
             onChange={handleChange}
             disabled={isSubmitting}
             placeholder="e.g., CS104"
-            className={`font-lexend bg-white border text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
-              formErrors.courseName ? "border-red-500" : "border-[#cecece]"
-            } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`font-lexend bg-white border text-gray-900 text-sm rounded-md 
+              focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+              ${formErrors.courseName ? "border-red-500" : "border-[#cecece]"}
+              ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
           />
           {formErrors.courseName && (
             <p className="mt-2 text-sm text-red-600 font-lexend">
@@ -114,7 +130,7 @@ const CreateSessionForm = () => {
           )}
         </div>
 
-        {/* Roster Selection */}
+        {/* In CreateSessionForm.js */}
         <div className="mb-5">
           <label
             htmlFor="rosterId"
@@ -122,28 +138,20 @@ const CreateSessionForm = () => {
           >
             Roster
           </label>
-          <select
-            id="rosterId"
+          <Dropdown
             name="rosterId"
             value={formValues.rosterId}
             onChange={handleChange}
-            disabled={isSubmitting || !rosters.length}
-            className={`font-lexend bg-white border text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
-              formErrors.rosterId ? "border-red-500" : "border-[#cecece]"
-            } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
-          >
-            <option value="">Select a roster...</option>
-            {rosters.map((roster) => (
-              <option key={roster.id} value={roster.id}>
-                {roster.name || `Roster ${roster.id}`}
-              </option>
-            ))}
-          </select>
-          {formErrors.rosterId && (
-            <p className="mt-2 text-sm text-red-600 font-lexend">
-              {formErrors.rosterId}
-            </p>
-          )}
+            disabled={isSubmitting || isLoadingRosters || !rosters.length}
+            error={formErrors.rosterId}
+            placeholder={
+              isLoadingRosters ? "Loading rosters..." : "Select a roster..."
+            }
+            options={rosters.map((r) => ({
+              value: r.id,
+              label: r.name || `Roster ${r.id}`,
+            }))}
+          />
         </div>
 
         {/* Start Time */}
@@ -161,9 +169,9 @@ const CreateSessionForm = () => {
             value={formValues.startAt}
             onChange={handleChange}
             disabled={isSubmitting}
-            className={`font-lexend bg-white border text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
-              formErrors.startAt ? "border-red-500" : "border-[#cecece]"
-            } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`font-lexend bg-white border text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+              ${formErrors.startAt ? "border-red-500" : "border-[#cecece]"}
+              ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
           />
           {formErrors.startAt && (
             <p className="mt-2 text-sm text-red-600 font-lexend">
@@ -187,9 +195,9 @@ const CreateSessionForm = () => {
             value={formValues.endAt}
             onChange={handleChange}
             disabled={isSubmitting}
-            className={`font-lexend bg-white border text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
-              formErrors.endAt ? "border-red-500" : "border-[#cecece]"
-            } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`font-lexend bg-white border text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+              ${formErrors.endAt ? "border-red-500" : "border-[#cecece]"}
+              ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
           />
           {formErrors.endAt && (
             <p className="mt-2 text-sm text-red-600 font-lexend">
@@ -214,11 +222,13 @@ const CreateSessionForm = () => {
             value={formValues.lateAfterMinutes}
             onChange={handleChange}
             disabled={isSubmitting}
-            className={`font-lexend bg-white border text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
-              formErrors.lateAfterMinutes
-                ? "border-red-500"
-                : "border-[#cecece]"
-            } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`font-lexend bg-white border text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5
+              ${
+                formErrors.lateAfterMinutes
+                  ? "border-red-500"
+                  : "border-[#cecece]"
+              }
+              ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
           />
           {formErrors.lateAfterMinutes && (
             <p className="mt-2 text-sm text-red-600 font-lexend">
@@ -232,12 +242,12 @@ const CreateSessionForm = () => {
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
-              className="px-4 py-2 text-sm rounded-xl border border-gray-300 text-gray-700 cursor-pointer
-                      hover:bg-gray-100 active:scale-[0.98] 
-                      transition-all duration-200 disabled:opacity-50 
-                      disabled:cursor-not-allowed font-medium"
               onClick={closeModal}
               disabled={isSubmitting}
+              className="px-4 py-2 text-sm rounded-xl border border-gray-300 text-gray-700 cursor-pointer
+                hover:bg-gray-100 active:scale-[0.98]
+                transition-all duration-200 disabled:opacity-50 
+                disabled:cursor-not-allowed font-medium"
             >
               Cancel
             </button>
@@ -251,7 +261,8 @@ const CreateSessionForm = () => {
                 !formValues.endAt
               }
               className="px-4 py-2 rounded-xl text-sm text-white flex items-center justify-center gap-2 
-                      font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-blue-600 hover:bg-blue-700 active:scale-[0.98] cursor-pointer"
+                font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed 
+                bg-blue-600 hover:bg-blue-700 active:scale-[0.98] cursor-pointer"
             >
               {isSubmitting ? "Creating..." : "Create"}
             </button>

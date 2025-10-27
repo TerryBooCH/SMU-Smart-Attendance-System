@@ -55,10 +55,11 @@ public class AttendanceController {
         }
     }
 
-    // UPDATE attendance status
-    @PutMapping("/{attendanceId}")
+    // UPDATE attendance status by session and student internal IDs
+    @PutMapping("/session/{sessionId}/student/{studentId}")
     public ResponseEntity<?> updateAttendanceStatus(
-            @PathVariable Long attendanceId,
+            @PathVariable Long sessionId,
+            @PathVariable Long studentId,
             @RequestBody Map<String, String> request) {
         try {
             String newStatus = request.get("status");
@@ -68,27 +69,33 @@ public class AttendanceController {
                 throw new IllegalArgumentException("Status is required");
             }
 
+            // Validate status
+            if (!isValidStatus(newStatus)) {
+                throw new IllegalArgumentException("Invalid status. Must be one of: PENDING, ABSENT, PRESENT, LATE");
+            }
+
             if (method == null || method.isBlank()) {
                 method = "MANUAL";
             }
 
-            Attendance updatedAttendance = attendanceManager.updateAttendanceStatus(attendanceId, newStatus, method);
-            LoggerFacade.info("Updated attendance record ID: " + attendanceId + " to status: " + newStatus);
+            // Validate method
+            if (!isValidMethod(method)) {
+                throw new IllegalArgumentException("Invalid method. Must be one of: AUTO, MANUAL, NOT MARKED");
+            }
+
+            Attendance updatedAttendance = attendanceManager.updateAttendanceStatusBySessionAndStudent(sessionId, studentId, newStatus, method);
+            LoggerFacade.info("Updated attendance for Session ID: " + sessionId + ", Student Internal ID: " + studentId + " to status: " + newStatus);
             return ResponseEntity.ok(convertToDTO(updatedAttendance));
         } catch (NoSuchElementException e) {
-            LoggerFacade.warning("Failed to update — Attendance record not found: ID " + attendanceId);
+            LoggerFacade.warning("Failed to update — Attendance record not found for Session ID: " + sessionId + ", Student Internal ID: " + studentId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(createErrorResponse("Attendance record not found with ID: " + attendanceId));
+                    .body(createErrorResponse("Attendance record not found for Session ID: " + sessionId + " and Student Internal ID: " + studentId));
         } catch (IllegalArgumentException e) {
-            LoggerFacade.warning("Invalid attendance update request for ID " + attendanceId + ": " + e.getMessage());
+            LoggerFacade.warning("Invalid attendance update request for Session ID: " + sessionId + ", Student Internal ID: " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
-        } catch (IllegalStateException e) {
-            LoggerFacade.warning("Conflict while updating attendance record " + attendanceId + ": " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while updating attendance record " + attendanceId + ": " + e.getMessage());
+            LoggerFacade.severe("Unexpected error while updating attendance for Session ID: " + sessionId + ", Student Internal ID: " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while updating attendance record"));
         }
@@ -117,6 +124,18 @@ public class AttendanceController {
     }
 
     // Helper methods
+    private boolean isValidStatus(String status) {
+        return status != null && 
+            (status.equals("PENDING") || status.equals("PRESENT") || 
+                status.equals("ABSENT") || status.equals("LATE"));
+    }
+
+    private boolean isValidMethod(String method) {
+        return method != null && 
+            (method.equals("AUTO") || method.equals("MANUAL") || 
+                method.equals("NOT MARKED"));
+    }
+
     private Map<String, String> createErrorResponse(String message) {
         Map<String, String> response = new HashMap<>();
         response.put("error", message);

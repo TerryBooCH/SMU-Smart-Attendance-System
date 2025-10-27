@@ -70,6 +70,30 @@ public class AttendanceManager {
         return attendanceRepository.save(attendance);
     }
 
+    // UPDATE: Update attendance status by session and student internal IDs (works even when session is closed)
+    public Attendance updateAttendanceStatusBySessionAndStudent(Long sessionId, Long studentInternalId, String status, String method) {
+        // Find attendance by session and student internal ID
+        Attendance attendance = attendanceRepository.findBySessionIdAndStudentId(sessionId, studentInternalId)
+                .orElseThrow(() -> new NoSuchElementException("Attendance record not found for session ID: " + sessionId + " and student internal ID: " + studentInternalId));
+        
+        // Validate status
+        if (!isValidStatus(status)) {
+            throw new IllegalArgumentException("Invalid attendance status: " + status);
+        }
+        
+        // Validate method
+        if (!isValidMethod(method)) {
+            throw new IllegalArgumentException("Invalid method: " + method);
+        }
+        
+        // NOTE: Removed session open validation to allow updates even when session is closed
+        
+        attendance.setStatus(status);
+        attendance.setMethod(method);
+        
+        return attendanceRepository.save(attendance);
+    }
+
     // UPDATE: Correct an attendance record
     public Attendance updateAttendance(Attendance attendance) {
         return attendanceRepository.save(attendance);

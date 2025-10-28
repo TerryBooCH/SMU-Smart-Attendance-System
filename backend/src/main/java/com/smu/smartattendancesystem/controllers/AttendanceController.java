@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import com.smu.smartattendancesystem.dto.AttendanceDTO;
 import com.smu.smartattendancesystem.managers.AttendanceManager;
+import com.smu.smartattendancesystem.managers.StudentManager;
 import com.smu.smartattendancesystem.models.Attendance;
+import com.smu.smartattendancesystem.models.Student;
 import com.smu.smartattendancesystem.utils.LoggerFacade;
 
 @RestController
@@ -21,9 +23,11 @@ import com.smu.smartattendancesystem.utils.LoggerFacade;
 public class AttendanceController {
 
     private final AttendanceManager attendanceManager;
+    private final StudentManager studentManager;
 
-    public AttendanceController(AttendanceManager attendanceManager) {
+    public AttendanceController(AttendanceManager attendanceManager, StudentManager studentManager) {
         this.attendanceManager = attendanceManager;
+        this.studentManager = studentManager;
     }
 
     // GET attendance records by session ID
@@ -55,11 +59,11 @@ public class AttendanceController {
         }
     }
 
-    // UPDATE attendance status by session and student internal IDs
-    @PutMapping("/session/{sessionId}/student/{studentId}")
+    // UPDATE attendance status by session and student string ID (like S1234567A)
+    @PutMapping("/session/{sessionId}/student/{studentStringId}")
     public ResponseEntity<?> updateAttendanceStatus(
             @PathVariable Long sessionId,
-            @PathVariable Long studentId,
+            @PathVariable String studentStringId,
             @RequestBody Map<String, String> request) {
         try {
             String newStatus = request.get("status");
@@ -83,19 +87,28 @@ public class AttendanceController {
                 throw new IllegalArgumentException("Invalid method. Must be one of: AUTO, MANUAL, NOT MARKED");
             }
 
-            Attendance updatedAttendance = attendanceManager.updateAttendanceStatusBySessionAndStudent(sessionId, studentId, newStatus, method);
-            LoggerFacade.info("Updated attendance for Session ID: " + sessionId + ", Student Internal ID: " + studentId + " to status: " + newStatus);
+            // Get student by string ID to find the numerical ID using StudentManager
+            Student student = studentManager.getStudentByStudentId(studentStringId)
+                    .orElseThrow(() -> new NoSuchElementException("Student not found with ID: " + studentStringId));
+
+            // If method is MANUAL, set confidence to null
+            Double confidence = "MANUAL".equals(method) ? null : null;
+
+            Attendance updatedAttendance = attendanceManager.updateAttendanceStatusBySessionAndStudent(
+                    sessionId, student.getId(), newStatus, method, confidence);
+            
+            LoggerFacade.info("Updated attendance for Session ID: " + sessionId + ", Student: " + studentStringId + " to status: " + newStatus);
             return ResponseEntity.ok(convertToDTO(updatedAttendance));
         } catch (NoSuchElementException e) {
-            LoggerFacade.warning("Failed to update — Attendance record not found for Session ID: " + sessionId + ", Student Internal ID: " + studentId);
+            LoggerFacade.warning("Failed to update — " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(createErrorResponse("Attendance record not found for Session ID: " + sessionId + " and Student Internal ID: " + studentId));
+                    .body(createErrorResponse(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            LoggerFacade.warning("Invalid attendance update request for Session ID: " + sessionId + ", Student Internal ID: " + studentId + ": " + e.getMessage());
+            LoggerFacade.warning("Invalid attendance update request for Session ID: " + sessionId + ", Student: " + studentStringId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while updating attendance for Session ID: " + sessionId + ", Student Internal ID: " + studentId + ": " + e.getMessage());
+            LoggerFacade.severe("Unexpected error while updating attendance for Session ID: " + sessionId + ", Student: " + studentStringId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while updating attendance record"));
         }

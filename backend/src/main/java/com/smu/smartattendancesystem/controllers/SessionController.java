@@ -141,10 +141,6 @@ public class SessionController {
             Session session = sessionManager.getSession(id)
                     .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
 
-            if (session.isOpen()) {
-                throw new IllegalStateException("Session is already open");
-            }
-
             session.setOpen(true);
             Session updated = sessionManager.updateSession(session);
             LoggerFacade.info("Opened Session " + id + ".");
@@ -170,10 +166,6 @@ public class SessionController {
         try {
             Session session = sessionManager.getSession(id)
                     .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
-
-            if (!session.isOpen()) {
-                throw new IllegalStateException("Session is already closed");
-            }
 
             session.setOpen(false);
             Session updated = sessionManager.updateSession(session);

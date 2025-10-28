@@ -71,7 +71,7 @@ public class AttendanceManager {
     }
 
     // UPDATE: Update attendance status by session and student internal IDs (works even when session is closed)
-    public Attendance updateAttendanceStatusBySessionAndStudent(Long sessionId, Long studentInternalId, String status, String method) {
+    public Attendance updateAttendanceStatusBySessionAndStudent(Long sessionId, Long studentInternalId, String status, String method, Double confidence) {
         // Find attendance by session and student internal ID
         Attendance attendance = attendanceRepository.findBySessionIdAndStudentId(sessionId, studentInternalId)
                 .orElseThrow(() -> new NoSuchElementException("Attendance record not found for session ID: " + sessionId + " and student internal ID: " + studentInternalId));
@@ -90,6 +90,7 @@ public class AttendanceManager {
         
         attendance.setStatus(status);
         attendance.setMethod(method);
+        attendance.setConfidence(confidence); // This will be null for MANUAL method
         
         return attendanceRepository.save(attendance);
     }

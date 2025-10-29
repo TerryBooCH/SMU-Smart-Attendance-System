@@ -70,12 +70,48 @@ public class StudentService {
 
     @Transactional
     public Student createStudent(Student student) throws IllegalArgumentException, IllegalStateException {
-        // Validate input
-        if (student == null || student.getStudentId() == null || student.getStudentId().isBlank()) {
-            throw new IllegalArgumentException("Student ID is invalid");
+        // Validate student object
+        if (student == null) {
+            throw new IllegalArgumentException("Invalid request");
         }
+
+        // Validate student id
+        if (student.getStudentId() == null || student.getStudentId().isBlank()) {
+            throw new IllegalArgumentException("Student ID is invalid");
+        } else if (!student.getStudentId().matches("^[A-Z]\\d{7}$")) {
+            throw new IllegalArgumentException(
+                    "Student ID must start with one capital letter followed by 7 digits (e.g., S1234567)");
+        }
+
+        // Validate name
+        if (student.getName() == null || student.getName().isBlank()) {
+            throw new IllegalArgumentException("Name is required to create a user account");
+        } else if (student.getName().trim().length() < 2) {
+            throw new IllegalArgumentException("Name must be at least 2 characters");
+        }
+
+        // Validate class (2 letters + 3 digits, e.g., AB123)
+        if (student.getClassName() == null || student.getClassName().isBlank()) {
+            throw new IllegalArgumentException("Class is required");
+        } else if (!student.getClassName().trim().matches("^[A-Z]{2}\\d{3}$")) {
+            throw new IllegalArgumentException("Class must start with 2 letters followed by 3 numbers (e.g., AB123)");
+        }
+
+        // Validate email (simple format)
         if (student.getEmail() == null || student.getEmail().isBlank()) {
             throw new IllegalArgumentException("Student email is required to create a user account");
+        } else if (!student.getEmail().trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
+            throw new IllegalArgumentException("Enter a valid email address");
+        }
+
+        // Validate phone (optional, exactly 8 digits if provided)
+        if (student.getPhone() != null && !student.getPhone().isBlank()) {
+            String phoneTrim = student.getPhone().trim();
+            if (!phoneTrim.matches("^\\d+$")) {
+                throw new IllegalArgumentException("Phone number must contain only numbers");
+            } else if (phoneTrim.length() != 8) {
+                throw new IllegalArgumentException("Phone number must be exactly 8 digits");
+            }
         }
 
         // Check for duplicates

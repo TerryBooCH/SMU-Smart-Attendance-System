@@ -28,7 +28,7 @@ public class BatchImportService {
 
     // Validation patterns
     private static final Pattern STUDENT_ID_PATTERN = Pattern.compile("^[A-Z]\\d{7}$");
-    private static final Pattern CLASS_NAME_PATTERN = Pattern.compile("^[A-Za-z]{2}\\d{3}$");
+    private static final Pattern CLASS_NAME_PATTERN = Pattern.compile("^[A-Z]{2}\\d{3}$");
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\d{8}$");
 

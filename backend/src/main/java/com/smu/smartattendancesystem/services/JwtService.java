@@ -71,6 +71,7 @@ public class JwtService {
     // Validate JWT token
     public boolean validateJwtToken(String token) {
         try {
+            @SuppressWarnings("unused")
             Jws<Claims> claims = Jwts.parser()
                     .verifyWith(key)
                     .build()

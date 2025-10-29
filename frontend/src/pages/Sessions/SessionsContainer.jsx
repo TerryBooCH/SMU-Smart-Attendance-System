@@ -2,7 +2,9 @@ import React, { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import useSession from "../../hooks/useSession";
 import { Eye } from "lucide-react";
-import { formatDate } from "../../utils/dateUtils";
+import { formatDateTime } from "../../utils/dateUtils";
+import DeleteSessionButton from "../../components/DeleteSessionButton";
+import OpenSessionButton from "../../components/OpenSessionButton";
 
 const SessionsContainer = () => {
   const { sessions, loading, error, fetchAllSessions } = useSession();
@@ -10,7 +12,6 @@ const SessionsContainer = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Only fetch once on mount
     if (!hasFetched.current) {
       fetchAllSessions();
       hasFetched.current = true;
@@ -41,13 +42,10 @@ const SessionsContainer = () => {
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Course ID
+                  Course Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Location Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Session Date
+                  Roster Name
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Start At
@@ -70,71 +68,78 @@ const SessionsContainer = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
+                {/* New column */}
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Open Session
+                </th>
               </tr>
             </thead>
+
             <tbody className="bg-white divide-y divide-gray-200">
               {sessions && sessions.length > 0 ? (
                 sessions.map((session) => (
                   <tr key={session.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {session.courseId || "N/A"}
+                      <div className="text-sm text-gray-900 font-medium">
+                        {session.courseName || "N/A"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">
+                        {session.rosterName || "Unnamed Roster"}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-600">
+                        {formatDateTime(session.startAt)}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-600">
+                        {formatDateTime(session.endAt)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-900">
-                        {session.locationName || "N/A"}
+                        {session.lateAfterMinutes ?? "—"}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {formatDate(session.sessionDate)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {session.startAt || "N/A"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {session.endAt || "N/A"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {session.lateAfterMinutes || "N/A"}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        session.isOpen 
-                          ? 'bg-green-100 text-green-800' 
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {session.isOpen ? 'Open' : 'Closed'}
+                      <span
+                        className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${
+                          session.open
+                            ? "bg-green-100 text-green-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {session.open ? "Open" : "Closed"}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {formatDate(session.createdAt)}
+                        {formatDateTime(session.createdAt)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">
-                        {formatDate(session.updatedAt)}
+                        {formatDateTime(session.updatedAt)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex space-x-2">
                         <button
                           onClick={() => navigate(`/session/${session.id}`)}
-                          className="flex items-center cursor-pointer px-2 py-2 text-black"
+                          className="flex items-center cursor-pointer px-2 py-2 text-black hover:text-blue-600 transition-colors"
                           title="View"
                         >
                           <Eye size={16} />
                         </button>
+                        <DeleteSessionButton session={session} />
                       </div>
+                    </td>
+                    {/* Placeholder for your button */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                      <OpenSessionButton session={session} />
                     </td>
                   </tr>
                 ))

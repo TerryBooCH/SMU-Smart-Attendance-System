@@ -27,6 +27,10 @@ public class SessionManager {
         return sessionRepo.findById(id);
     }
 
+    public List<Session> getSessionsByRosterId(Long rosterId) {
+        return sessionRepo.findByRosterId(rosterId);
+    }
+
     // READ: List all sessions
     // Use case: admin/lecturer views timetable
     public List<Session> getAllSessions() {

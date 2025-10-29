@@ -230,6 +230,32 @@ export const StudentProvider = ({ children }) => {
     }
   };
 
+  const importStudentsFromCsv = async (file) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await studentService.importStudentsFromCsv(file);
+
+      // Destructure response
+      const { students: importedStudents = [] } = response;
+
+      // Merge imported students into current list
+      if (importedStudents.length > 0) {
+        setStudents((prev) => [...prev, ...importedStudents]);
+      }
+
+      // Return full import result (so UI can show errors, counts, etc.)
+      return response;
+    } catch (error) {
+      console.error("Error importing students:", error);
+      setError(error.message || "Failed to import students");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const value = {
     students,
     selectedStudent,
@@ -248,6 +274,7 @@ export const StudentProvider = ({ children }) => {
     uploadStudentFaceData,
     getFaceDataByStudentId,
     deleteStudentFaceDataByFaceId,
+    importStudentsFromCsv,
   };
 
   return (

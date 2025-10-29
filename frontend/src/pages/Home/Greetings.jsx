@@ -1,7 +1,6 @@
 import React from "react";
 import Logo from "../../assets/logo.svg";
-import TimeDisplay from "./TimeDisplay";
-import { getGreeting, getCurrentDate } from "../../utils/dateUtils";
+import { getGreeting } from "../../utils/dateUtils";
 
 const Greetings = () => {
   return (
@@ -14,26 +13,9 @@ const Greetings = () => {
           </span>
         </div>
 
-        <h1 className="text-6xl font-bold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-4 leading-tight">
+        <h1 className="text-6xl font-semibold bg-gradient-to-r from-gray-900 via-gray-800 to-gray-700 bg-clip-text text-transparent mb-4 leading-tight">
           {getGreeting()}!
         </h1>
-
-        <div className="mb-2">
-          <TimeDisplay />
-        </div>
-
-        <div className="flex items-center gap-6 mt-8">
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <span className="relative flex size-3">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex size-3 rounded-full bg-green-500"></span>
-            </span>
-            System Online
-          </div>
-          <div className="text-sm text-gray-500">
-            Last updated: {getCurrentDate()}
-          </div>
-        </div>
       </div>
     </div>
   );

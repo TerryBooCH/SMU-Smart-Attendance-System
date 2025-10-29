@@ -53,9 +53,6 @@ const QuickNav = () => {
     <div className="max-w-6xl mx-auto px-8 pb-16 flex-1">
       <div className="mb-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Quick Actions</h2>
-        <p className="text-gray-600">
-          Choose an action to get started with your attendance management.
-        </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

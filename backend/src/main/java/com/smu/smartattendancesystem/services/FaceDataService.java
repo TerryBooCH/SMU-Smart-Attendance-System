@@ -110,12 +110,23 @@ public class FaceDataService {
     @Transactional(readOnly = true)
     public Optional<FaceDataDTO> getLatestFaceData(String studentId) {
         // Validate if student exists
+        @SuppressWarnings("unused")
         Student student = validateStudent(studentId);
 
         Optional<FaceData> optFaceData = faceManager.getOneByStudentId(studentId);
 
         // Convert FaceData to DTO and return it if found, if not return empty
         return optFaceData.map(fd -> FaceDataDTO.fromEntity(fd, storage));
+    }
+
+    // Delete all face data belonging to the student
+    public void deleteAllImagesByStudentId(String studentId) {
+        validateStudent(studentId);
+        try {
+            storage.deleteFolder(studentId);
+        } catch (IOException e) {
+            System.err.println("Failed to delete folder for " + studentId + ": " + e.getMessage());
+        }
     }
 
     // Convert FaceData entity to DTO to be returned to frontend

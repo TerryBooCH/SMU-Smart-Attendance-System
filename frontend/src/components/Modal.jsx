@@ -10,12 +10,16 @@ const Modal = () => {
   // Handle clicking outside to close modal
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
+      // If click is outside modal *and* not inside a dropdown menu
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target) &&
+        !event.target.closest(".dropdown-portal") // 👈 this line prevents modal close on dropdown clicks
+      ) {
         closeModal();
       }
     };
 
-    // Handle ESC key to close modal
     const handleEscKey = (event) => {
       if (event.key === "Escape") {
         closeModal();
@@ -25,7 +29,6 @@ const Modal = () => {
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
       document.addEventListener("keydown", handleEscKey);
-      // Prevent scrolling of background content
       document.body.style.overflow = "hidden";
     }
 

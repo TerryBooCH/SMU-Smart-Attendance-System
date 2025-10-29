@@ -5,6 +5,7 @@ import { IdCardLanyard, Mail, Phone, GraduationCap } from 'lucide-react';
 const UserBanner = ({ student }) => {
   const studentName = student?.name || 'John Doe';
   const initials = getInitials(studentName);
+  const faceImage = student?.face?.imageBase64;
 
   return (
     <div className="p-6">
@@ -31,13 +32,21 @@ const UserBanner = ({ student }) => {
           </div>
         </div>
 
-        {/* Profile Picture (Initials) */}
+        {/* Profile Picture */}
         <div className="absolute left-1/2 -translate-x-1/2 -bottom-8">
           <div className="relative">
             <div className="w-32 h-32 rounded-full border-4 border-white bg-white shadow-xl overflow-hidden flex items-center justify-center">
-              <div className="w-full h-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
-                <span className="text-4xl font-semibold text-white">{initials}</span>
-              </div>
+              {faceImage ? (
+                <img
+                  src={faceImage}
+                  alt={studentName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center">
+                  <span className="text-4xl font-semibold text-white">{initials}</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

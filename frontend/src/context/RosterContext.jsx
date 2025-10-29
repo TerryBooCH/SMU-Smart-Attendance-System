@@ -93,9 +93,7 @@ export const RosterProvider = ({ children }) => {
       const updatedRoster = response.data || response.roster || response;
 
       setRosters((prev) =>
-        prev.map((roster) =>
-          roster.id === rosterId ? updatedRoster : roster
-        )
+        prev.map((roster) => (roster.id === rosterId ? updatedRoster : roster))
       );
 
       // Update selectedRoster if it's the one being updated
@@ -119,9 +117,7 @@ export const RosterProvider = ({ children }) => {
 
       await rosterService.deleteRosterById(rosterId);
 
-      setRosters((prev) =>
-        prev.filter((roster) => roster.id !== rosterId)
-      );
+      setRosters((prev) => prev.filter((roster) => roster.id !== rosterId));
 
       // Clear selectedRoster if it was deleted
       if (selectedRoster && selectedRoster.id === rosterId) {
@@ -147,7 +143,10 @@ export const RosterProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await rosterService.addStudentToRoster(rosterId, studentId);
+      const response = await rosterService.addStudentToRoster(
+        rosterId,
+        studentId
+      );
       const addedStudent = response.data || response.student || response;
 
       // Add the student to the local studentsInRoster state
@@ -157,6 +156,66 @@ export const RosterProvider = ({ children }) => {
     } catch (error) {
       console.error("Error adding student to roster:", error);
       setError(error.message || "Failed to add student to roster");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const removeStudentFromRoster = async (rosterId, studentId) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await rosterService.removeStudentFromRoster(
+        rosterId,
+        studentId
+      );
+
+      // Remove the student locally after successful API call
+      setStudentsInRoster((prev) =>
+        prev.filter((student) => student.studentId !== studentId)
+      );
+
+      return response;
+    } catch (error) {
+      console.error("Error removing student from roster:", error);
+      setError(error.message || "Failed to remove student from roster");
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+    const importStudentsToRosterFromCsv = async (file) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await rosterService.importStudentsToRosterFromCsv(file);
+      const { rosters: importedRosters = [] } = response;
+
+      // Update rosters in state (merge or append)
+      if (importedRosters.length > 0) {
+        setRosters((prev) => {
+          const updated = [...prev];
+          importedRosters.forEach((r) => {
+            const index = updated.findIndex((x) => x.id === r.id);
+            if (index !== -1) {
+              updated[index] = { ...updated[index], ...r };
+            } else {
+              updated.push(r);
+            }
+          });
+          return updated;
+        });
+      }
+
+      // Return full response so UI can display importedCount, errorCount, errors
+      return response;
+    } catch (error) {
+      console.error("Error importing students to roster:", error);
+      setError(error.message || "Failed to import students to roster");
       throw error;
     } finally {
       setLoading(false);
@@ -183,13 +242,13 @@ export const RosterProvider = ({ children }) => {
     updateRosterById,
     deleteRosterById,
     addStudentToRoster,
+    removeStudentFromRoster,
     clearStudentsInRoster,
+    importStudentsToRosterFromCsv
   };
 
   return (
-    <RosterContext.Provider value={value}>
-      {children}
-    </RosterContext.Provider>
+    <RosterContext.Provider value={value}>{children}</RosterContext.Provider>
   );
 };
 

@@ -17,7 +17,7 @@ const TimeToStartDisplay = ({ session }) => {
 
       // If session has ended
       if (now > endTime) {
-        setTimeToStart("Over");
+        setTimeToStart("Ended");
         return;
       }
 
@@ -52,7 +52,7 @@ const TimeToStartDisplay = ({ session }) => {
   return (
     <div
       className={`text-medium font-medium ${
-        timeToStart === "Over"
+        timeToStart === "Ended"
           ? "text-gray-400"
           : timeToStart === "In Progress"
           ? "text-green-600"

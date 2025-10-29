@@ -5,6 +5,7 @@ import { ModalProvider } from "./context/ModalContext";
 import { StudentProvider } from "./context/StudentContext";
 import { SessionProvider } from "./context/SessionContext";
 import { RosterProvider } from "./context/RosterContext";
+import { AttendanceProvider } from "./context/AttendanceContext";
 import { ToastProvider } from "./context/ToastContext";
 import Modal from "./components/Modal";
 import ToastContainer from "./components/ToastContainer";
@@ -28,38 +29,37 @@ function App() {
         <StudentProvider>
           <RosterProvider>
             <SessionProvider>
-              <ModalProvider>
-                <SidebarProvider>
-                  <ToastProvider>
-                    <Modal />
-                    <ToastContainer />
-                    <Routes>
-                      <Route path="/" element={<Landing />} />
-                      <Route path="/home" element={<Home />} />
-                      <Route path="/signin" element={<SignIn />} />
-                      <Route path="/students" element={<Students />} />
-                      <Route path="/student/:id" element={<StudentView />} />
-                      <Route path="/rosters" element={<Rosters />} />
-                      <Route path="/roster/:id" element={<RosterView />} />
-                      <Route path="/sessions" element={<Sessions />} />
-                      <Route
-                        path="/session/:id/"
-                        element={<SessionView />}
-                      />
-                      <Route
-                        path="/session/:id/live-recognition"
-                        element={<LiveRecognition />}
-                      />
-                      <Route path="/reports" element={<Reports />} />
-                      <Route
-                        path="/live-recognition"
-                        element={<LiveRecognition />}
-                      />
-                      <Route path="/settings" element={<Settings />} />
-                    </Routes>
-                  </ToastProvider>
-                </SidebarProvider>
-              </ModalProvider>
+              <AttendanceProvider>
+                <ModalProvider>
+                  <SidebarProvider>
+                    <ToastProvider>
+                      <Modal />
+                      <ToastContainer />
+                      <Routes>
+                        <Route path="/" element={<Landing />} />
+                        <Route path="/home" element={<Home />} />
+                        <Route path="/signin" element={<SignIn />} />
+                        <Route path="/students" element={<Students />} />
+                        <Route path="/student/:id" element={<StudentView />} />
+                        <Route path="/rosters" element={<Rosters />} />
+                        <Route path="/roster/:id" element={<RosterView />} />
+                        <Route path="/sessions" element={<Sessions />} />
+                        <Route path="/session/:id/" element={<SessionView />} />
+                        <Route
+                          path="/session/:id/live-recognition"
+                          element={<LiveRecognition />}
+                        />
+                        <Route path="/reports" element={<Reports />} />
+                        <Route
+                          path="/live-recognition"
+                          element={<LiveRecognition />}
+                        />
+                        <Route path="/settings" element={<Settings />} />
+                      </Routes>
+                    </ToastProvider>
+                  </SidebarProvider>
+                </ModalProvider>
+              </AttendanceProvider>
             </SessionProvider>
           </RosterProvider>
         </StudentProvider>

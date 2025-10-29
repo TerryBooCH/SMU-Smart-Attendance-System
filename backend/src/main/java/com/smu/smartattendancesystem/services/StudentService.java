@@ -1,13 +1,17 @@
 package com.smu.smartattendancesystem.services;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.smu.smartattendancesystem.connector.CloudConnector;
 import com.smu.smartattendancesystem.dto.FaceDataDTO;
 import com.smu.smartattendancesystem.dto.StudentWithFaceDTO;
 import com.smu.smartattendancesystem.managers.StudentManager;
@@ -21,11 +25,13 @@ public class StudentService {
     private final StudentManager studentManager;
     private final UserManager userManager;
     private final FaceDataService faceDataService;
+    private final CloudConnector cloudConnector;
 
-    public StudentService(StudentManager studentManager, UserManager userManager, FaceDataService faceDataService) {
+    public StudentService(StudentManager studentManager, UserManager userManager, FaceDataService faceDataService, CloudConnector cloudConnector) {
         this.studentManager = studentManager;
         this.userManager = userManager;
         this.faceDataService = faceDataService;
+        this.cloudConnector = cloudConnector;
     }
 
     public List<StudentWithFaceDTO> getAllStudents() {
@@ -135,6 +141,20 @@ public class StudentService {
                 savedStudent);
         newUser.setStudent(savedStudent); // Link user to student
         userManager.createUser(newUser); // Save user to database
+
+        // Sync to cloud
+        try {
+            Map<String, Object> studentData = new HashMap<>();
+            studentData.put("studentId", savedStudent.getStudentId());
+            studentData.put("name", savedStudent.getName());
+            studentData.put("email", savedStudent.getEmail());
+            studentData.put("className", savedStudent.getClassName());
+            studentData.put("phone", savedStudent.getPhone());
+            cloudConnector.syncEntity("students", savedStudent.getStudentId(), studentData);
+        } catch (ExecutionException | InterruptedException e) {
+            // Log error but don't fail the operation
+            System.err.println("Failed to sync student to cloud: " + e.getMessage());
+        }
 
         return savedStudent;
     }

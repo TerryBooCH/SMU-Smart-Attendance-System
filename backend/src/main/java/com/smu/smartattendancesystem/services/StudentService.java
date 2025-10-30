@@ -252,10 +252,17 @@ public class StudentService {
 
         // Sync new username and email to linked user account
         User user = savedStudent.getUser();
-        user.setName(savedStudent.getName());
-        user.setEmail(savedStudent.getEmail());
-
-        userManager.updateUser(user);
+        if (user == null) {
+            // Create user account if it doesn't exist (e.g., for students synced from cloud)
+            String defPassword = savedStudent.getStudentId();
+            user = new User(savedStudent.getName(), savedStudent.getEmail(), defPassword, 0, savedStudent);
+            user.setStudent(savedStudent);
+            userManager.createUser(user);
+        } else {
+            user.setName(savedStudent.getName());
+            user.setEmail(savedStudent.getEmail());
+            userManager.updateUser(user);
+        }
     
         // Sync to cloud
         try {

@@ -14,7 +14,9 @@ import org.springframework.transaction.annotation.Transactional;
 import com.smu.smartattendancesystem.config.DatabaseConfig;
 import com.smu.smartattendancesystem.connector.CloudConnector;
 import com.smu.smartattendancesystem.managers.StudentManager;
+import com.smu.smartattendancesystem.managers.UserManager;
 import com.smu.smartattendancesystem.models.Student;
+import com.smu.smartattendancesystem.models.User;
 
 @Service
 public class CloudSyncService {
@@ -23,13 +25,16 @@ public class CloudSyncService {
 
     private final CloudConnector cloudConnector;
     private final StudentManager studentManager;
+    private final UserManager userManager;
     private final DatabaseConfig databaseConfig;
 
-    public CloudSyncService(CloudConnector cloudConnector, 
+    public CloudSyncService(CloudConnector cloudConnector,
                            StudentManager studentManager,
+                           UserManager userManager,
                            DatabaseConfig databaseConfig) {
         this.cloudConnector = cloudConnector;
         this.studentManager = studentManager;
+        this.userManager = userManager;
         this.databaseConfig = databaseConfig;
     }
 
@@ -80,12 +85,19 @@ public class CloudSyncService {
                 try {
                     // Convert Map to Student object
                     Student student = mapToStudent(studentData);
-                    
+
                     // Save to local SQLite
-                    studentManager.addStudent(student);
+                    Student savedStudent = studentManager.addStudent(student);
+
+                    // Create corresponding user account
+                    String defPassword = savedStudent.getStudentId();
+                    User newUser = new User(savedStudent.getName(), savedStudent.getEmail(), defPassword, 0, savedStudent);
+                    newUser.setStudent(savedStudent);
+                    userManager.createUser(newUser);
+
                     successCount++;
-                    
-                    logger.debug("Downloaded student: {}", student.getStudentId());
+
+                    logger.debug("Downloaded student and created user: {}", student.getStudentId());
                 } catch (Exception e) {
                     logger.error("Failed to download student: {}", studentData.get("studentId"), e);
                 }
@@ -135,12 +147,19 @@ public class CloudSyncService {
             int downloadedCount = 0;
             for (Map<String, Object> cloudStudent : cloudStudents) {
                 String studentId = (String) cloudStudent.get("studentId");
-                
+
                 if (studentManager.getStudentByStudentId(studentId).isEmpty()) {
                     Student student = mapToStudent(cloudStudent);
-                    studentManager.addStudent(student);
+                    Student savedStudent = studentManager.addStudent(student);
+
+                    // Create corresponding user account
+                    String defPassword = savedStudent.getStudentId();
+                    User newUser = new User(savedStudent.getName(), savedStudent.getEmail(), defPassword, 0, savedStudent);
+                    newUser.setStudent(savedStudent);
+                    userManager.createUser(newUser);
+
                     downloadedCount++;
-                    logger.debug("⬇️ Downloaded new student from cloud: {}", studentId);
+                    logger.debug("⬇️ Downloaded new student from cloud and created user: {}", studentId);
                 }
             }
             logger.info("⬇️ Downloaded {} new students from Firebase", downloadedCount);

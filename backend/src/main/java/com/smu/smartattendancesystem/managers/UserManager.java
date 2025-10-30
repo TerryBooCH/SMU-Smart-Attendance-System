@@ -1,11 +1,12 @@
 package com.smu.smartattendancesystem.managers;
 
-import com.smu.smartattendancesystem.models.User;
-import com.smu.smartattendancesystem.repositories.UserRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.smu.smartattendancesystem.models.User;
+import com.smu.smartattendancesystem.repositories.UserRepository;
 
 @Service
 public class UserManager {
@@ -56,5 +57,10 @@ public class UserManager {
     // Use case: admin deletes an account
     public void deleteUser(Long id) {
         userRepo.deleteById(id);
+    }
+
+    // COUNT: Get total number of users
+    public long getUserCount() {
+        return userRepo.count();
     }
 }

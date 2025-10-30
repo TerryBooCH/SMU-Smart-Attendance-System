@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -142,7 +141,7 @@ public class StudentService {
         newUser.setStudent(savedStudent); // Link user to student
         userManager.createUser(newUser); // Save user to database
 
-        // Sync to cloud
+        // Sync to cloud (Firebase as primary)
         try {
             Map<String, Object> studentData = new HashMap<>();
             studentData.put("studentId", savedStudent.getStudentId());
@@ -151,7 +150,7 @@ public class StudentService {
             studentData.put("className", savedStudent.getClassName());
             studentData.put("phone", savedStudent.getPhone());
             cloudConnector.syncEntity("students", savedStudent.getStudentId(), studentData);
-        } catch (ExecutionException | InterruptedException e) {
+        } catch (Exception e) {
             // Log error but don't fail the operation
             System.err.println("Failed to sync student to cloud: " + e.getMessage());
         }
@@ -162,20 +161,42 @@ public class StudentService {
     // Initialize user accounts for the students populated in the DB
     @Transactional
     public void initUserAccounts() {
+        // Check if users already exist - if so, skip initialization
+        long userCount = userManager.getUserCount();
+        if (userCount > 0) {
+            System.out.println("User accounts already initialized (" + userCount + " users found). Skipping initialization.");
+            return;
+        }
+
+        System.out.println("Initializing user accounts for existing students...");
+        
         // Retrieve all students from the database
         List<Student> students = studentManager.getAllStudents();
-
-        for (Student s : students) {
-            String defPassword = s.getStudentId(); // Set default password to studentId
-            User newUser = new User(
-                    s.getName(),
-                    s.getEmail(),
-                    defPassword,
-                    0,
-                    s);
-            newUser.setStudent(s); // Link user to student
-            userManager.createUser(newUser); // Save user to database
+        
+        if (students.isEmpty()) {
+            System.out.println("No students found in database. Skipping user account initialization.");
+            return;
         }
+
+        int createdCount = 0;
+        for (Student s : students) {
+            try {
+                String defPassword = s.getStudentId(); // Set default password to studentId
+                User newUser = new User(
+                        s.getName(),
+                        s.getEmail(),
+                        defPassword,
+                        0,
+                        s);
+                newUser.setStudent(s); // Link user to student
+                userManager.createUser(newUser); // Save user to database
+                createdCount++;
+            } catch (Exception e) {
+                System.err.println("Failed to create user for student " + s.getStudentId() + ": " + e.getMessage());
+            }
+        }
+
+        System.out.println("User account initialization complete: " + createdCount + " users created for " + students.size() + " students");
     }
 
     public StudentWithFaceDTO updateStudent(String studentId, Student student) {

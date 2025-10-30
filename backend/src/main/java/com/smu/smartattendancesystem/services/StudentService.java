@@ -235,6 +235,20 @@ public class StudentService {
         user.setEmail(savedStudent.getEmail());
 
         userManager.updateUser(user);
+    
+        // Sync to cloud
+        try {
+            Map<String, Object> studentData = new HashMap<>();
+            studentData.put("studentId", savedStudent.getStudentId());
+            studentData.put("name", savedStudent.getName());
+            studentData.put("email", savedStudent.getEmail());
+            studentData.put("className", savedStudent.getClassName());
+            studentData.put("phone", savedStudent.getPhone());
+            
+            cloudConnector.syncEntity("students", savedStudent.getStudentId(), studentData);
+        } catch (Exception e) {
+            System.err.println("Failed to sync update: " + e.getMessage());
+        }
 
         // Create and return the DTO object combining student and face data
         FaceDataDTO face = faceDataService.getLatestFaceData(savedStudent.getStudentId())
@@ -259,6 +273,13 @@ public class StudentService {
 
         // Delete student account
         studentManager.deleteStudentByStudentId(existingStudent.getStudentId());
+
+        // Sync to cloud
+        try {
+            cloudConnector.deleteEntity("students", studentId);
+        } catch (Exception e) {
+            System.err.println("Failed to delete from cloud: " + e.getMessage());
+    }
     }
 
     // Search students by name (partial match, case insensitive)

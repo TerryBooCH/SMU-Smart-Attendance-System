@@ -17,7 +17,7 @@ public abstract class BaseRecognizer {
     }
 
     // Returns the index of the face has the highest similarity with
-    public int recognize(Mat face, List<Mat> dataset) {
+    public RecognitionResult recognize(Mat face, List<Mat> dataset) {
         List<Double> scores = computeScore(face, dataset);
         int bestIndex = 0;
         for (int i = 1; i < scores.size(); i++) {
@@ -26,7 +26,7 @@ public abstract class BaseRecognizer {
             }
         }
 
-        return bestIndex;
+        return new RecognitionResult(bestIndex, scores.get(bestIndex));
     }
 
     public List<Double> computeScore(Mat face, List<Mat> dataset) {

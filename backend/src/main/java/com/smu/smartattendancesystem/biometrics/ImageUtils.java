@@ -23,10 +23,10 @@ public class ImageUtils {
     public static Mat crop(DetectionResult detectionResult, Mat image) {
         Rect2d roi = detectionResult.getBbox();
         Mat face = image.submat(
-            Math.clamp(Math.round(roi.x), 0, image.cols()),
             Math.clamp(Math.round(roi.y), 0, image.rows()),
-            Math.clamp(Math.round(roi.x + roi.width), 0, image.cols()),
-            Math.clamp(Math.round(roi.y + roi.height), 0, image.rows())
+            Math.clamp(Math.round(roi.y + roi.height), 0, image.rows()),
+            Math.clamp(Math.round(roi.x), 0, image.cols()),
+            Math.clamp(Math.round(roi.x + roi.width), 0, image.cols())
         );
         return face; 
     } 

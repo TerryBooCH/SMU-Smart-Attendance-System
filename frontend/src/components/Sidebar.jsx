@@ -274,13 +274,28 @@ const Sidebar = () => {
           <KeyboardShortcutsModalButton isCollapsed={isCollapsed} />
           <Link
             to="/settings"
-            className="group flex items-center rounded-xl transition-all duration-200 text-gray-700 hover:text-gray-900 hover:bg-gray-50 p-3"
+            className={`group relative flex items-center rounded-xl transition-all duration-200 p-3 ${
+              isActive("/settings")
+                ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
+                : "hover:bg-gray-50 text-gray-700 hover:text-gray-900"
+            }`}
           >
+            {isActive("/settings") && (
+              <div
+                className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full transition-all duration-300 ease-in-out ${
+                  isCollapsed ? "opacity-0" : "opacity-100"
+                }`}
+              ></div>
+            )}
             <div className="flex-shrink-0 w-6 flex justify-center">
               <Settings
                 size={20}
-                strokeWidth={2}
-                className="text-gray-600 group-hover:text-gray-900 transition-colors duration-200"
+                strokeWidth={isActive("/settings") ? 2.5 : 2}
+                className={`transition-all duration-200 ${
+                  isActive("/settings")
+                    ? "text-white"
+                    : "text-gray-600 group-hover:text-gray-900"
+                }`}
               />
             </div>
             <div
@@ -288,13 +303,30 @@ const Sidebar = () => {
                 isCollapsed ? "max-w-0 opacity-0" : "max-w-xs opacity-100"
               }`}
             >
-              <span className="font-medium text-sm whitespace-nowrap">
+              <span
+                className={`font-medium text-sm whitespace-nowrap ${
+                  isActive("/settings")
+                    ? "text-white"
+                    : "text-gray-900 group-hover:text-gray-900"
+                }`}
+              >
                 Settings
               </span>
-              <kbd className="px-1.5 py-0.5 text-[10px] font-semibold bg-gray-100 border border-gray-300 rounded text-gray-600">
+              <kbd
+                className={`px-1.5 py-0.5 text-[10px] font-semibold rounded border transition-colors duration-200 ${
+                  isActive("/settings")
+                    ? "bg-white/20 border-white/30 text-white"
+                    : "bg-gray-100 border-gray-300 text-gray-600"
+                }`}
+              >
                 CTRL + ,
               </kbd>
             </div>
+            {isCollapsed && (
+              <div className="absolute left-16 bg-gray-900 text-white px-2 py-1 rounded-md text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                Settings (⌘,)
+              </div>
+            )}
           </Link>
           <LogoutButton isCollapsed={isCollapsed} />
 

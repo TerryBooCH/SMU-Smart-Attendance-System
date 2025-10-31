@@ -38,10 +38,10 @@ export const validateCreateStudentForm = (values) => {
   if (!values.className || !values.className.trim()) {
     errors.className = "Class is required";
   } else {
-    const classRegex = /^[A-Za-z]{2}\d{3}$/;
+    const classRegex = /^[A-Z]{2}\d{3}$/; // uppercase only now
     if (!classRegex.test(values.className.trim())) {
       errors.className =
-        "Class must start with 2 letters followed by 3 numbers (e.g., AB123)";
+        "Class must start with 2 capital letters followed by 3 numbers (e.g., AB123)";
     }
   }
 
@@ -82,10 +82,10 @@ export const validateUpdateStudentForm = (values) => {
   if (!values.className || !values.className.trim()) {
     errors.className = "Class is required";
   } else {
-    const classRegex = /^[A-Za-z]{2}\d{3}$/;
+    const classRegex = /^[A-Z]{2}\d{3}$/; // only uppercase allowed
     if (!classRegex.test(values.className.trim())) {
       errors.className =
-        "Class must start with 2 letters followed by 3 numbers (e.g., AB123)";
+        "Class must start with 2 capital letters followed by 3 numbers (e.g., AB123)";
     }
   }
 

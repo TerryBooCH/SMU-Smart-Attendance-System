@@ -1,12 +1,13 @@
 package com.smu.smartattendancesystem.managers;
 
-import com.smu.smartattendancesystem.models.Attendance;
-import com.smu.smartattendancesystem.repositories.AttendanceRepository;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+
+import org.springframework.stereotype.Service;
+
+import com.smu.smartattendancesystem.models.Attendance;
+import com.smu.smartattendancesystem.repositories.AttendanceRepository;
 
 @Service
 public class AttendanceManager {
@@ -20,7 +21,7 @@ public class AttendanceManager {
     public Attendance markAttendance(Attendance attendance) {
         return attendanceRepository.save(attendance);
     }
-    
+
     public List<Attendance> saveAll(List<Attendance> attendances) {
         return attendanceRepository.saveAll(attendances);
     }
@@ -103,6 +104,11 @@ public class AttendanceManager {
     // DELETE: Remove a record
     public void deleteAttendance(Long id) {
         attendanceRepository.deleteById(id);
+    }
+  
+    // Find all attendance records by session id
+    public List<Attendance> getAttendanceBySessionId(Long sessionId) {
+        return attendanceRepository.findBySession_Id(sessionId);
     }
 
     private boolean isValidStatus(String status) {

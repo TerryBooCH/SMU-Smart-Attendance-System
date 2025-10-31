@@ -55,9 +55,9 @@ VALUES
 -- ─────────────────────────────────────────────────────────
 INSERT INTO "session" (roster_id, course_name, start_at, end_at, is_open, late_after_minutes, created_at, updated_at)
 VALUES
- ((SELECT id FROM roster WHERE name='CS102 - Tutorial A'), 'CS102', '2025-10-20 09:00:00', '2025-10-20 10:00:00', 0, 10, datetime('now', 'localtime'), datetime('now', 'localtime')),
- ((SELECT id FROM roster WHERE name='CS102 - Tutorial A'), 'CS102', '2025-10-21 09:00:00', '2025-10-21 10:00:00', 0, 10, datetime('now', 'localtime'), datetime('now', 'localtime')),
- ((SELECT id FROM roster WHERE name='CS102 - Tutorial B'), 'CS102', '2025-10-22 14:00:00', '2025-10-22 15:00:00', 0, 10, datetime('now', 'localtime'), datetime('now', 'localtime'));
+ ((SELECT id FROM roster WHERE name='CS102 - Tutorial A'), 'CS102', '2025-10-20 09:00:00', '2025-10-20 10:00:00', 0, 15, datetime('now', 'localtime'), datetime('now', 'localtime')),
+ ((SELECT id FROM roster WHERE name='CS102 - Tutorial A'), 'CS102', '2025-10-21 09:00:00', '2025-10-21 10:00:00', 0, 15, datetime('now', 'localtime'), datetime('now', 'localtime')),
+ ((SELECT id FROM roster WHERE name='CS102 - Tutorial B'), 'CS102', '2025-10-22 14:00:00', '2025-10-22 15:00:00', 0, 15, datetime('now', 'localtime'), datetime('now', 'localtime'));
 
 -- ─────────────────────────────────────────────────────────
 -- 6) Attendance (SQLite-compatible timestamps)

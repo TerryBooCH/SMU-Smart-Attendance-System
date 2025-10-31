@@ -1,8 +1,10 @@
 package com.smu.smartattendancesystem.repositories;
 
-import com.smu.smartattendancesystem.models.Attendance;
-import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.smu.smartattendancesystem.models.Attendance;
 
 public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 

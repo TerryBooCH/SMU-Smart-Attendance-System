@@ -22,6 +22,7 @@ import RosterView from "./pages/RosterView";
 import Reports from "./pages/Reports";
 import LiveRecognition from "./pages/LiveRecognition";
 import Settings from "./pages/Settings";
+import Summary from "./pages/Summary";
 
 function App() {
   return (
@@ -60,6 +61,7 @@ function App() {
                           element={<LiveRecognition />}
                         />
                         <Route path="/settings" element={<Settings />} />
+                        <Route path="/summary" element={<Summary />} />
                       </Routes>
                     </ToastProvider>
                   </SidebarProvider>

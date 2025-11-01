@@ -1,5 +1,6 @@
 package com.smu.smartattendancesystem.services;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,12 +46,12 @@ public class UserService {
         String token = jwtService.generateToken(user);
 
         // Build user info to be returned
-        Map<String, Object> userInfo = Map.of(
-                "name", user.getName(),
-                "email", user.getEmail(),
-                "permissionLevel", user.getPermissionLevel());
+        Map<String, Object> userInfo = new LinkedHashMap<>();
+        userInfo.put("name", user.getName());
+        userInfo.put("email", user.getEmail());
+        userInfo.put("permissionLevel", user.getPermissionLevel());
 
-        String linkedStudentId = user.getLinkedStudentId(); // may be null for TA/Professor
+        String linkedStudentId = user.getLinkedStudentId(); // may be null
         if (linkedStudentId != null && !linkedStudentId.isBlank()) {
             userInfo.put("studentId", linkedStudentId);
         }

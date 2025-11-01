@@ -76,11 +76,11 @@ VALUES
 INSERT INTO attendance (session_id, student_id, status, method, confidence, timestamp, created_at, updated_at)
 VALUES
  ((SELECT id FROM "session" WHERE roster_id=(SELECT id FROM roster WHERE name='CS102 - Tutorial A') AND start_at='2025-10-21 09:00:00'),
-  (SELECT id FROM student WHERE student_id='S1000001'), 'PRESENT', 'EDGE', 0.95, '2025-10-21 09:01:40', datetime('now', 'localtime'), datetime('now', 'localtime')),
+  (SELECT id FROM student WHERE student_id='S1000001'), 'PRESENT', 'AUTO', 0.95, '2025-10-21 09:01:40', datetime('now', 'localtime'), datetime('now', 'localtime')),
  ((SELECT id FROM "session" WHERE roster_id=(SELECT id FROM roster WHERE name='CS102 - Tutorial A') AND start_at='2025-10-21 09:00:00'),
   (SELECT id FROM student WHERE student_id='S1000002'), 'PRESENT', 'AUTO', 0.93, '2025-10-21 09:03:05', datetime('now', 'localtime'), datetime('now', 'localtime')),
  ((SELECT id FROM "session" WHERE roster_id=(SELECT id FROM roster WHERE name='CS102 - Tutorial A') AND start_at='2025-10-21 09:00:00'),
-  (SELECT id FROM student WHERE student_id='S1000003'), 'PENDING', 'MANUAL', NULL, '2025-10-21 08:59:55', datetime('now', 'localtime'), datetime('now', 'localtime'));
+  (SELECT id FROM student WHERE student_id='S1000003'), 'PENDING', 'NOT MARKED', NULL, '2025-10-21 08:59:55', datetime('now', 'localtime'), datetime('now', 'localtime'));
 
 -- Session 3 (Tutorial B, 2025-10-22)
 INSERT INTO attendance (session_id, student_id, status, method, confidence, timestamp, created_at, updated_at)

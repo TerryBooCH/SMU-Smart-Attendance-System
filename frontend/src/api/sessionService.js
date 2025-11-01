@@ -118,4 +118,25 @@ export const sessionService = {
       throw customError;
     }
   },
+
+  getSessionSummary: async (sessionId) => {
+    try {
+      const response = await apiClient.get(`/api/reports/session/${sessionId}/summary`);
+      console.log("Fetched session summary:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching session summary:", error);
+      const errorData = error.response?.data || {};
+      const errorMessage =
+        errorData.message ||
+        errorData.error ||
+        error.message ||
+        "Error fetching session summary";
+      const statusCode = error.response?.status || 500;
+
+      const customError = new Error(errorMessage);
+      customError.statusCode = statusCode;
+      throw customError;
+    }
+  },
 };

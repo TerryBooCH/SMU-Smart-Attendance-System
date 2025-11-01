@@ -16,6 +16,7 @@ import Students from "./pages/Students";
 import StudentView from "./pages/StudentView";
 import Sessions from "./pages/Sessions";
 import SessionView from "./pages/SessionView";
+import SessionDashboard from "./pages/SessionDashboard";
 import Rosters from "./pages/Rosters";
 import RosterView from "./pages/RosterView";
 import Reports from "./pages/Reports";
@@ -48,6 +49,10 @@ function App() {
                         <Route
                           path="/session/:id/live-recognition"
                           element={<LiveRecognition />}
+                        />
+                        <Route
+                          path="/session/:id/dashboard"
+                          element={<SessionDashboard />}
                         />
                         <Route path="/reports" element={<Reports />} />
                         <Route

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import OpenSessionButton from "../../components/OpenSessionButton";
 import TimeDateDisplay from "../../components/TimeDateDisplay";
 import TimeToStartDisplay from "./TimeToStartDisplay";
+import NavToDashboardButton from "./NavToDashboardButton";
 
 const Toolbar = ({ session }) => {
   return (
@@ -17,7 +18,8 @@ const Toolbar = ({ session }) => {
            
         </div>
 
-        <div>
+        <div className="flex gap-2 items-center">
+          <NavToDashboardButton session={session} />
          <OpenSessionButton session={session} />
         </div>
       </div>

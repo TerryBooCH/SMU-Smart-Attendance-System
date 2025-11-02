@@ -176,4 +176,28 @@ export const studentService = {
       throw customError;
     }
   },
+
+  // Inside studentService
+  getStudentAttendanceSummary: async (studentId) => {
+    try {
+      const response = await apiClient.get(
+        `/api/reports/student/${studentId}/summary`
+      );
+      console.log("Fetched student attendance summary:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching student attendance summary:", error);
+      const errorData = error.response?.data || {};
+      const errorMessage =
+        errorData.message ||
+        errorData.error ||
+        error.message ||
+        "Error fetching student attendance summary";
+      const statusCode = error.response?.status || 500;
+
+      const customError = new Error(errorMessage);
+      customError.statusCode = statusCode;
+      throw customError;
+    }
+  },
 };

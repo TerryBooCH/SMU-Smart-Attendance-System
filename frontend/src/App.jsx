@@ -14,6 +14,7 @@ import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import Students from "./pages/Students";
 import StudentView from "./pages/StudentView";
+import StudentDashboard from "./pages/StudentDashboard";
 import Sessions from "./pages/Sessions";
 import SessionView from "./pages/SessionView";
 import SessionDashboard from "./pages/SessionDashboard";
@@ -43,6 +44,10 @@ function App() {
                         <Route path="/signin" element={<SignIn />} />
                         <Route path="/students" element={<Students />} />
                         <Route path="/student/:id" element={<StudentView />} />
+                        <Route
+                          path="/student/:id/dashboard"
+                          element={<StudentDashboard />}
+                        />
                         <Route path="/rosters" element={<Rosters />} />
                         <Route path="/roster/:id" element={<RosterView />} />
                         <Route path="/sessions" element={<Sessions />} />

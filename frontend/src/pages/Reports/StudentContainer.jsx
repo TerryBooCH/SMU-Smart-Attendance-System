@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { User } from "lucide-react";
 import useStudent from "../../hooks/useStudent";
 import { getInitials } from "../../utils/stringUtils";
+import NavigateToStudentDashboardButton from "./NavigateToStudentDashboardButton";
 
 const StudentsContainer = () => {
   const { students, loading, error, fetchAllStudents } = useStudent();
@@ -126,8 +127,8 @@ const StudentsContainer = () => {
                     </td>
 
                     {/* Actions Placeholder */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 italic">
-                      — Placeholder —
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 ">
+                      <NavigateToStudentDashboardButton student={student} />
                     </td>
                   </tr>
                 ))

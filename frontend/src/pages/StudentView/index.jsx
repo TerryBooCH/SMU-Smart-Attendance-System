@@ -8,6 +8,7 @@ import UpdateStudentDetailsForm from "./UpdateStudentDetailsForm";
 import StudentFaceDataContainer from "./StudentFaceDataContainer";
 import StudentIdContainer from "./StudentIdContainer";
 import DeleteStudentContainer from "./DeleteStudentContainer";
+import LinkToDashboardContainer from "./LinkToDashboardContainer";
 
 const StudentView = () => {
   const { id } = useParams();
@@ -92,6 +93,7 @@ const StudentView = () => {
         faceData={studentFaceData}
         loading={loading}
       />
+      <LinkToDashboardContainer studentId={id} />
       <DeleteStudentContainer student={selectedStudent} />
     </>
   );

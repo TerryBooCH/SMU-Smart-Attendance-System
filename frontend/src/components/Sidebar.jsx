@@ -63,25 +63,18 @@ const Sidebar = () => {
               shortcut: "3",
             },
             {
-              path: "/live-recognition",
-              icon: Video,
-              label: "Live Recognition",
-              description: "Real-time detection",
-              shortcut: "4",
-            },
-            {
               path: "/students",
               icon: Users,
               label: "Students",
               description: "Student management",
-              shortcut: "5",
+              shortcut: "4",
             },
             {
               path: "/reports",
               icon: FileText,
               label: "Reports",
               description: "Analytics & exports",
-              shortcut: "6",
+              shortcut: "5",
             },
           ];
   }

@@ -9,9 +9,8 @@ const KeyboardShortcutsModalContent = () => {
         { keys: ["Ctrl", "1"], label: "Go to Home" },
         { keys: ["Ctrl", "2"], label: "Go to Sessions" },
         { keys: ["Ctrl", "3"], label: "Go to Rosters" },
-        { keys: ["Ctrl", "4"], label: "Go to Live Recognition" },
-        { keys: ["Ctrl", "5"], label: "Go to Students" },
-        { keys: ["Ctrl", "6"], label: "Go to Reports" },
+        { keys: ["Ctrl", "4"], label: "Go to Students" },
+        { keys: ["Ctrl", "5"], label: "Go to Reports" },
       ],
     },
     {
@@ -23,9 +22,7 @@ const KeyboardShortcutsModalContent = () => {
     },
     {
       category: "General",
-      items: [
-        { keys: ["Esc"], label: "Close Modal / Cancel Action" },
-      ],
+      items: [{ keys: ["Esc"], label: "Close Modal / Cancel Action" }],
     },
   ];
 

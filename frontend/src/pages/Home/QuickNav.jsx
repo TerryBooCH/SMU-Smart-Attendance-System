@@ -1,9 +1,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { Users, School, Video, FileText, ArrowRight } from "lucide-react";
+import { Users, School, FileText, UsersRound, ArrowRight } from "lucide-react";
 
 const QuickNav = () => {
-  // Call useNavigate at the component level, not inside a function
   const navigate = useNavigate();
 
   const handleNavigation = (path) => {
@@ -15,11 +14,20 @@ const QuickNav = () => {
       id: "sessions",
       title: "Manage Sessions",
       description:
-        "Set up and monitor attendance sessions with course details and real-time status.",
+        "Create and open a session to start attendance tracking with course details.",
       icon: School,
       primary: true,
       gradient: "from-blue-600 to-blue-700",
       path: "/sessions",
+    },
+    {
+      id: "rosters",
+      title: "Manage Rosters",
+      description:
+        "Organize and assign students to specific courses or session groups.",
+      icon: UsersRound,
+      gradient: "from-teal-600 to-teal-700",
+      path: "/rosters",
     },
     {
       id: "students",
@@ -29,14 +37,6 @@ const QuickNav = () => {
       icon: Users,
       gradient: "from-purple-600 to-purple-700",
       path: "/students",
-    },
-    {
-      id: "recognition",
-      title: "Live Recognition",
-      description: "Real-time face detection and automatic attendance marking.",
-      icon: Video,
-      gradient: "from-emerald-600 to-emerald-700",
-      path: "/recognition",
     },
     {
       id: "reports",
@@ -62,12 +62,10 @@ const QuickNav = () => {
           onClick={() => handleNavigation(navItems[0].path)}
         >
           <div className="relative overflow-hidden bg-white rounded-3xl p-8 h-full shadow-lg hover:shadow-2xl border border-gray-100 transition-all duration-300">
-            {/* Background gradient overlay */}
             <div
               className={`absolute inset-0 bg-gradient-to-br ${navItems[0].gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
             ></div>
 
-            {/* Content */}
             <div className="relative z-10">
               <div className="flex items-start justify-between mb-6">
                 <div
@@ -112,12 +110,10 @@ const QuickNav = () => {
               onClick={() => handleNavigation(item.path)}
             >
               <div className="relative overflow-hidden bg-white rounded-2xl p-6 shadow-md hover:shadow-xl border border-gray-100 transition-all duration-300">
-                {/* Background gradient overlay */}
                 <div
                   className={`absolute inset-0 bg-gradient-to-br ${item.gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`}
                 ></div>
 
-                {/* Content */}
                 <div className="relative z-10 flex items-start gap-5">
                   <div
                     className={`p-3 rounded-xl bg-gradient-to-br ${item.gradient} shadow-md flex-shrink-0`}

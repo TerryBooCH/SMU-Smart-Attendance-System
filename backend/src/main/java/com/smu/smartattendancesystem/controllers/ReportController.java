@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smu.smartattendancesystem.dto.SessionSummaryDTO;
+import com.smu.smartattendancesystem.dto.StudentAttendanceSummaryDTO;
 import com.smu.smartattendancesystem.services.ReportService;
 import com.smu.smartattendancesystem.utils.LoggerFacade;
 import static com.smu.smartattendancesystem.utils.ResponseFormatting.createErrorResponse;
@@ -50,4 +51,30 @@ public class ReportController {
         }
     }
 
+    // Retrieve student's attendance summary
+    @GetMapping("/student/{studentId}/summary")
+    public ResponseEntity<?> getStudentAttendanceSummary(@PathVariable String studentId) {
+        try {
+            LoggerFacade.info("Generating attendance summary for Student ID: " + studentId);
+            StudentAttendanceSummaryDTO summary = reportService.getStudentAttendanceSummary(studentId);
+            return ResponseEntity.ok(summary);
+        } catch (EntityNotFoundException | java.util.NoSuchElementException e) {
+            LoggerFacade.warning("Student not found: " + studentId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse(e.getMessage()));
+
+        } catch (IllegalArgumentException e) {
+            LoggerFacade.warning("Invalid Student ID: " + studentId + " | " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(createErrorResponse(e.getMessage()));
+
+        } catch (Exception e) {
+            LoggerFacade
+                    .severe("Unexpected error while generating attendance summary for Student ID: " + studentId + " | "
+                            + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("An error occurred while generating the student attendance summary"));
+        }
+    }
 }

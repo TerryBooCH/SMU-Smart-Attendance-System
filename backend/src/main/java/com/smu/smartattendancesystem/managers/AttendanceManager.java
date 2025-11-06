@@ -31,6 +31,11 @@ public class AttendanceManager {
         return attendanceRepository.findById(id);
     }
 
+    // FIXED: Use sessionId instead of Session object
+    public List<Attendance> findBySessionAndStatus(Long sessionId, String status) {
+        return attendanceRepository.findBySessionIdAndStatus(sessionId, status);
+    }
+
     // READ: List all attendance records
     public List<Attendance> getAllAttendance() {
         return attendanceRepository.findAll();

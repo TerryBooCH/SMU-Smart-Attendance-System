@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { logService } from "../../api/logService";
 import useToast from "../../hooks/useToast";
-import { Download, Loader2 } from "lucide-react"; // Loader2 for spinner
+import { Download, Loader2 } from "lucide-react";
 
 const DownloadLogFileButton = () => {
   const { success, error } = useToast();
@@ -24,21 +24,21 @@ const DownloadLogFileButton = () => {
     <button
       onClick={handleDownload}
       disabled={loading}
-      className={`cursor-pointer flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-white text-medium transition-colors ${
-        loading
+      className={`flex cursor-pointer items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white transition-all
+        ${loading
           ? "bg-gray-400 cursor-not-allowed"
-          : "bg-blue-600 hover:bg-blue-700"
-      }`}
+          : "bg-black hover:bg-gray-800"}
+      `}
     >
       {loading ? (
         <>
           <Loader2 className="animate-spin w-5 h-5" />
-          Downloading...
+          <span>Downloading...</span>
         </>
       ) : (
         <>
           <Download className="w-5 h-5" />
-          Download Log File
+          <span>Download Log File</span>
         </>
       )}
     </button>

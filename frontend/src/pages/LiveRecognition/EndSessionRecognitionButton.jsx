@@ -18,7 +18,7 @@ const EndSessionRecognitionButton = ({ id }) => {
     try {
       await closeSession(id);
       success("Session closed successfully.");
-      navigate("/sessions");
+      navigate(`/session/${id}`);
     } catch (err) {
       console.error("Error closing session:", err);
       error(`Failed to close session: ${err.message || "Unknown error"}`);

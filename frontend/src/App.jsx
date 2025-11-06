@@ -24,6 +24,7 @@ import Reports from "./pages/Reports";
 import LiveRecognition from "./pages/LiveRecognition";
 import Settings from "./pages/Settings";
 import Summary from "./pages/Summary";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -67,6 +68,7 @@ function App() {
                         />
                         <Route path="/settings" element={<Settings />} />
                         <Route path="/summary" element={<Summary />} />
+                        <Route path="*" element={<NotFound />} />
                       </Routes>
                     </ToastProvider>
                   </SidebarProvider>

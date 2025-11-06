@@ -19,5 +19,7 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Long> {
 
     Optional<Attendance> findBySessionIdAndStudentId(Long sessionId, Long studentId);
 
+    List<Attendance> findBySessionIdAndStatus(Long sessionId, String status);
+
     boolean existsBySessionIdAndStudentId(Long sessionId, Long studentId);
 }

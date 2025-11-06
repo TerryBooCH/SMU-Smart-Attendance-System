@@ -169,6 +169,19 @@ public class SessionController {
 
             session.setOpen(false);
             Session updated = sessionManager.updateSession(session);
+            
+            // Set all PENDING attendance records to ABSENT
+            List<Attendance> pendingAttendances = attendanceManager.findBySessionAndStatus(id, "PENDING");
+            if (!pendingAttendances.isEmpty()) {
+                for (Attendance attendance : pendingAttendances) {
+                    attendance.setStatus("ABSENT");
+                    attendance.setMethod("AUTO");
+                    // attendance.setTimestamp(LocalDateTime.now());
+                }
+                attendanceManager.saveAll(pendingAttendances);
+                LoggerFacade.info("Set " + pendingAttendances.size() + " PENDING attendance records to ABSENT for Session " + id + ".");
+            }
+            
             LoggerFacade.info("Closed Session " + id + ".");
             return ResponseEntity.ok(toDTO(updated));
         } catch (EntityNotFoundException e) {

@@ -5,28 +5,28 @@ import java.time.LocalDateTime;
 public class SessionSummaryDTO {
 
     // Retrieved from session
-    private final Long sessionId;
-    private final String courseName;
-    private final Long rosterId;
-    private final int rosterSize; // expected students
-    private final LocalDateTime startAt;
-    private final LocalDateTime endAt;
-    private final int lateAfterMinutes;
-    private final boolean isOpen;
+    private Long sessionId;
+    private String courseName;
+    private Long rosterId;
+    private int rosterSize; // expected students
+    private LocalDateTime startAt;
+    private LocalDateTime endAt;
+    private int lateAfterMinutes;
+    private boolean isOpen;
 
     // Computed based on attendance records for the session
-    private final int markedCount; // rows with status != pending
-    private final int unmarkedCount; // unmarked attendances (rosterSize − markedCount)
-    private final int presentCount;
-    private final int lateCount;
-    private final int absentCount;
-    private final int pendingCount;
+    private int markedCount; // rows with status != pending
+    private int unmarkedCount; // unmarked attendances (rosterSize − markedCount)
+    private int presentCount;
+    private int lateCount;
+    private int absentCount;
+    private int pendingCount;
 
     // Attendance rate
-    private final double attendanceRate; // (present + late) / rosterSize
-    private final double punctualRate; // present / rosterSize
-    private final double lateRate; // late / rosterSize
-    private final double absentRate; // absent / rosterSize
+    private double attendanceRate; // (present + late) / rosterSize
+    private double punctualRate; // present / rosterSize
+    private double lateRate; // late / rosterSize
+    private double absentRate; // absent / rosterSize
 
     public SessionSummaryDTO(
             Long sessionId,

@@ -23,16 +23,16 @@ export const rosterService = {
     }
   },
 
-  deleteRosterById: async (rosterId) => {
-    try {
-      const response = await apiClient.delete(`/api/rosters/${rosterId}`);
-      console.log(response);
-      return response;
-    } catch (error) {
-      console.error("Error deleting roster:", error);
-      throw error;
-    }
-  },
+  // deleteRosterById: async (rosterId) => {
+  //   try {
+  //     const response = await apiClient.delete(`/api/rosters/${rosterId}`);
+  //     console.log(response);
+  //     return response;
+  //   } catch (error) {
+  //     console.error("Error deleting roster:", error);
+  //     throw error;
+  //   }
+  // },
 
   updateRosterById: async (rosterId, rosterData) => {
     try {

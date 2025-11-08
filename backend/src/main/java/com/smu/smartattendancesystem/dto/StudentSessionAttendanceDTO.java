@@ -5,21 +5,21 @@ import java.time.LocalDateTime;
 public class StudentSessionAttendanceDTO {
 
     // Retrieved from session
-    private final Long sessionId;
-    private final String courseName;
-    private final Long rosterId;
-    private final String rosterName;
-    private final LocalDateTime startAt;
-    private final LocalDateTime endAt;
-    private final int lateAfterMinutes;
-    private final boolean isOpen;
+    private Long sessionId;
+    private String courseName;
+    private Long rosterId;
+    private String rosterName;
+    private LocalDateTime startAt;
+    private LocalDateTime endAt;
+    private int lateAfterMinutes;
+    private boolean isOpen;
 
     // Attendance information for the session
-    private final String status;
-    private final String method;
-    private final Double confidence;
-    private final LocalDateTime timestamp;
-    private final Integer arrivalOffsetMinutes; // minutes difference from startAt ( how early/late student is (0 = on
+    private String status;
+    private String method;
+    private Double confidence;
+    private LocalDateTime timestamp;
+    private Integer arrivalOffsetMinutes; // minutes difference from startAt ( how early/late student is (0 = on
                                                 // time, +5 = 5 minutes late, -3 = 3
     // minutes early))
 

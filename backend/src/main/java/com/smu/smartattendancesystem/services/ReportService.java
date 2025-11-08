@@ -29,11 +29,11 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class ReportService {
 
-    private final SessionManager sessionManager;
-    private final AttendanceManager attendanceManager;
-    private final StudentManager studentManager;
-    private final StudentRosterRepository studentRosterRepository;
-    private final AttendanceRepository attendanceRepository;
+    private SessionManager sessionManager;
+    private AttendanceManager attendanceManager;
+    private StudentManager studentManager;
+    private StudentRosterRepository studentRosterRepository;
+    private AttendanceRepository attendanceRepository;
 
     public ReportService(SessionManager sessionManager,
             AttendanceManager attendanceManager,

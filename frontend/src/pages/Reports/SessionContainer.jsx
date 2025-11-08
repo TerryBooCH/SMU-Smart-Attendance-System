@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useSession from "../../hooks/useSession";
 import { formatDateTime } from "../../utils/dateUtils";
 import NavigateToSessionDashboardButton from "./NavigateToSessionDashboardButton";
-import DownloadSessionReportButton from "./DownloadSessionReportButton";
+import DownloadSessionReportButton from "../../components/DownloadSessionReportButton";
 
 const SessionContainer = () => {
   const { sessions, loading, error, fetchAllSessions } = useSession();

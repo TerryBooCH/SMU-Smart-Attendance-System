@@ -3,7 +3,7 @@ import { User } from "lucide-react";
 import useStudent from "../../hooks/useStudent";
 import { getInitials } from "../../utils/stringUtils";
 import NavigateToStudentDashboardButton from "./NavigateToStudentDashboardButton";
-import DownloadStudentReportButton from "./DownloadStudentReportButton";
+import DownloadStudentReportButton from "../../components/DownloadStudentReportButton";
 
 const StudentsContainer = () => {
   const { students, loading, error, fetchAllStudents } = useStudent();

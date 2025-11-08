@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { useModal } from "../../hooks/useModal";
-import FileTypeDropdown from "../../components/FileTypeDropdown";
-import { exportService } from "../../api/exportService";
-import useToast from "../../hooks/useToast";
+import { useModal } from "../hooks/useModal";
+import FileTypeDropdown from "./FileTypeDropdown";
+import { exportService } from "../api/exportService";
+import useToast from "../hooks/useToast";
 import { Loader2, Download } from "lucide-react";
 
 const DownloadSessionReportForm = ({ session }) => {

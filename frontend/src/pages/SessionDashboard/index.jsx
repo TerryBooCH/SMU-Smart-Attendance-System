@@ -5,7 +5,7 @@ import Breadcrumb from "../../components/Breadcrumb";
 import useSession from "../../hooks/useSession";
 import DashboardHeader from "./DashboardHeader";
 import MainDashboardContainer from "./MainDashboardContainer";
-import DownloadSessionReportForm from "./DownloadSessionReportForm";
+import DownloadSessionReportContainer from "./DownloadSessionReportContainer";
 
 const SessionDashboard = () => {
   const { id } = useParams();
@@ -52,7 +52,7 @@ const SessionDashboard = () => {
 
         <div className="flex-1 overflow-y-auto">
           <DashboardHeader session={selectedSession} />
-          <DownloadSessionReportForm session={selectedSession} />
+          <DownloadSessionReportContainer session={selectedSession} />
           <MainDashboardContainer sessionId={id} />
         </div>
       </main>

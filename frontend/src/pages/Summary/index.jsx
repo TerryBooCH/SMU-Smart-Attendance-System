@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "../../components/Sidebar";
 import Breadcrumb from "../../components/Breadcrumb";
 import StudentDashboardHeader from "../StudentDashboard/StudentDashboardHeader";
-import DownloadStudentReportForm from "../StudentDashboard/DownloadStudentReportForm";
+import DownloadStudentReportContainer from "../StudentDashboard/DownloadStudentReportContainer";
 import MainDashboardContainer from "../StudentDashboard/MainDashboardContainer";
 import useAuth from "../../hooks/useAuth";
 import useStudent from "../../hooks/useStudent";
@@ -45,7 +45,7 @@ const Summary = () => {
         </div>
         <div className="flex-1 overflow-y-auto">
           <StudentDashboardHeader student={selectedStudent} />
-          <DownloadStudentReportForm student={selectedStudent} />
+          <DownloadStudentReportContainer student={selectedStudent} />
           <MainDashboardContainer studentId={studentId} />
         </div>
       </main>

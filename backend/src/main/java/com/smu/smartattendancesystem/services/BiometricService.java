@@ -10,6 +10,7 @@ import com.smu.smartattendancesystem.biometrics.detection.*;
 import com.smu.smartattendancesystem.biometrics.metrics.*;
 import com.smu.smartattendancesystem.biometrics.recognition.*;
 import com.smu.smartattendancesystem.biometrics.ImageUtils;
+import com.smu.smartattendancesystem.dto.AttendanceDTO;
 import com.smu.smartattendancesystem.dto.DetectionResultDTO;
 import com.smu.smartattendancesystem.dto.RecognitionResultDTO;
 import com.smu.smartattendancesystem.dto.RecognitionResponse;
@@ -19,9 +20,14 @@ import com.smu.smartattendancesystem.managers.SessionManager;
 import com.smu.smartattendancesystem.models.*;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
 
 @Service
 public class BiometricService {
@@ -45,38 +51,55 @@ public class BiometricService {
         // "neuralnet_mtcnn", new NeuralNetRecognizer(...)
     );
 
-    private final Map<String, Set<String>> allowedDetectorRecognizer = Map.of(
-        "hist", detectorMap.keySet(),
-        "eigen", Set.of("yolo", "mtcnn")
-        // "neuralnet", Set.of("yolo", "mtcnn")
-    );
+    private final Map<String, Set<String>> allowedDetectorRecognizer;
 
     private final Map<String, BaseMetric> metricMap = Map.of(  // Used to tell how similar two face embedding vectors are
         "euclidian", new EuclideanDistance(),
         "cosine", new CosineSimilarity()
     );
 
-    private String rootFaces;
+    @Value("${faces.root}")
+    private String root;
+
+    @Value("${faces.detection.defaultDetector:yolo}")
+    private String defaultDetector;
+
+    @Value("${faces.recognition.defaultRecognizer:eigen}")
+    private String defaultRecognizer;
+    
+    @Value("${faces.recognition.defaultMetric:cosine}")
+    private String defaultMetric;
+
+    @Value("${faces.recognition.manualThreshold:0.4}")
+    private Double manualThreshold;
+
+    @Value("${faces.recognition.autoMarkThreshold:0.7}")
+    private Double autoMarkThreshold;
+
     private final Path basePath = Paths.get(System.getProperty("user.dir"));
-
-
     public BiometricService(
         SessionManager sessionManager, 
         RosterManager rosterManager,
-        AttendanceManager attendanceManager,
-        @Value("${faces.root}") String rootFaces
+        AttendanceManager attendanceManager
     ) {
-        System.out.println(rootFaces);
         this.sessionManager = sessionManager;
         this.rosterManager = rosterManager;
         this.attendanceManager = attendanceManager;
-        this.rootFaces = rootFaces;
+        this.allowedDetectorRecognizer = Map.of(
+            "hist", detectorMap.keySet(),
+            "eigen", Set.of("yolo", "mtcnn")
+            // "neuralnet", Set.of("yolo", "mtcnn")
+        );
+        
     }
 
-    public List<DetectionResultDTO> detect(MultipartFile image, String type) throws IOException {
+    public List<DetectionResultDTO> detect(
+        MultipartFile image, 
+        String type
+    ) throws IOException {
         if (image == null) throw new IllegalArgumentException("No image provided.");
 
-        if (type == null || type.equals("")) throw new IllegalArgumentException("Missing 'type' field.");
+        type = (type == null || type.isEmpty()) ? defaultDetector : type;
         type = type.toLowerCase();
 
         BaseDetector detector = detectorMap.get(type.toLowerCase());
@@ -92,49 +115,70 @@ public class BiometricService {
 
     public RecognitionResponse recognize(
         MultipartFile image,
+        long session_id, 
         String detector_type,
         String type,
-        long session_id, 
         String metric_name,  // Note: Metric has no effect on Histogram recognizers as they do not produce image embedding vectors.
-        double threshold
+        Double threshold
     ) throws IOException {
         if (image == null) throw new IllegalArgumentException("No image provided.");
 
         // Check detector
-        if (detector_type == null || detector_type.equals("")) throw new IllegalArgumentException("Missing 'detector_type' field.");
+        if (detector_type == null || detector_type.isBlank()) {
+            if (defaultDetector != null && detectorMap.containsKey(defaultDetector.toLowerCase())) {
+                detector_type = defaultDetector;
+            } else {
+                throw new IllegalArgumentException("Missing 'detector_type' field.");
+            }
+        }
         detector_type = detector_type.toLowerCase();
 
         BaseDetector detector = detectorMap.get(detector_type);
         if (detector == null) throw new IllegalArgumentException("Invalid detector type. Allowed values: " + detectorMap.keySet().stream().toList());
 
         // Check recognizer
-        if (type == null || type.equals("")) throw new IllegalArgumentException("Missing 'type' field.");
-        type = type.toLowerCase();
-
-        
-        BaseRecognizer recognizer = null;
-        if (recognizerMap.get(type) != null) {
-            recognizer = recognizerMap.get(type);
-        } else if (recognizerMap.get(type + "_" + detector_type) != null) {
-            recognizer = recognizerMap.get(type + "_" + detector_type);
-        } else {
-            throw new IllegalArgumentException("Invalid recognizer type. Allowed values: " + validRecognizers);
+        if (type == null || type.isBlank()) {
+            if (defaultRecognizer != null && recognizerMap.containsKey(defaultRecognizer.toLowerCase())) {
+                type = defaultRecognizer;
+            } else {
+                throw new IllegalArgumentException("Missing 'type' field.");
+            }
         }
-
+        type = type.toLowerCase();
+        
         if (!allowedDetectorRecognizer.get(type).contains(detector_type)) throw new UnsupportedOperationException(
             String.format("Recognizer '%s' is not compatible with detector '%s'. Allowed detectors for this recognizer: %s", 
                 type, detector_type, allowedDetectorRecognizer.get(type)
             )
         );
 
+        BaseRecognizer recognizer = null;
+        if (recognizerMap.containsKey(type)) {
+            recognizer = recognizerMap.get(type);
+        } else if (recognizerMap.containsKey(type + "_" + detector_type)) {
+            recognizer = recognizerMap.get(type + "_" + detector_type);
+        } else {
+            throw new IllegalArgumentException("Invalid recognizer type. Allowed values: " + validRecognizers);
+        }
+
+        // Check metric
+        metric_name = (metric_name != null) ? metric_name : defaultMetric;
+        BaseMetric metric = metricMap.getOrDefault(metric_name, new CosineSimilarity());
+        recognizer.setMetric(metric);
+
+        // Check threshold
+        threshold = (threshold != null) ? threshold : autoMarkThreshold;
+
         // Check session
-        Optional<Session> session = this.sessionManager.getSession(session_id);
-        if (session.isEmpty()) throw new IllegalArgumentException("Session ID does not exist.");
+        Optional<Session> optSession = this.sessionManager.getSession(session_id);
+        if (optSession.isEmpty()) throw new IllegalArgumentException("Session ID does not exist.");
+
+        Session session = optSession.get();
 
         Map<String, List<String>> warnings = new LinkedHashMap<>();
 
         // Link to Roster
-        Roster roster = session.get().getRoster();
+        Roster roster = session.getRoster();
         List<Student> students = roster.getStudents();
 
         List<FaceData> faceDataList = students.stream()
@@ -143,14 +187,10 @@ public class BiometricService {
 
         if (faceDataList.isEmpty()) throw new IllegalArgumentException(String.format("No reference images found for recognition (Roster #%d)", roster.getId()));
 
-        BaseMetric metric = metricMap.getOrDefault(metric_name, new CosineSimilarity());
-        recognizer.setMetric(metric);
-
-
         Map<Student, List<Mat>> dataset = new LinkedHashMap<>(); 
         for (FaceData faceData : faceDataList) {
             Student student = faceData.getStudent();
-            Mat face = Imgcodecs.imread(basePath.resolve(this.rootFaces).resolve(faceData.getImagePath()).toString());
+            Mat face = Imgcodecs.imread(basePath.resolve(this.root).resolve(faceData.getImagePath()).toString());
 
             if (face.empty()) continue;
 
@@ -225,15 +265,69 @@ public class BiometricService {
                 index -= size;
             }
 
+
             // TODO: Link to attendance
             // If lower than required threshold, dont mark attendance, return status manual
             // Mark as late if after `late_after_minutes`
             // Mark as present if before
-            results.add(new RecognitionResultDTO(detected.toDTO(), top_student, result.getScore(), Optional.empty()));
+            Duration lateAfter = Duration.ofMinutes(session.getLateAfterMinutes());
+            Duration duration = Duration.between(session.getStartAt(), LocalDateTime.now());
+
+            String status;
+            String method;
+            Attendance attendance;
+            if (result.getScore() < manualThreshold) {
+                status = "PENDING";
+                method = "NOT MARKED";
+            } else if (result.getScore() < manualThreshold) {
+                status = "PENDING";
+                method = "MANUAL";
+            } else {
+                status = duration.compareTo(lateAfter) <= 0 ? "LATE" : "PRESENT";
+                method = "AUTO";
+            }
+            attendance = attendanceManager.updateAttendanceStatusBySessionAndStudent(session_id, top_student.getId(), status, method, result.getScore());
+
+            results.add(new RecognitionResultDTO(detected.toDTO(), top_student, result.getScore(), convertToDTO(attendance)));
         }
 
-
-
         return new RecognitionResponse(warnings, results);
+    }
+
+    private AttendanceDTO convertToDTO(Attendance attendance) {
+        return new AttendanceDTO(
+                attendance.getId(),
+                attendance.getCreatedAt(),
+                attendance.getUpdatedAt(),
+                attendance.getStatus(),
+                attendance.getMethod(),
+                attendance.getConfidence(),
+                attendance.getTimestamp(),
+                attendance.getStudent().getId(),
+                attendance.getStudent().getStudentId(),
+                attendance.getStudent().getName(),
+                attendance.getStudent().getEmail(),
+                attendance.getStudent().getPhone(),
+                attendance.getStudent().getClassName(),
+                attendance.getSession().getId(),
+                attendance.getSession().getCourseName(),
+                attendance.getSession().isOpen()
+        );
+    }
+    
+    public void setDefaultDetector(String defaultDetector) {
+        this.defaultDetector = defaultDetector;
+    }
+
+    public void setDefaultRecognizer(String defaultRecognizer) {
+        this.defaultRecognizer = defaultRecognizer;
+    }
+
+    public void setDefaultMetric(String defaultMetric) {
+        this.defaultMetric = defaultMetric;
+    }
+
+    public void setAutoMarkThreshold(Double autoMarkThreshold) {
+        this.autoMarkThreshold = autoMarkThreshold;
     }
 }

@@ -7,9 +7,9 @@ public class RecognitionResultDTO {
     private DetectionResultDTO detected;
 	private Student top_student;
     private double recognition_score;
-    private Optional<Attendance> attendance;
+    private AttendanceDTO attendance;
 
-	public RecognitionResultDTO(DetectionResultDTO detected, Student top_student, double recognition_score, Optional<Attendance> attendance) {
+	public RecognitionResultDTO(DetectionResultDTO detected, Student top_student, double recognition_score, AttendanceDTO attendance) {
         this.detected = detected;
         this.top_student = top_student;
         this.recognition_score = recognition_score;
@@ -40,11 +40,11 @@ public class RecognitionResultDTO {
         this.recognition_score = recognition_score;
     }
 
-    public Optional<Attendance> getAttendance() {
+    public AttendanceDTO getAttendance() {
 		return attendance;
 	}
 
-	public void setAttendance(Optional<Attendance> attendance) {
+	public void setAttendance(AttendanceDTO attendance) {
 		this.attendance = attendance;
 	}
 }

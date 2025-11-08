@@ -25,7 +25,10 @@ public class BiometricController {
     }
     
     @PostMapping(value="/detect", consumes="multipart/form-data")
-    public ResponseEntity<?> detect(@RequestParam("image") MultipartFile image, @RequestParam("type") String type) {
+    public ResponseEntity<?> detect(
+        @RequestParam(name="image") MultipartFile image, 
+        @RequestParam(name="type", required=false) String type
+    ) {
         try {
             List<DetectionResultDTO> results = this.biometricService.detect(image, type);
             LoggerFacade.info("Biometric detection successful - Type: " + type + 
@@ -50,21 +53,22 @@ public class BiometricController {
     // Give a warning if no face can be detected for one of the students 
     @PostMapping(value={"/recognize"}, consumes="multipart/form-data")
     public ResponseEntity<?> recognize(
-        @RequestParam("image") MultipartFile image,
-        @RequestParam("detector_type") String detector_type,
-        @RequestParam("recognizer_type") String type,
-        @RequestParam("session_id") long session_id, 
-        @RequestParam(value="metric_name", required=false) String metric_name,
-        @RequestParam(value="threshold", required=false) Double threshold
+        @RequestParam(name="image") MultipartFile image,
+        @RequestParam(name="session_id") long session_id, 
+        @RequestParam(name="detector_type", required=false) String detector_type,
+        @RequestParam(name="type", required=false) String type,
+        @RequestParam(name="metric_name", required=false) String metric_name,
+        @RequestParam(name="threshold", required=false) Double threshold
     ) {
         try {
-            RecognitionResponse response = biometricService.recognize(image, detector_type, type, session_id, metric_name, threshold);
+            RecognitionResponse response = biometricService.recognize(image, session_id, detector_type, type, metric_name, threshold);
             return ResponseEntity.ok()
                     .body(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while recognizing."));
         }

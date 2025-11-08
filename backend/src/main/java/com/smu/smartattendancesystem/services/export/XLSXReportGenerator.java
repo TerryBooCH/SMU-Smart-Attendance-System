@@ -10,7 +10,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 public class XLSXReportGenerator implements ReportGenerator {
 
     @Override
-    public void generate(List<String> headers, List<List<String>> rows, OutputStream out) throws Exception {
+    public void generate(String title, List<String> headers, List<List<String>> rows, OutputStream out) throws Exception {
         SXSSFWorkbook wb = new SXSSFWorkbook(100);
         try {
             // Create a streaming workbook to stream rows

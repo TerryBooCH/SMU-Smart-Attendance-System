@@ -12,7 +12,7 @@ import org.apache.commons.csv.QuoteMode;
 public class CSVReportGenerator implements ReportGenerator {
 
     @Override
-    public void generate(List<String> headers, List<List<String>> rows, OutputStream out) throws Exception {
+    public void generate(String title, List<String> headers, List<List<String>> rows, OutputStream out) throws Exception {
 
         try (OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8);
                 CSVPrinter printer = new CSVPrinter(

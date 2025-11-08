@@ -1,19 +1,26 @@
 package com.smu.smartattendancesystem.services.export;
 
 import java.io.OutputStream;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
 import com.smu.smartattendancesystem.dto.StudentAttendanceSummaryDTO;
 import com.smu.smartattendancesystem.dto.StudentSessionAttendanceDTO;
-import com.smu.smartattendancesystem.managers.RosterManager;
+import com.smu.smartattendancesystem.managers.AttendanceManager;
+import com.smu.smartattendancesystem.repositories.StudentRosterRepository;
 import com.smu.smartattendancesystem.managers.SessionManager;
 import com.smu.smartattendancesystem.managers.StudentManager;
+import com.smu.smartattendancesystem.models.Attendance;
+import com.smu.smartattendancesystem.models.Session;
 import com.smu.smartattendancesystem.models.Student;
+import com.smu.smartattendancesystem.models.StudentRoster;
 import com.smu.smartattendancesystem.services.ReportService;
 
 @Service
@@ -21,20 +28,22 @@ public class ExportService {
     private ReportService reportService;
     private StudentManager studentManager;
     private SessionManager sessionManager;
-    private RosterManager rosterManager;
+    private StudentRosterRepository studentRosterRepository;
+    private AttendanceManager attendanceManager;
 
     public ExportService(ReportService reportService,
             StudentManager studentManager,
             SessionManager sessionManager,
-            RosterManager rosterManager) {
+            StudentRosterRepository studentRosterRepository,
+            AttendanceManager attendanceManager) {
         this.reportService = reportService;
         this.studentManager = studentManager;
         this.sessionManager = sessionManager;
-        this.rosterManager = rosterManager;
+        this.studentRosterRepository = studentRosterRepository;
+        this.attendanceManager = attendanceManager;
     }
 
-    // Exports a student's attendance summary using the given ReportGenerator (CSV,
-    // XLSX)
+    // Exports a student's attendance summary using the given ReportGenerator
     public void exportStudentAttendance(String studentId, ReportGenerator generator, OutputStream out)
             throws Exception {
 
@@ -44,58 +53,246 @@ public class ExportService {
         Student student = studentManager.getStudentByStudentId(studentId)
                 .orElseThrow(() -> new NoSuchElementException("Student not found: " + studentId));
 
-        // Pick headers by format (CSV/XLSX share; PDF can differ)
+        // Pick the appropriate headers for the file, based on file extension
         List<String> headers = headersForStudent(generator.getFileExtension());
 
-        // Build rows to match CSV/XLSX headers:
-        // Name, Status, Method, Student ID, Class, Course, Email, Phone, Timestamp,
-        // Action
+        // Build the rows to match the headers
         List<List<String>> rows = new ArrayList<>(details.size());
         for (StudentSessionAttendanceDTO d : details) {
             rows.add(List.of(
+                    // Student info
+                    checkString(summary.getStudentId()), // Student ID
                     checkString(summary.getName()), // Name
+                    checkString(summary.getClassName()), // Class
+
+                    // Session fields
+                    String.valueOf(d.getSessionId()), // Session ID
+                    checkString(d.getRosterName()), // Roster Name
+                    checkTime(d.getStartAt()), // Start Time
+                    checkTime(d.getEndAt()), // End Time
+                    String.valueOf(d.getLateAfterMinutes()), // Late After (min)
+
+                    // Attendance fields
                     checkString(d.getStatus()), // Status
                     checkString(d.getMethod()), // Method
-                    checkString(summary.getStudentId()), // Student ID
-                    checkString(summary.getClassName()), // Class
-                    checkString(d.getCourseName()), // Course
-                    checkString(student.getEmail()), // Email
-                    checkString(student.getPhone()), // Phone
+                    checkDouble(d.getConfidence()), // Confidence
                     checkTime(d.getTimestamp()), // Timestamp
-                    checkString(d.getStatus())));
+                    arrivalOffsetMinutes(d.getStartAt(), d.getTimestamp(), d.getStatus(), d.getMethod()), // Arrival
+                                                                                                          // Offset (how
+                                                                                                          // early/late)
+
+                    // Session flag
+                    String.valueOf(d.isOpen())));
         }
 
         generator.generate(headers, rows, out);
     }
 
-    // Select header format based on export type
+    // Export session summary details using the given ReportGenerator
+    public void exportSessionSummary(Long sessionId, ReportGenerator generator, OutputStream out) throws Exception {
+
+        // Check if session exists
+        Session session = sessionManager.getSession(sessionId)
+                .orElseThrow(() -> new NoSuchElementException("Session not found: " + sessionId));
+
+        // Retrieve fields from session
+        Long sid = session.getId();
+        String course = checkString(session.getCourseName());
+        String rosterName = (session.getRoster() != null && session.getRoster().getName() != null)
+                ? session.getRoster().getName()
+                : ""; // Prevent null pointer exception if session created has not been assigned to a
+                      // roster
+        LocalDateTime start = session.getStartAt();
+        LocalDateTime end = session.getEndAt();
+        int lateAfterMin = session.getLateAfterMinutes() == null ? 15 : session.getLateAfterMinutes();
+
+        // Pick the appropriate headers for the file, based on file extension
+        List<String> headers = headersForSession(generator.getFileExtension());
+
+        // Build rows to match the headers (retrieve students who have been marked
+        // first, then the unmarked students)
+        List<List<String>> rows = new ArrayList<>();
+
+        // Build rows for marked students
+        List<Attendance> attendanceList;
+        try {
+            attendanceList = attendanceManager.getAttendanceBySessionId(sessionId);
+        } catch (NoSuchElementException e) {
+            // If no attendance records are found for the session, use an empty list instead
+            // of throwing an exception
+            attendanceList = List.of();
+        }
+        Set<Long> markedStudents = new HashSet<>();
+
+        for (Attendance a : attendanceList) {
+            Student s = a.getStudent();
+            if (s != null)
+                markedStudents.add(s.getId());
+
+            String arrivalOffset = arrivalOffsetMinutes(start, a.getTimestamp(), a.getStatus(), a.getMethod());
+
+            rows.add(List.of(
+                    // Student details
+                    checkString(s != null ? s.getStudentId() : ""),
+                    checkString(s != null ? s.getName() : ""),
+                    course,
+
+                    // Session fields
+                    sid.toString(), // Session ID
+                    rosterName, // Roster Name
+                    checkTime(start), // Start Time
+                    checkTime(end), // End Time
+                    String.valueOf(lateAfterMin), // Late After (min)
+
+                    // Attendance fields
+                    checkString(a.getStatus()), // Status
+                    checkString(a.getMethod()), // Method
+                    checkDouble(a.getConfidence()), // Confidence
+                    checkTime(a.getTimestamp()), // Timestamp
+                    arrivalOffset, // Arrival Offset (min)
+                    String.valueOf(session.isOpen())));
+        }
+
+        // Build rows for unmarked students
+        if (session.getRoster() != null) {
+            List<StudentRoster> rosterEntries = studentRosterRepository.findByRoster(session.getRoster());
+            for (StudentRoster sr : rosterEntries) {
+                Student s = sr.getStudent();
+                if (s == null)
+                    continue;
+                if (markedStudents.contains(s.getId()))
+                    continue;
+
+                rows.add(List.of(
+                        // Student details
+                        checkString(s.getStudentId()),
+                        checkString(s.getName()),
+                        course,
+
+                        // Session fields
+                        sid.toString(), // Session ID
+                        rosterName, // Roster Name
+                        checkTime(start), // Start Time
+                        checkTime(end), // End Time
+                        String.valueOf(lateAfterMin), // Late After (min)
+
+                        // Attendance fields (unmarked)
+                        "UNMARKED", // Status
+                        "NOT MARKED", // Method
+                        "-", // Confidence
+                        "-", // Timestamp
+                        "-", // Arrival Offset (min)
+                        String.valueOf(session.isOpen())));
+            }
+        }
+
+        generator.generate(headers, rows, out);
+    }
+
+    // Select header format based on export type for student attendance summary
     private List<String> headersForStudent(String ext) {
         String e = ext == null ? "" : ext.toLowerCase();
         switch (e) {
             case "pdf":
-                return List.of("Student ID", "Student Name", "Attendance Status",
-                        "Recorded At", "Confidence Score", "Method", "Notes");
+                // modify pdf later if needed
+                return List.of("Student ID", "Student Name", "Class",
+                        "Session ID", "Roster Name",
+                        "Start Time", "End Time", "Late After (min)",
+                        "Status", "Method", "Confidence", "Timestamp", "Arrival Offset (min)", "Open");
             case "xlsx":
             case "csv":
             default:
-                return List.of("Name", "Status", "Method",
-                        "Student ID", "Class", "Course", "Email", "Phone", "Timestamp", "Status");
+                // CSV/XLSX share the same columns
+                return List.of(
+                        "Student ID", "Name", "Class",
+                        "Session ID", "Roster Name",
+                        "Start Time", "End Time", "Late After (min)",
+                        "Status", "Method", "Confidence", "Timestamp",
+                        "Arrival Offset (min)", "Open");
         }
     }
 
-    // Helpers to prevent NullPointerException
-    // returns an empty string if null
+    // Select header format based on export type for session summary
+    private List<String> headersForSession(String ext) {
+        String e = ext == null ? "" : ext.toLowerCase();
+        switch (e) {
+            case "pdf":
+                // modify pdf later if needed
+                return List.of("Session ID", "Course", "Roster",
+                        "Start Time", "End Time", "Duration",
+                        "Late After (min)", "Arrival Offset (min)",
+                        "Method", "Confidence", "Timestamp", "Status");
+            case "xlsx":
+            case "csv":
+            default:
+                // CSV/XLSX share the same columns
+                return List.of(
+                        "Student ID", "Name", "Class",
+                        "Session ID", "Roster Name",
+                        "Start Time", "End Time", "Late After (min)",
+                        "Status", "Method", "Confidence", "Timestamp",
+                        "Arrival Offset (min)", "Open");
+        }
+    }
+
+    /*
+     * Helper methods
+     */
+
+    // Returns "-" if the input string is null.
     private static String checkString(String s) {
-        return s == null ? "" : s;
+        return s == null ? "-" : s;
     }
 
-    // converts double to string, or return empty if null
+    // Converts a Double to string format.
+    // Returns "-" if the value is null to indicate missing data.
     private static String checkDouble(Double d) {
-        return d == null ? "" : d.toString();
+        return d == null ? "-" : d.toString();
     }
 
-    // converts LocalDateTime to string, or return empty if null
+    // Converts LocalDateTime to ISO string format.
+    // Returns "-" if the timestamp is null to ensure consistent CSV output.
     private static String checkTime(LocalDateTime t) {
-        return t == null ? "" : t.toString();
+        return t == null ? "-" : t.toString();
+    }
+
+    // Calculates how early or late a student arrived compared to session start
+    // time.
+    // Returns:
+    // - "<1 min early" or "<1 min late" for differences less than a minute
+    // - "X min early" / "X min late" for differences over a minute
+    // - "on time" if timestamps are identical
+    // - "-" if timestamp is null or attendance is unmarked/unrecorded
+    private static String arrivalOffsetMinutes(LocalDateTime start,
+            LocalDateTime ts,
+            String status,
+            String method) {
+
+        // Return "-" if timestamps are missing
+        if (start == null || ts == null)
+            return "-";
+
+        // Skip offset calculation if attendance is pending or unmarked
+        if ((status != null && (status.equalsIgnoreCase("PENDING")
+                || status.equalsIgnoreCase("UNMARKED")))
+                || (method != null && method.equalsIgnoreCase("NOT MARKED"))) {
+            return "-";
+        }
+
+        // Compute total difference in seconds between start and timestamp
+        long seconds = Duration.between(start, ts).getSeconds();
+
+        // Return formatted string based on difference
+        if (seconds == 0)
+            return "on time";
+        if (seconds > 0) {
+            long mins = seconds / 60;
+            return mins == 0 ? "<1 min late" : mins + " min late"; // if less than a minute late, return <1 min late,
+                                                                   // else return the no. mins late
+        } else {
+            long mins = (-seconds) / 60;
+            return mins == 0 ? "<1 min early" : mins + " min early"; // if less than a minute early, return <1 min
+                                                                     // early, else return the no. mins early
+        }
     }
 }

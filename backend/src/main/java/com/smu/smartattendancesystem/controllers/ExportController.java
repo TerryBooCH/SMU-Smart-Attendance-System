@@ -77,6 +77,46 @@ public class ExportController {
         }
     }
 
+    // Export a session summary report (csv, xlsx, pdf)
+    @GetMapping("/session/{sessionId}")
+    public ResponseEntity<?> exportSession(
+            @PathVariable Long sessionId,
+            @RequestParam(defaultValue = "csv") String format) {
+
+        LoggerFacade.info("User requested session export for ID: " + sessionId + " (format=" + format + ")");
+        try {
+            ReportGenerator generator = pickGenerator(format);
+
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            exportService.exportSessionSummary(sessionId, generator, baos);
+
+            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            String filename = "session_" + sessionId + "_" + timestamp + "." + generator.getFileExtension();
+
+            InputStreamResource resource = new InputStreamResource(new ByteArrayInputStream(baos.toByteArray()));
+            LoggerFacade.info("Generated export file: " + filename + " | size: " + baos.size() + " bytes");
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+                    .contentType(MediaType.parseMediaType(generator.getContentType()))
+                    .contentLength(baos.size())
+                    .body(resource);
+
+        } catch (NoSuchElementException e) {
+            LoggerFacade.warning("Session not found: " + sessionId);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (UnsupportedOperationException e) {
+            LoggerFacade.warning("Export format not implemented: " + format);
+            return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED)
+                    .body(createErrorResponse(e.getMessage()));
+        } catch (Exception e) {
+            LoggerFacade.severe("Error exporting session report (" + sessionId + "): " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(createErrorResponse("Export failed"));
+        }
+    }
+
     // Returns the appropriate ReportGenerator based on format
     private ReportGenerator pickGenerator(String format) {
         String f = format == null ? "csv" : format.trim().toLowerCase();

@@ -5,6 +5,7 @@ import Breadcrumb from "../../components/Breadcrumb";
 import useStudent from "../../hooks/useStudent";
 import StudentDashboardHeader from "./StudentDashboardHeader";
 import MainDashboardContainer from "./MainDashboardContainer";
+import DownloadStudentReportForm from "./DownloadStudentReportForm";
 
 const StudentDashboard = () => {
   const { id } = useParams();
@@ -50,6 +51,7 @@ const StudentDashboard = () => {
         </div>
         <div className="flex-1 overflow-y-auto">
           <StudentDashboardHeader student={selectedStudent} />
+          <DownloadStudentReportForm student={selectedStudent} />
           <MainDashboardContainer studentId={id} />
         </div>
       </main>

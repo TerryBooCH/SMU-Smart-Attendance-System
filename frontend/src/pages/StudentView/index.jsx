@@ -9,7 +9,7 @@ import StudentFaceDataContainer from "./StudentFaceDataContainer";
 import StudentIdContainer from "./StudentIdContainer";
 import DeleteStudentContainer from "./DeleteStudentContainer";
 import LinkToDashboardContainer from "./LinkToDashboardContainer";
-
+import DownloadStudentReportForm from "./DownloadStudentReportForm";
 const StudentView = () => {
   const { id } = useParams();
   const location = useLocation();
@@ -94,6 +94,7 @@ const StudentView = () => {
         loading={loading}
       />
       <LinkToDashboardContainer studentId={id} />
+      <DownloadStudentReportForm student={selectedStudent} />
       <DeleteStudentContainer student={selectedStudent} />
     </>
   );

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import useSession from "../../hooks/useSession";
 import { formatDateTime } from "../../utils/dateUtils";
 import NavigateToSessionDashboardButton from "./NavigateToSessionDashboardButton";
+import DownloadSessionReportButton from "./DownloadSessionReportButton";
 
 const SessionContainer = () => {
   const { sessions, loading, error, fetchAllSessions } = useSession();
@@ -59,12 +60,6 @@ const SessionContainer = () => {
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Created At
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Updated At
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
               </tr>
@@ -110,18 +105,11 @@ const SessionContainer = () => {
                         {session.open ? "Open" : "Closed"}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {formatDateTime(session.createdAt)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {formatDateTime(session.updatedAt)}
-                      </div>
-                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-                      <NavigateToSessionDashboardButton session={session} />
+                      <div className="flex space-x-2">
+                        <NavigateToSessionDashboardButton session={session} />
+                        <DownloadSessionReportButton session={session} />
+                      </div>
                     </td>
                   </tr>
                 ))

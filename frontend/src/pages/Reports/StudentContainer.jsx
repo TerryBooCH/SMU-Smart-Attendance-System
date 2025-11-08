@@ -3,6 +3,7 @@ import { User } from "lucide-react";
 import useStudent from "../../hooks/useStudent";
 import { getInitials } from "../../utils/stringUtils";
 import NavigateToStudentDashboardButton from "./NavigateToStudentDashboardButton";
+import DownloadStudentReportButton from "./DownloadStudentReportButton";
 
 const StudentsContainer = () => {
   const { students, loading, error, fetchAllStudents } = useStudent();
@@ -126,9 +127,12 @@ const StudentsContainer = () => {
                       </div>
                     </td>
 
-                    {/* Actions Placeholder */}
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 ">
-                      <NavigateToStudentDashboardButton student={student} />
+                    {/* Actions */}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
+                      <div className="flex space-x-2">
+                        <NavigateToStudentDashboardButton student={student} />
+                        <DownloadStudentReportButton student={student} />
+                      </div>
                     </td>
                   </tr>
                 ))

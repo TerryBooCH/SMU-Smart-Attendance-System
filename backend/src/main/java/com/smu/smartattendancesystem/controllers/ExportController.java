@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.smu.smartattendancesystem.services.export.CSVReportGenerator;
+import com.smu.smartattendancesystem.services.export.PDFReportGenerator;
 import com.smu.smartattendancesystem.services.export.ExportService;
 import com.smu.smartattendancesystem.services.export.ReportGenerator;
 import com.smu.smartattendancesystem.services.export.XLSXReportGenerator;
@@ -127,7 +128,7 @@ public class ExportController {
             case "xlsx":
                 return new XLSXReportGenerator();
             case "pdf":
-                throw new UnsupportedOperationException("PDF export not implemented yet");
+                return new PDFReportGenerator();
             default:
                 throw new UnsupportedOperationException("Unsupported format: " + f);
         }

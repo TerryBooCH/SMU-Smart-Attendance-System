@@ -31,6 +31,20 @@ public class ExportService {
     private StudentRosterRepository studentRosterRepository;
     private AttendanceManager attendanceManager;
 
+    private static final List<String> STUDENT_EXPORT_HEADERS = List.of(
+            "Student ID", "Name", "Class",
+            "Session ID", "Roster Name",
+            "Start Time", "End Time", "Late After (min)",
+            "Status", "Method", "Confidence", "Timestamp",
+            "Arrival Offset (min)", "Open");
+
+    private static final List<String> SESSION_EXPORT_HEADERS = List.of(
+            "Student ID", "Name", "Class",
+            "Session ID", "Roster Name",
+            "Start Time", "End Time", "Late After (min)",
+            "Status", "Method", "Confidence", "Timestamp",
+            "Arrival Offset (min)", "Open");
+
     public ExportService(ReportService reportService,
             StudentManager studentManager,
             SessionManager sessionManager,
@@ -53,8 +67,8 @@ public class ExportService {
         Student student = studentManager.getStudentByStudentId(studentId)
                 .orElseThrow(() -> new NoSuchElementException("Student not found: " + studentId));
 
-        // Pick the appropriate headers for the file, based on file extension
-        List<String> headers = headersForStudent(generator.getFileExtension());
+        // Retrieve headers
+        List<String> headers = headersForStudent();
 
         // Build the rows to match the headers
         List<List<String>> rows = new ArrayList<>(details.size());
@@ -85,7 +99,8 @@ public class ExportService {
                     String.valueOf(d.isOpen())));
         }
 
-        generator.generate(headers, rows, out);
+        String title = buildStudentTitle(summary); // only used for PDF
+        generator.generate(title, headers, rows, out);
     }
 
     // Export session summary details using the given ReportGenerator
@@ -106,8 +121,8 @@ public class ExportService {
         LocalDateTime end = session.getEndAt();
         int lateAfterMin = session.getLateAfterMinutes() == null ? 15 : session.getLateAfterMinutes();
 
-        // Pick the appropriate headers for the file, based on file extension
-        List<String> headers = headersForSession(generator.getFileExtension());
+        // Retrieve headers
+        List<String> headers = headersForSession();
 
         // Build rows to match the headers (retrieve students who have been marked
         // first, then the unmarked students)
@@ -186,53 +201,32 @@ public class ExportService {
             }
         }
 
-        generator.generate(headers, rows, out);
+        String title = buildSessionTitle(session); 
+        generator.generate(title, headers, rows, out);
     }
 
-    // Select header format based on export type for student attendance summary
-    private List<String> headersForStudent(String ext) {
-        String e = ext == null ? "" : ext.toLowerCase();
-        switch (e) {
-            case "pdf":
-                // modify pdf later if needed
-                return List.of("Student ID", "Student Name", "Class",
-                        "Session ID", "Roster Name",
-                        "Start Time", "End Time", "Late After (min)",
-                        "Status", "Method", "Confidence", "Timestamp", "Arrival Offset (min)", "Open");
-            case "xlsx":
-            case "csv":
-            default:
-                // CSV/XLSX share the same columns
-                return List.of(
-                        "Student ID", "Name", "Class",
-                        "Session ID", "Roster Name",
-                        "Start Time", "End Time", "Late After (min)",
-                        "Status", "Method", "Confidence", "Timestamp",
-                        "Arrival Offset (min)", "Open");
-        }
+    // Return headers for student attendance summary
+    private List<String> headersForStudent() {
+        return STUDENT_EXPORT_HEADERS;
     }
 
-    // Select header format based on export type for session summary
-    private List<String> headersForSession(String ext) {
-        String e = ext == null ? "" : ext.toLowerCase();
-        switch (e) {
-            case "pdf":
-                // modify pdf later if needed
-                return List.of("Session ID", "Course", "Roster",
-                        "Start Time", "End Time", "Duration",
-                        "Late After (min)", "Arrival Offset (min)",
-                        "Method", "Confidence", "Timestamp", "Status");
-            case "xlsx":
-            case "csv":
-            default:
-                // CSV/XLSX share the same columns
-                return List.of(
-                        "Student ID", "Name", "Class",
-                        "Session ID", "Roster Name",
-                        "Start Time", "End Time", "Late After (min)",
-                        "Status", "Method", "Confidence", "Timestamp",
-                        "Arrival Offset (min)", "Open");
-        }
+    // Return headers for session summary
+    private List<String> headersForSession() {
+        return SESSION_EXPORT_HEADERS;
+    }
+
+    private String buildStudentTitle(StudentAttendanceSummaryDTO summary) {
+        return String.format("Student Attendance Summary - (%s | %s | %s)",
+                checkString(summary.getStudentId()),
+                checkString(summary.getName()),
+                checkString(summary.getClassName()));
+    }
+
+    private String buildSessionTitle(Session session) {
+        return String.format("Session Summary - (%s | Session %s | %s)",
+                (session.getRoster() != null ? checkString(session.getRoster().getName()) : "-"),
+                String.valueOf(session.getId()),
+                checkTime(session.getStartAt()));
     }
 
     /*

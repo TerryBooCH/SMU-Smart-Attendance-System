@@ -13,11 +13,14 @@ public interface ReportGenerator {
      * @param out     OutputStream where file bytes will be written
      * @throws Exception if any error occurs during generation
      */
-    void generate(List<String> headers, List<List<String>> rows, OutputStream out) throws Exception;
+    default void generate(List<String> headers, List<List<String>> rows, OutputStream out) throws Exception {
+        generate("Report Export", headers, rows, out);
+    }
 
-    /** @return MIME type (e.g., "text/csv", "application/pdf") */
+    // Primary method all generators must implement
+    void generate(String title, List<String> headers, List<List<String>> rows, OutputStream out) throws Exception;
+
     String getContentType();
 
-    /** @return File extension without dot (e.g., "csv", "xlsx", "pdf") */
     String getFileExtension();
 }

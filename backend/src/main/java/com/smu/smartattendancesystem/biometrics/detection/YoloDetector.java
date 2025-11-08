@@ -1,35 +1,27 @@
 package com.smu.smartattendancesystem.biometrics.detection;
 
 import java.util.*;
-import java.nio.file.Path;
-import java.util.AbstractMap.SimpleEntry;
-
 import org.opencv.core.*;
 import org.opencv.dnn.Dnn;
 import org.opencv.dnn.Net;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+import java.nio.file.Path;
 
 public class YoloDetector extends BaseDetector {
     private Path yoloPath;
     private Net model;
     private int imageSize;
     private double scoreThreshold;
-    private double iouThreshold;
 
     // imageSize is the size of the image the model itself will be working with
     // It is NOT the input size of the image, letterbox resizing is applied so no other
     // preprocessing step is needed.
-    public YoloDetector(String yoloPath, int imageSize, double scoreThreshold, double iouThreshold) {
+    public YoloDetector(String yoloPath, int imageSize, double scoreThreshold) {
         this.yoloPath = basePath.resolve(yoloPath);
         this.model = Dnn.readNetFromONNX(this.yoloPath.toString());
         this.imageSize = imageSize;
         this.scoreThreshold = scoreThreshold;
-        this.iouThreshold = iouThreshold;
-    }
-
-    public YoloDetector(String yoloPath, int imageSize, double scoreThreshold) {
-        this(yoloPath, imageSize, scoreThreshold, 0.7);
     }
 
     public YoloDetector(String yoloPath, int imageSize) {

@@ -9,7 +9,6 @@ import org.opencv.imgproc.Imgproc;
 import smile.data.*;
 import smile.feature.extraction.PCA;
 import smile.math.matrix.Matrix;
-
 import com.fasterxml.jackson.core.json.*;
 import com.fasterxml.jackson.core.type.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,14 +17,14 @@ import com.smu.smartattendancesystem.biometrics.metrics.*;
 public class EigenFaceRecognizer extends BaseRecognizer {
     private PCA pca;
 
-    public EigenFaceRecognizer(PCA pca, int image_size) {
-        super(image_size);
+	public EigenFaceRecognizer(PCA pca, int image_size, BaseMetric metric) {
+        super(image_size, metric);
         this.pca = pca;
     }
 
-	public EigenFaceRecognizer(PCA pca, int image_size, BaseMetric metric) {
-        this(pca, image_size);
-        this.metric = metric;
+    public EigenFaceRecognizer(PCA pca, int image_size) {
+        super(image_size);
+        this.pca = pca;
     }
 
     public static EigenFaceRecognizer fromConfig(String path) {

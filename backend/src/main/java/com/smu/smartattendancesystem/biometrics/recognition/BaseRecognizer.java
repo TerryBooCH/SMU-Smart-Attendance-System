@@ -12,8 +12,13 @@ public abstract class BaseRecognizer {
     protected int image_size;
     protected BaseMetric metric;
 
-    public BaseRecognizer(int image_size) {
+	public BaseRecognizer(int image_size, BaseMetric metric) {
         this.image_size = image_size;
+        this.metric = metric;
+    }
+
+    public BaseRecognizer(int image_size) {
+        this(image_size, new CosineSimilarity());
     }
 
     // Returns the index of the face has the highest similarity with

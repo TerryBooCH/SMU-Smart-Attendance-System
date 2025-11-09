@@ -18,6 +18,7 @@ import com.smu.smartattendancesystem.managers.AttendanceManager;
 import com.smu.smartattendancesystem.managers.RosterManager;
 import com.smu.smartattendancesystem.managers.SessionManager;
 import com.smu.smartattendancesystem.models.*;
+import com.smu.smartattendancesystem.repositories.AttendanceRepository;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -34,6 +35,7 @@ public class BiometricService {
     private final SessionManager sessionManager;
     private final RosterManager rosterManager;
     private final AttendanceManager attendanceManager;
+    private final AttendanceRepository attendanceRepository;
 
     private final Map<String, BaseDetector> detectorMap = Map.of(
         "haar", new CascadeDetector("src/main/resources/weights/haarcascade_frontalface_alt.xml"),
@@ -80,11 +82,13 @@ public class BiometricService {
     public BiometricService(
         SessionManager sessionManager, 
         RosterManager rosterManager,
-        AttendanceManager attendanceManager
+        AttendanceManager attendanceManager,
+        AttendanceRepository attendanceRepository
     ) {
         this.sessionManager = sessionManager;
         this.rosterManager = rosterManager;
         this.attendanceManager = attendanceManager;
+        this.attendanceRepository = attendanceRepository;
         this.allowedDetectorRecognizer = Map.of(
             "hist", detectorMap.keySet(),
             "eigen", Set.of("yolo", "mtcnn")
@@ -188,23 +192,16 @@ public class BiometricService {
         manualThreshold = (manualThreshold == null) ? defaultManualThreshold : manualThreshold;
         autoThreshold = (autoThreshold == null) ? defaultAutoThreshold : autoThreshold;
 
-        String status;
-        String method;
-
         if (score > autoThreshold) {
-            status = elapsed.compareTo(lateAfter) <= 0 ? "PRESENT" : "LATE";
-            method = "AUTO";
-        } else if (score > manualThreshold) {
-            status = "PENDING";
-            method = "MANUAL";
+            String status = elapsed.compareTo(lateAfter) <= 0 ? "PRESENT" : "LATE";
+            
+            return attendanceManager.updateAttendanceStatusBySessionAndStudent(
+                session.getId(), student.getId(), status, "AUTO", score
+            );
         } else {
-            status = "PENDING";
-            method = "NOT MARKED";
-        } 
+            return null;
+        }
 
-        return attendanceManager.updateAttendanceStatusBySessionAndStudent(
-            session.getId(), student.getId(), status, method, score
-        );
     }
 
     public RecognitionResponse recognize(
@@ -289,14 +286,12 @@ public class BiometricService {
                 index -= size;
             }
 
-            // If attendance is taken after session closes, return null for attendance
-            if (LocalDateTime.now().isBefore(session.getEndAt())) {
+            Attendance attendance = determineAttendance(session, top_student, result.getScore(), manualThreshold, autoThreshold);
+            if (attendance == null) {  // return null if attendance was not changed
                 results.add(new RecognitionResultDTO(detected.toDTO(), top_student, result.getScore(), null));
             } else {
-                Attendance attendance = determineAttendance(session, top_student, result.getScore(), manualThreshold, autoThreshold);
                 results.add(new RecognitionResultDTO(detected.toDTO(), top_student, result.getScore(), convertToDTO(attendance)));
             }
-
         }
 
         return new RecognitionResponse(warnings, results);

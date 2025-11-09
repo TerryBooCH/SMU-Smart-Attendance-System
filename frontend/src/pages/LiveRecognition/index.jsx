@@ -13,13 +13,13 @@ const LiveRecognition = () => {
   const { showToast } = useToast();
 
   const [isCameraOn, setIsCameraOn] = useState(true);
-  const [activeSidebar, setActiveSidebar] = useState(null);
+  const [activeSidebar, setActiveSidebar] = useState("notifications");
 
-  const hasFetched = useRef(false); 
+  const hasFetched = useRef(false);
 
   useEffect(() => {
     if (!id || hasFetched.current) return;
-    hasFetched.current = true; 
+    hasFetched.current = true;
 
     const fetchSession = async () => {
       try {

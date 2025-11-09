@@ -1,12 +1,17 @@
 import apiClient from "./axios";
 
 export const exportService = {
-  downloadStudentReport: async (studentId, format = "csv") => {
+
+  downloadStudentReport: async (studentId, format = "csv", fields = {}) => {
     try {
-      const response = await apiClient.get(`/api/exports/student/${studentId}`, {
-        params: { format },
-        responseType: "blob",
-      });
+      const response = await apiClient.post(
+        `/api/exports/student/${studentId}`,
+        fields, // Request body
+        {
+          params: { format }, // Query param
+          responseType: "blob", // Expect binary data
+        }
+      );
 
       // Extract filename from Content-Disposition header
       const contentDisposition = response.headers["content-disposition"];
@@ -19,17 +24,15 @@ export const exportService = {
         }
       }
 
-      // Create and trigger file download
+      // Create a download link
       const blob = new Blob([response.data], { type: response.data.type });
       const url = window.URL.createObjectURL(blob);
-
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
       window.URL.revokeObjectURL(url);
 
       console.log(`✅ Student report downloaded successfully: ${filename}`);
@@ -39,12 +42,17 @@ export const exportService = {
     }
   },
 
-  downloadSessionReport: async (sessionId, format = "csv") => {
+
+  downloadSessionReport: async (sessionId, format = "csv", fields = {}) => {
     try {
-      const response = await apiClient.get(`/api/exports/session/${sessionId}`, {
-        params: { format },
-        responseType: "blob",
-      });
+      const response = await apiClient.post(
+        `/api/exports/session/${sessionId}`,
+        fields, // Request body
+        {
+          params: { format }, // Query param
+          responseType: "blob",
+        }
+      );
 
       // Extract filename
       const contentDisposition = response.headers["content-disposition"];
@@ -60,14 +68,12 @@ export const exportService = {
       // Trigger download
       const blob = new Blob([response.data], { type: response.data.type });
       const url = window.URL.createObjectURL(blob);
-
       const link = document.createElement("a");
       link.href = url;
       link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-
       window.URL.revokeObjectURL(url);
 
       console.log(`✅ Session report downloaded successfully: ${filename}`);

@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.LinkedHashSet;
+import java.util.function.*;
 
 import org.springframework.stereotype.Service;
 
@@ -16,7 +18,6 @@ import com.smu.smartattendancesystem.dto.StudentSessionAttendanceDTO;
 import com.smu.smartattendancesystem.managers.AttendanceManager;
 import com.smu.smartattendancesystem.repositories.StudentRosterRepository;
 import com.smu.smartattendancesystem.managers.SessionManager;
-import com.smu.smartattendancesystem.managers.StudentManager;
 import com.smu.smartattendancesystem.models.Attendance;
 import com.smu.smartattendancesystem.models.Session;
 import com.smu.smartattendancesystem.models.Student;
@@ -26,195 +27,283 @@ import com.smu.smartattendancesystem.services.ReportService;
 @Service
 public class ExportService {
     private ReportService reportService;
-    private StudentManager studentManager;
     private SessionManager sessionManager;
     private StudentRosterRepository studentRosterRepository;
     private AttendanceManager attendanceManager;
 
-    private static final List<String> STUDENT_EXPORT_HEADERS = List.of(
-            "Student ID", "Name", "Class",
-            "Session ID", "Roster Name",
-            "Start Time", "End Time", "Late After (min)",
-            "Status", "Method", "Confidence", "Timestamp",
-            "Arrival Offset (min)", "Open");
-
-    private static final List<String> SESSION_EXPORT_HEADERS = List.of(
-            "Student ID", "Name", "Class",
-            "Session ID", "Roster Name",
-            "Start Time", "End Time", "Late After (min)",
-            "Status", "Method", "Confidence", "Timestamp",
-            "Arrival Offset (min)", "Open");
-
     public ExportService(ReportService reportService,
-            StudentManager studentManager,
             SessionManager sessionManager,
             StudentRosterRepository studentRosterRepository,
             AttendanceManager attendanceManager) {
         this.reportService = reportService;
-        this.studentManager = studentManager;
         this.sessionManager = sessionManager;
         this.studentRosterRepository = studentRosterRepository;
         this.attendanceManager = attendanceManager;
     }
 
-    // Exports a student's attendance summary using the given ReportGenerator
-    public void exportStudentAttendance(String studentId, ReportGenerator generator, OutputStream out)
-            throws Exception {
+    // Represents a single column in the report (header and how to extract the data
+    // for the header)
+    private enum Column {
+        STUDENT_ID("Student ID", ctx -> ctx.studentId()),
+        NAME("Name", ctx -> ctx.name()),
+        CLASS_NAME("Class", ctx -> ctx.className()),
+        SESSION_ID("Session ID", ctx -> String.valueOf(ctx.sessionId())),
+        ROSTER_NAME("Roster Name", ctx -> nullSafe(ctx.rosterName())),
+        START_TIME("Start Time", ctx -> nullTime(ctx.start())),
+        END_TIME("End Time", ctx -> nullTime(ctx.end())),
+        LATE_AFTER("Late After (min)", ctx -> String.valueOf(ctx.lateAfterMin())),
+        STATUS("Status", ctx -> nullSafe(ctx.status())),
+        METHOD("Method", ctx -> nullSafe(ctx.method())),
+        CONFIDENCE("Confidence", ctx -> nullDouble(ctx.confidence())),
+        TIMESTAMP("Timestamp", ctx -> nullTime(ctx.timestamp())),
+        ARRIVAL_OFFSET("Arrival Offset (min)", ctx -> nullSafe(ctx.arrivalOffset())),
+        OPEN("Open", ctx -> String.valueOf(ctx.open()));
 
-        // Retrieve student's attendance summary
-        StudentAttendanceSummaryDTO summary = reportService.getStudentAttendanceSummary(studentId);
-        List<StudentSessionAttendanceDTO> details = summary.getSessions();
-        Student student = studentManager.getStudentByStudentId(studentId)
-                .orElseThrow(() -> new NoSuchElementException("Student not found: " + studentId));
+        private final String header;
+        private final Function<RowContext, String> extractor;
 
-        // Retrieve headers
-        List<String> headers = headersForStudent();
-
-        // Build the rows to match the headers
-        List<List<String>> rows = new ArrayList<>(details.size());
-        for (StudentSessionAttendanceDTO d : details) {
-            rows.add(List.of(
-                    // Student info
-                    checkString(summary.getStudentId()), // Student ID
-                    checkString(summary.getName()), // Name
-                    checkString(summary.getClassName()), // Class
-
-                    // Session fields
-                    String.valueOf(d.getSessionId()), // Session ID
-                    checkString(d.getRosterName()), // Roster Name
-                    checkTime(d.getStartAt()), // Start Time
-                    checkTime(d.getEndAt()), // End Time
-                    String.valueOf(d.getLateAfterMinutes()), // Late After (min)
-
-                    // Attendance fields
-                    checkString(d.getStatus()), // Status
-                    checkString(d.getMethod()), // Method
-                    checkDouble(d.getConfidence()), // Confidence
-                    checkTime(d.getTimestamp()), // Timestamp
-                    arrivalOffsetMinutes(d.getStartAt(), d.getTimestamp(), d.getStatus(), d.getMethod()), // Arrival
-                                                                                                          // Offset (how
-                                                                                                          // early/late)
-
-                    // Session flag
-                    String.valueOf(d.isOpen())));
+        Column(String header, Function<RowContext, String> extractor) {
+            this.header = header;
+            this.extractor = extractor;
         }
 
-        String title = buildStudentTitle(summary); // only used for PDF
+        String header() {
+            return header;
+        }
+
+        String extract(RowContext ctx) {
+            return extractor.apply(ctx);
+        }
+    }
+
+    // Represents a single row of data in the exported file (record of possible
+    // fields)
+    private static record RowContext(
+            String studentId, String name, String className,
+            Long sessionId, String rosterName,
+            LocalDateTime start, LocalDateTime end, int lateAfterMin,
+            String status, String method, Double confidence,
+            LocalDateTime timestamp, String arrivalOffset, boolean open) {
+    }
+
+    // Helpers used by Column extractors to handle null in output
+    private static String nullSafe(String s) {
+        return s == null ? "-" : s;
+    }
+
+    private static String nullDouble(Double d) {
+        return d == null ? "-" : d.toString();
+    }
+
+    private static String nullTime(LocalDateTime t) {
+        return t == null ? "-" : t.toString();
+    }
+
+    // The Builder pattern for Export Options
+    // Allows users to decide what to include / exclude in the report, except for
+    // mandatory columns
+    public static final class Options {
+        private final List<Column> columns;
+
+        private Options(List<Column> cols) {
+            this.columns = List.copyOf(cols);
+        }
+
+        public List<Column> columns() {
+            return columns;
+        }
+
+        public static Builder builder() {
+            return new Builder();
+        }
+
+        public static final class Builder {
+            private final LinkedHashSet<Column> set = new LinkedHashSet<>();
+
+            public Builder() {
+                // Set the mandatory columns
+                set.add(Column.STUDENT_ID);
+                set.add(Column.NAME);
+                set.add(Column.CLASS_NAME);
+                set.add(Column.SESSION_ID);
+            }
+
+            // Fields to include / exclude
+            public Builder rosterName(boolean b) {
+                return t(b, Column.ROSTER_NAME);
+            }
+
+            public Builder startTime(boolean b) {
+                return t(b, Column.START_TIME);
+            }
+
+            public Builder endTime(boolean b) {
+                return t(b, Column.END_TIME);
+            }
+
+            public Builder lateAfter(boolean b) {
+                return t(b, Column.LATE_AFTER);
+            }
+
+            public Builder status(boolean b) {
+                return t(b, Column.STATUS);
+            }
+
+            public Builder method(boolean b) {
+                return t(b, Column.METHOD);
+            }
+
+            public Builder confidence(boolean b) {
+                return t(b, Column.CONFIDENCE);
+            }
+
+            public Builder timestamp(boolean b) {
+                return t(b, Column.TIMESTAMP);
+            }
+
+            public Builder arrivalOffset(boolean b) {
+                return t(b, Column.ARRIVAL_OFFSET);
+            }
+
+            public Builder open(boolean b) {
+                return t(b, Column.OPEN);
+            }
+
+            private Builder t(boolean include, Column c) {
+                if (include)
+                    set.add(c);
+                else
+                    set.remove(c);
+                return this;
+            }
+
+            public Options build() {
+                // Ensure mandatory columns are present
+                if (!set.contains(Column.STUDENT_ID) || !set.contains(Column.NAME)
+                        || !set.contains(Column.CLASS_NAME) || !set.contains(Column.SESSION_ID)) {
+                    throw new IllegalStateException("Mandatory columns missing");
+                }
+                return new Options(new java.util.ArrayList<>(set));
+            }
+        }
+    }
+
+    // Export student's attendance summary
+    public void exportStudentAttendance(String studentId, Options options,
+            ReportGenerator generator, OutputStream out) throws Exception {
+
+        StudentAttendanceSummaryDTO summary = reportService.getStudentAttendanceSummary(studentId);
+        List<StudentSessionAttendanceDTO> details = summary.getSessions();
+
+        // Retrieve headers from options
+        List<String> headers = options.columns().stream().map(Column::header).toList();
+
+        // Build a RowContext for each attendance record
+        List<List<String>> rows = new ArrayList<>(details.size());
+        for (StudentSessionAttendanceDTO d : details) {
+            RowContext ctx = new RowContext(
+                    // Student info
+                    summary.getStudentId(),
+                    summary.getName(),
+                    summary.getClassName(),
+                    // Session fields
+                    d.getSessionId(),
+                    d.getRosterName(),
+                    d.getStartAt(),
+                    d.getEndAt(),
+                    d.getLateAfterMinutes(),
+                    // Attendance fields
+                    d.getStatus(),
+                    d.getMethod(),
+                    d.getConfidence(),
+                    d.getTimestamp(),
+                    arrivalOffsetMinutes(d.getStartAt(), d.getTimestamp(), d.getStatus(), d.getMethod()),
+                    // Session flag
+                    d.isOpen());
+            List<String> row = new ArrayList<>(options.columns().size());
+            for (Column c : options.columns())
+                row.add(c.extract(ctx));
+            rows.add(row);
+        }
+
+        String title = buildStudentTitle(summary); // Only used for PDF exports, CSV and XLSX will ignore it
         generator.generate(title, headers, rows, out);
     }
 
-    // Export session summary details using the given ReportGenerator
-    public void exportSessionSummary(Long sessionId, ReportGenerator generator, OutputStream out) throws Exception {
+    // Export session summary details
+    public void exportSessionSummary(Long sessionId, Options options,
+            ReportGenerator generator, OutputStream out) throws Exception {
 
         // Check if session exists
         Session session = sessionManager.getSession(sessionId)
                 .orElseThrow(() -> new NoSuchElementException("Session not found: " + sessionId));
 
-        // Retrieve fields from session
-        Long sid = session.getId();
-        String course = checkString(session.getCourseName());
-        String rosterName = (session.getRoster() != null && session.getRoster().getName() != null)
-                ? session.getRoster().getName()
-                : ""; // Prevent null pointer exception if session created has not been assigned to a
-                      // roster
-        LocalDateTime start = session.getStartAt();
-        LocalDateTime end = session.getEndAt();
-        int lateAfterMin = session.getLateAfterMinutes() == null ? 15 : session.getLateAfterMinutes();
-
-        // Retrieve headers
-        List<String> headers = headersForSession();
-
-        // Build rows to match the headers (retrieve students who have been marked
-        // first, then the unmarked students)
-        List<List<String>> rows = new ArrayList<>();
-
-        // Build rows for marked students
+        // Fetch all attendance records for the session
         List<Attendance> attendanceList;
         try {
             attendanceList = attendanceManager.getAttendanceBySessionId(sessionId);
         } catch (NoSuchElementException e) {
-            // If no attendance records are found for the session, use an empty list instead
-            // of throwing an exception
             attendanceList = List.of();
         }
-        Set<Long> markedStudents = new HashSet<>();
 
+        // Build rows for marked students
+        List<List<String>> rows = new ArrayList<>();
+
+        Set<Long> marked = new HashSet<>();
         for (Attendance a : attendanceList) {
             Student s = a.getStudent();
             if (s != null)
-                markedStudents.add(s.getId());
-
-            String arrivalOffset = arrivalOffsetMinutes(start, a.getTimestamp(), a.getStatus(), a.getMethod());
-
-            rows.add(List.of(
-                    // Student details
-                    checkString(s != null ? s.getStudentId() : ""),
-                    checkString(s != null ? s.getName() : ""),
-                    course,
-
-                    // Session fields
-                    sid.toString(), // Session ID
-                    rosterName, // Roster Name
-                    checkTime(start), // Start Time
-                    checkTime(end), // End Time
-                    String.valueOf(lateAfterMin), // Late After (min)
-
-                    // Attendance fields
-                    checkString(a.getStatus()), // Status
-                    checkString(a.getMethod()), // Method
-                    checkDouble(a.getConfidence()), // Confidence
-                    checkTime(a.getTimestamp()), // Timestamp
-                    arrivalOffset, // Arrival Offset (min)
-                    String.valueOf(session.isOpen())));
+                marked.add(s.getId());
+            RowContext ctx = new RowContext(
+                    s != null ? s.getStudentId() : "-",
+                    s != null ? s.getName() : "-",
+                    session.getCourseName(), // you used course in that column slot
+                    session.getId(),
+                    session.getRoster() != null ? session.getRoster().getName() : null,
+                    session.getStartAt(),
+                    session.getEndAt(),
+                    session.getLateAfterMinutes() == null ? 15 : session.getLateAfterMinutes(),
+                    a.getStatus(),
+                    a.getMethod(),
+                    a.getConfidence(),
+                    a.getTimestamp(),
+                    arrivalOffsetMinutes(session.getStartAt(), a.getTimestamp(), a.getStatus(), a.getMethod()),
+                    session.isOpen());
+            rows.add(projectRow(ctx, options));
         }
-
         // Build rows for unmarked students
         if (session.getRoster() != null) {
-            List<StudentRoster> rosterEntries = studentRosterRepository.findByRoster(session.getRoster());
-            for (StudentRoster sr : rosterEntries) {
+            for (StudentRoster sr : studentRosterRepository.findByRoster(session.getRoster())) {
                 Student s = sr.getStudent();
-                if (s == null)
+                if (s == null || marked.contains(s.getId()))
                     continue;
-                if (markedStudents.contains(s.getId()))
-                    continue;
-
-                rows.add(List.of(
-                        // Student details
-                        checkString(s.getStudentId()),
-                        checkString(s.getName()),
-                        course,
-
-                        // Session fields
-                        sid.toString(), // Session ID
-                        rosterName, // Roster Name
-                        checkTime(start), // Start Time
-                        checkTime(end), // End Time
-                        String.valueOf(lateAfterMin), // Late After (min)
-
-                        // Attendance fields (unmarked)
-                        "UNMARKED", // Status
-                        "NOT MARKED", // Method
-                        "-", // Confidence
-                        "-", // Timestamp
-                        "-", // Arrival Offset (min)
-                        String.valueOf(session.isOpen())));
+                RowContext ctx = new RowContext(
+                        s.getStudentId(), s.getName(), session.getCourseName(),
+                        session.getId(),
+                        session.getRoster().getName(),
+                        session.getStartAt(),
+                        session.getEndAt(),
+                        session.getLateAfterMinutes() == null ? 15 : session.getLateAfterMinutes(),
+                        "UNMARKED", "NOT MARKED", null, null, "-", session.isOpen());
+                rows.add(projectRow(ctx, options));
             }
         }
-
-        String title = buildSessionTitle(session); 
+        // Generate the report
+        List<String> headers = options.columns().stream().map(Column::header).toList();
+        String title = buildSessionTitle(session);
         generator.generate(title, headers, rows, out);
     }
 
-    // Return headers for student attendance summary
-    private List<String> headersForStudent() {
-        return STUDENT_EXPORT_HEADERS;
+    // Projects only the selected columns from the RowContext to a list of strings,
+    // to be exported as a row in the report
+    private List<String> projectRow(RowContext ctx, Options options) {
+        List<String> row = new ArrayList<>(options.columns().size());
+        for (Column c : options.columns())
+            row.add(c.extract(ctx));
+        return row;
     }
 
-    // Return headers for session summary
-    private List<String> headersForSession() {
-        return SESSION_EXPORT_HEADERS;
-    }
-
+    // Build title for student attendance report (used in PDF exports)
     private String buildStudentTitle(StudentAttendanceSummaryDTO summary) {
         return String.format("Student Attendance Summary - (%s | %s | %s)",
                 checkString(summary.getStudentId()),
@@ -222,6 +311,7 @@ public class ExportService {
                 checkString(summary.getClassName()));
     }
 
+    // Build title for session summary reports (used in PDF exports)
     private String buildSessionTitle(Session session) {
         return String.format("Session Summary - (%s | Session %s | %s)",
                 (session.getRoster() != null ? checkString(session.getRoster().getName()) : "-"),
@@ -236,12 +326,6 @@ public class ExportService {
     // Returns "-" if the input string is null.
     private static String checkString(String s) {
         return s == null ? "-" : s;
-    }
-
-    // Converts a Double to string format.
-    // Returns "-" if the value is null to indicate missing data.
-    private static String checkDouble(Double d) {
-        return d == null ? "-" : d.toString();
     }
 
     // Converts LocalDateTime to ISO string format.

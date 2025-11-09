@@ -58,10 +58,11 @@ public class BiometricController {
         @RequestParam(name="detector_type", required=false) String detector_type,
         @RequestParam(name="type", required=false) String type,
         @RequestParam(name="metric_name", required=false) String metric_name,
-        @RequestParam(name="threshold", required=false) Double threshold
+        @RequestParam(name="manual_threshold", required=false) Double manual_threshold,
+        @RequestParam(name="auto_threshold", required=false) Double auto_threshold
     ) {
         try {
-            RecognitionResponse response = biometricService.recognize(image, session_id, detector_type, type, metric_name, threshold);
+            RecognitionResponse response = biometricService.recognize(image, session_id, detector_type, type, metric_name, manual_threshold, auto_threshold);
             return ResponseEntity.ok()
                     .body(response);
         } catch (IllegalArgumentException e) {

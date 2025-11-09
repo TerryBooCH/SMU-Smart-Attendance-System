@@ -7,6 +7,7 @@ import useAttendance from "../../hooks/useAttendance";
 import Header from "./Header";
 import Toolbar from "./Toolbar";
 import AttendanceContainer from "./AttendanceContainer";
+import DownloadSessionReportContainer from "./DownloadSessionReportContainer";
 
 const SessionView = () => {
   const { id } = useParams();
@@ -37,6 +38,7 @@ const SessionView = () => {
         <div className="flex-1 overflow-y-auto">
             <Header session={selectedSession} />
             <Toolbar session={selectedSession} />
+            <DownloadSessionReportContainer session={selectedSession} />
             <AttendanceContainer attendances={attendances} isLoading={attendanceLoading} />
         </div>
       </main>

@@ -44,28 +44,38 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = useCallback(async (credentials) => {
-    setLoading(true);
-    setError(null);
+  const login = useCallback(
+    async (credentials) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const response = await authService.login(credentials);
-      tokenUtils.setToken({
-        accessToken: response.accessToken,
-        expiresIn: response.expiresIn,
-      });
-      setUser(response.user);
-      setIsAuthenticated(true);
-      return true;
-    } catch (err) {
-      console.error("Login error:", err);
-      setError(err.message || "Login failed");
-      setIsAuthenticated(false);
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      try {
+        const response = await authService.login(credentials);
+        tokenUtils.setToken({
+          accessToken: response.accessToken,
+          expiresIn: response.expiresIn,
+        });
+
+        // Re-initialize to decode the token and set user consistently
+        initializeAuth();
+        return {
+          success: true,
+          permLevel: response?.user?.permissionLevel ?? null,
+        };
+      } catch (err) {
+        console.error("Login error:", err);
+        setError(err.message || "Login failed");
+        setIsAuthenticated(false);
+        return {
+          success: false,
+          permLevel: null,
+        };
+      } finally {
+        setLoading(false);
+      }
+    },
+    [initializeAuth]
+  );
 
   const logout = useCallback(() => {
     tokenUtils.clearToken();

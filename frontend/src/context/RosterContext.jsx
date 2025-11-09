@@ -96,7 +96,6 @@ export const RosterProvider = ({ children }) => {
         prev.map((roster) => (roster.id === rosterId ? updatedRoster : roster))
       );
 
-      // Update selectedRoster if it's the one being updated
       if (selectedRoster && selectedRoster.id === rosterId) {
         setSelectedRoster(updatedRoster);
       }
@@ -110,6 +109,7 @@ export const RosterProvider = ({ children }) => {
     }
   };
 
+  /*
   const deleteRosterById = async (rosterId) => {
     try {
       setLoading(true);
@@ -119,12 +119,10 @@ export const RosterProvider = ({ children }) => {
 
       setRosters((prev) => prev.filter((roster) => roster.id !== rosterId));
 
-      // Clear selectedRoster if it was deleted
       if (selectedRoster && selectedRoster.id === rosterId) {
         setSelectedRoster(null);
       }
 
-      // Clear studentsInRoster if the deleted roster was selected
       if (selectedRoster && selectedRoster.id === rosterId) {
         setStudentsInRoster([]);
       }
@@ -137,6 +135,7 @@ export const RosterProvider = ({ children }) => {
       setLoading(false);
     }
   };
+  */
 
   const addStudentToRoster = async (rosterId, studentId) => {
     try {
@@ -149,7 +148,6 @@ export const RosterProvider = ({ children }) => {
       );
       const addedStudent = response.data || response.student || response;
 
-      // Add the student to the local studentsInRoster state
       setStudentsInRoster((prev) => [...prev, addedStudent]);
 
       return response;
@@ -172,7 +170,6 @@ export const RosterProvider = ({ children }) => {
         studentId
       );
 
-      // Remove the student locally after successful API call
       setStudentsInRoster((prev) =>
         prev.filter((student) => student.studentId !== studentId)
       );
@@ -187,7 +184,7 @@ export const RosterProvider = ({ children }) => {
     }
   };
 
-    const importStudentsToRosterFromCsv = async (file) => {
+  const importStudentsToRosterFromCsv = async (file) => {
     try {
       setLoading(true);
       setError(null);
@@ -195,7 +192,6 @@ export const RosterProvider = ({ children }) => {
       const response = await rosterService.importStudentsToRosterFromCsv(file);
       const { rosters: importedRosters = [] } = response;
 
-      // Update rosters in state (merge or append)
       if (importedRosters.length > 0) {
         setRosters((prev) => {
           const updated = [...prev];
@@ -211,7 +207,6 @@ export const RosterProvider = ({ children }) => {
         });
       }
 
-      // Return full response so UI can display importedCount, errorCount, errors
       return response;
     } catch (error) {
       console.error("Error importing students to roster:", error);
@@ -240,11 +235,11 @@ export const RosterProvider = ({ children }) => {
     fetchStudentsInRoster,
     createRoster,
     updateRosterById,
-    deleteRosterById,
+    // deleteRosterById, // commented out
     addStudentToRoster,
     removeStudentFromRoster,
     clearStudentsInRoster,
-    importStudentsToRosterFromCsv
+    importStudentsToRosterFromCsv,
   };
 
   return (

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Calendar, Clock, Users, AlertCircle, DoorOpen, DoorClosed } from 'lucide-react';
-import { formatDateTime, formatTime, calculateDuration } from '../../utils/dateUtils';
+import { Calendar, Clock, Users, AlertCircle, DoorOpen, DoorClosed, Info } from 'lucide-react';
+import { formatDateTime, calculateDuration } from '../../utils/dateUtils';
 
 const InfoContent = ({ sessionData }) => {
   if (!sessionData) {
@@ -16,7 +16,11 @@ const InfoContent = ({ sessionData }) => {
         ) : (
           <DoorClosed className="text-gray-500" size={20} />
         )}
-        <span className={`font-semibold ${sessionData.open ? 'text-green-600' : 'text-gray-500'}`}>
+        <span
+          className={`font-semibold ${
+            sessionData.open ? 'text-green-600' : 'text-gray-500'
+          }`}
+        >
           {sessionData.open ? 'Session Open' : 'Session Closed'}
         </span>
       </div>
@@ -34,7 +38,7 @@ const InfoContent = ({ sessionData }) => {
               <p className="text-sm font-medium text-gray-800">{sessionData.courseName}</p>
             </div>
           </div>
-          
+
           <div className="flex items-start gap-3">
             <Users className="text-gray-400 mt-0.5 flex-shrink-0" size={18} />
             <div>
@@ -55,15 +59,19 @@ const InfoContent = ({ sessionData }) => {
             <Clock className="text-gray-400 mt-0.5 flex-shrink-0" size={18} />
             <div>
               <p className="text-xs text-gray-500">Start Time</p>
-              <p className="text-sm font-medium text-gray-800">{formatDateTime(sessionData.startAt)}</p>
+              <p className="text-sm font-medium text-gray-800">
+                {formatDateTime(sessionData.startAt)}
+              </p>
             </div>
           </div>
-          
+
           <div className="flex items-start gap-3">
             <Clock className="text-gray-400 mt-0.5 flex-shrink-0" size={18} />
             <div>
               <p className="text-xs text-gray-500">End Time</p>
-              <p className="text-sm font-medium text-gray-800">{formatDateTime(sessionData.endAt)}</p>
+              <p className="text-sm font-medium text-gray-800">
+                {formatDateTime(sessionData.endAt)}
+              </p>
             </div>
           </div>
 
@@ -111,6 +119,18 @@ const InfoContent = ({ sessionData }) => {
           </div>
         </div>
       )}
+
+      {/* Closing Session Note */}
+      <div className="pt-4 border-t border-gray-200">
+        <div className="flex items-start gap-2 text-sm text-gray-600 bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+          <Info className="text-yellow-500 mt-0.5 flex-shrink-0" size={18} />
+          <p>
+            <span className="font-medium">Note:</span> Closing a session will
+            automatically mark all students with a pending status as{' '}
+            <span className="font-semibold text-gray-800">absent</span>.
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

@@ -1,10 +1,11 @@
-import React, { useState, useEffect, use } from "react";
+import React, { useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Logo from "../assets/logo.svg";
 import KeyboardShortcutsModalButton from "./KeyboardShortcutsModalButton";
 import useSidebar from "../hooks/useSidebar";
 import UserProfileContainer from "./UserProfileContainer";
 import LogoutButton from "./LogoutButton";
+import useAuth from "../hooks/useAuth";
 
 import {
   Users,
@@ -13,80 +14,80 @@ import {
   FileText,
   Settings,
   House,
-  Sparkles,
-  ChevronRight,
   PanelLeft,
-  ArrowLeft,
   UsersRound,
+  BarChart3,
 } from "lucide-react";
 
 const Sidebar = () => {
+  const { user, isLoading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { collapsed: isCollapsed, toggleCollapse } = useSidebar();
 
-  const navigationItems = [
-    {
-      path: "/home",
-      icon: House,
-      label: "Home",
-      description: "Dashboard overview",
-      shortcut: "1",
-    },
-    {
-      path: "/sessions",
-      icon: School,
-      label: "Sessions",
-      description: "Manage classes",
-      shortcut: "2",
-    },
-    {
-      path: "/rosters",
-      icon: UsersRound,
-      label: "Rosters",
-      description: "Roster management",
-      shortcut: "3",
-    },
-    {
-      path: "/live-recognition",
-      icon: Video,
-      label: "Live Recognition",
-      description: "Real-time detection",
-      shortcut: "4",
-    },
-    {
-      path: "/students",
-      icon: Users,
-      label: "Students",
-      description: "Student management",
-      shortcut: "5",
-    },
-    {
-      path: "/reports",
-      icon: FileText,
-      label: "Reports",
-      description: "Analytics & exports",
-      shortcut: "6",
-    },
-  ];
+  // Default empty nav until user is loaded
+  let navigationItems = [];
+
+  if (user && !isLoading && user.perm !== undefined) {
+    navigationItems =
+      user.perm === 0
+        ? [
+            {
+              path: "/summary",
+              icon: BarChart3,
+              label: "Summary",
+              description: "Attendance overview",
+              shortcut: "1",
+            },
+          ]
+        : [
+            {
+              path: "/home",
+              icon: House,
+              label: "Home",
+              description: "Dashboard overview",
+              shortcut: "1",
+            },
+            {
+              path: "/sessions",
+              icon: School,
+              label: "Sessions",
+              description: "Manage classes",
+              shortcut: "2",
+            },
+            {
+              path: "/rosters",
+              icon: UsersRound,
+              label: "Rosters",
+              description: "Roster management",
+              shortcut: "3",
+            },
+            {
+              path: "/students",
+              icon: Users,
+              label: "Students",
+              description: "Student management",
+              shortcut: "4",
+            },
+            {
+              path: "/reports",
+              icon: FileText,
+              label: "Reports",
+              description: "Analytics & exports",
+              shortcut: "5",
+            },
+          ];
+  }
 
   const isActive = (path) => {
-    if (path === "/students") {
-      return location.pathname.startsWith("/student");
-    }
-    if (path === "/rosters") {
-      return location.pathname.startsWith("/roster");
-    }
-    if (path === "/sessions") {
-      return location.pathname.startsWith("/session");
-    }
+    if (path === "/students") return location.pathname.startsWith("/student");
+    if (path === "/rosters") return location.pathname.startsWith("/roster");
+    if (path === "/sessions") return location.pathname.startsWith("/session");
     return location.pathname === path;
   };
 
-  // Keyboard navigation handler
   useEffect(() => {
     const handleKeyPress = (e) => {
-      // Check if Ctrl/Cmd key is pressed with a number
       if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !e.altKey) {
         const key = e.key;
         const item = navigationItems.find((item) => item.shortcut === key);
@@ -96,14 +97,13 @@ const Sidebar = () => {
           navigate(item.path);
         }
 
-        // Ctrl/Cmd + B to toggle sidebar
         if (key === "b" || key === "B") {
           e.preventDefault();
           toggleCollapse();
         }
 
-        // Ctrl/Cmd + , for settings
-        if (key === ",") {
+        // Disable settings shortcut for students
+        if (user?.perm !== 0 && key === ",") {
           e.preventDefault();
           navigate("/settings");
         }
@@ -112,7 +112,9 @@ const Sidebar = () => {
 
     window.addEventListener("keydown", handleKeyPress);
     return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [navigate, toggleCollapse]);
+  }, [navigate, toggleCollapse, navigationItems, user?.perm]);
+
+  if (isLoading) return null;
 
   return (
     <div
@@ -179,6 +181,7 @@ const Sidebar = () => {
               Navigation
             </h3>
           </div>
+
           {navigationItems.map((item) => {
             const IconComponent = item.icon;
             const active = isActive(item.path);
@@ -249,11 +252,6 @@ const Sidebar = () => {
                     </div>
                   </div>
                 </div>
-                {isCollapsed && (
-                  <div className="absolute left-16 bg-gray-900 text-white px-2 py-1 rounded-md text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                    {item.label} (⌘{item.shortcut})
-                  </div>
-                )}
               </Link>
             );
           })}
@@ -271,65 +269,66 @@ const Sidebar = () => {
             </h3>
           </div>
 
-          <KeyboardShortcutsModalButton isCollapsed={isCollapsed} />
-          <Link
-            to="/settings"
-            className={`group relative flex items-center rounded-xl transition-all duration-200 p-3 ${
-              isActive("/settings")
-                ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
-                : "hover:bg-gray-50 text-gray-700 hover:text-gray-900"
-            }`}
-          >
-            {isActive("/settings") && (
-              <div
-                className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full transition-all duration-300 ease-in-out ${
-                  isCollapsed ? "opacity-0" : "opacity-100"
-                }`}
-              ></div>
-            )}
-            <div className="flex-shrink-0 w-6 flex justify-center">
-              <Settings
-                size={20}
-                strokeWidth={isActive("/settings") ? 2.5 : 2}
-                className={`transition-all duration-200 ${
+          {/* Hide Shortcuts & Settings for Students */}
+          {user?.perm !== 0 && (
+            <>
+              <KeyboardShortcutsModalButton isCollapsed={isCollapsed} />
+              <Link
+                to="/settings"
+                className={`group relative flex items-center rounded-xl transition-all duration-200 p-3 ${
                   isActive("/settings")
-                    ? "text-white"
-                    : "text-gray-600 group-hover:text-gray-900"
-                }`}
-              />
-            </div>
-            <div
-              className={`flex-1 flex items-center justify-between ml-3 overflow-hidden transition-all duration-300 ease-in-out ${
-                isCollapsed ? "max-w-0 opacity-0" : "max-w-xs opacity-100"
-              }`}
-            >
-              <span
-                className={`font-medium text-sm whitespace-nowrap ${
-                  isActive("/settings")
-                    ? "text-white"
-                    : "text-gray-900 group-hover:text-gray-900"
+                    ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-200"
+                    : "hover:bg-gray-50 text-gray-700 hover:text-gray-900"
                 }`}
               >
-                Settings
-              </span>
-              <kbd
-                className={`px-1.5 py-0.5 text-[10px] font-semibold rounded border transition-colors duration-200 ${
-                  isActive("/settings")
-                    ? "bg-white/20 border-white/30 text-white"
-                    : "bg-gray-100 border-gray-300 text-gray-600"
-                }`}
-              >
-                CTRL + ,
-              </kbd>
-            </div>
-            {isCollapsed && (
-              <div className="absolute left-16 bg-gray-900 text-white px-2 py-1 rounded-md text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                Settings (⌘,)
-              </div>
-            )}
-          </Link>
-          <LogoutButton isCollapsed={isCollapsed} />
+                {isActive("/settings") && (
+                  <div
+                    className={`absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full transition-all duration-300 ease-in-out ${
+                      isCollapsed ? "opacity-0" : "opacity-100"
+                    }`}
+                  ></div>
+                )}
+                <div className="flex-shrink-0 w-6 flex justify-center">
+                  <Settings
+                    size={20}
+                    strokeWidth={isActive("/settings") ? 2.5 : 2}
+                    className={`transition-all duration-200 ${
+                      isActive("/settings")
+                        ? "text-white"
+                        : "text-gray-600 group-hover:text-gray-900"
+                    }`}
+                  />
+                </div>
+                <div
+                  className={`flex-1 flex items-center justify-between ml-3 overflow-hidden transition-all duration-300 ease-in-out ${
+                    isCollapsed ? "max-w-0 opacity-0" : "max-w-xs opacity-100"
+                  }`}
+                >
+                  <span
+                    className={`font-medium text-sm whitespace-nowrap ${
+                      isActive("/settings")
+                        ? "text-white"
+                        : "text-gray-900 group-hover:text-gray-900"
+                    }`}
+                  >
+                    Settings
+                  </span>
+                  <kbd
+                    className={`px-1.5 py-0.5 text-[10px] font-semibold rounded border transition-colors duration-200 ${
+                      isActive("/settings")
+                        ? "bg-white/20 border-white/30 text-white"
+                        : "bg-gray-100 border-gray-300 text-gray-600"
+                    }`}
+                  >
+                    CTRL + ,
+                  </kbd>
+                </div>
+              </Link>
+            </>
+          )}
 
+          {/* Always show Logout & Profile */}
+          <LogoutButton isCollapsed={isCollapsed} />
           <UserProfileContainer isCollapsed={isCollapsed} />
         </div>
       </nav>

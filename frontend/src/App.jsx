@@ -14,13 +14,17 @@ import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import Students from "./pages/Students";
 import StudentView from "./pages/StudentView";
+import StudentDashboard from "./pages/StudentDashboard";
 import Sessions from "./pages/Sessions";
 import SessionView from "./pages/SessionView";
+import SessionDashboard from "./pages/SessionDashboard";
 import Rosters from "./pages/Rosters";
 import RosterView from "./pages/RosterView";
 import Reports from "./pages/Reports";
 import LiveRecognition from "./pages/LiveRecognition";
 import Settings from "./pages/Settings";
+import Summary from "./pages/Summary";
+import NotFound from "./pages/NotFound";
 
 function App() {
   return (
@@ -41,6 +45,10 @@ function App() {
                         <Route path="/signin" element={<SignIn />} />
                         <Route path="/students" element={<Students />} />
                         <Route path="/student/:id" element={<StudentView />} />
+                        <Route
+                          path="/student/:id/dashboard"
+                          element={<StudentDashboard />}
+                        />
                         <Route path="/rosters" element={<Rosters />} />
                         <Route path="/roster/:id" element={<RosterView />} />
                         <Route path="/sessions" element={<Sessions />} />
@@ -49,12 +57,18 @@ function App() {
                           path="/session/:id/live-recognition"
                           element={<LiveRecognition />}
                         />
+                        <Route
+                          path="/session/:id/dashboard"
+                          element={<SessionDashboard />}
+                        />
                         <Route path="/reports" element={<Reports />} />
                         <Route
                           path="/live-recognition"
                           element={<LiveRecognition />}
                         />
                         <Route path="/settings" element={<Settings />} />
+                        <Route path="/summary" element={<Summary />} />
+                        <Route path="*" element={<NotFound />} />
                       </Routes>
                     </ToastProvider>
                   </SidebarProvider>

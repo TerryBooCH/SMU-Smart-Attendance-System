@@ -38,10 +38,16 @@ const SignInForm = () => {
 
     if (Object.keys(errors).length === 0) {
       try {
-        const successLogin = await login(trimmedValues);
+        const { success: successLogin, permLevel } = await login(trimmedValues);
+
         if (successLogin) {
           success?.("Logged in successfully");
-          navigate("/home");
+
+          if (permLevel === 0) {
+            navigate("/summary");
+          } else {
+            navigate("/home");
+          }
         }
       } catch (err) {
         console.error("Login error:", err);

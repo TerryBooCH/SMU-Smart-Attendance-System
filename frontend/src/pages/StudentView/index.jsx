@@ -8,7 +8,8 @@ import UpdateStudentDetailsForm from "./UpdateStudentDetailsForm";
 import StudentFaceDataContainer from "./StudentFaceDataContainer";
 import StudentIdContainer from "./StudentIdContainer";
 import DeleteStudentContainer from "./DeleteStudentContainer";
-
+import LinkToDashboardContainer from "./LinkToDashboardContainer";
+import DownloadAttendanceReportContainer from "./DownloadAttendanceReportContainer";
 const StudentView = () => {
   const { id } = useParams();
   const location = useLocation();
@@ -92,6 +93,8 @@ const StudentView = () => {
         faceData={studentFaceData}
         loading={loading}
       />
+      <LinkToDashboardContainer studentId={id} />
+      <DownloadAttendanceReportContainer student={selectedStudent} />
       <DeleteStudentContainer student={selectedStudent} />
     </>
   );

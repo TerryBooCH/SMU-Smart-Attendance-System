@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Eye } from "lucide-react";
 import useRoster from "../../hooks/useRoster";
 import { formatDate } from "../../utils/dateUtils";
-import DeleteRosterButton from "../../components/DeleteRosterButton";
+// import DeleteRosterButton from "../../components/DeleteRosterButton"; // commented out
 import UpdateRosterButton from "../../components/UpdateRosterButton";
 
 const RostersContainer = () => {
@@ -85,7 +85,7 @@ const RostersContainer = () => {
                           <Eye size={16} />
                         </button>
                         <UpdateRosterButton roster={roster} />
-                        <DeleteRosterButton roster={roster} />
+                        {/* <DeleteRosterButton roster={roster} /> */} {/* commented out */}
                       </div>
                     </td>
                   </tr>

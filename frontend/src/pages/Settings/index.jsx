@@ -3,6 +3,7 @@ import Sidebar from "../../components/Sidebar";
 import Breadcrumb from "../../components/Breadcrumb";
 import Header from "./Header";
 import LogEventsSettingsContainer from "./LogEventsSettingsContainer";
+import TreshHoldConfigContainer from "./TreshHoldConfigContainer";
 
 const Settings = () => {
   return (
@@ -20,6 +21,7 @@ const Settings = () => {
 
         <div className="flex-1 overflow-y-auto">
           <Header />
+          <TreshHoldConfigContainer />
           <LogEventsSettingsContainer />
         </div>
       </main>

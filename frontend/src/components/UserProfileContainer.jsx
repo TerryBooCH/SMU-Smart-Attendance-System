@@ -3,7 +3,7 @@ import useAuth from "../hooks/useAuth";
 import { getInitials } from "../utils/stringUtils";
 
 const UserProfileContainer = ({ isCollapsed }) => {
-  const { user, isLoading } = useAuth(); // assuming useAuth can expose loading state
+  const { user, isLoading } = useAuth();
 
   const getRoleLabel = (permissionLevel) => {
     switch (String(permissionLevel)) {

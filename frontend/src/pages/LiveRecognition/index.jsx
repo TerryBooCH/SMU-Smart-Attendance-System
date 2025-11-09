@@ -1,14 +1,42 @@
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import LiveRecognitionSidebar from "./LiveRecognitionSidebar";
-import Breadcrumb from "../../components/Breadcrumb";
 import MainRecognitionScreen from "./MainRecognitionScreen";
 import ControlBar from "./ControlBar";
+import useSession from "../../hooks/useSession";
+import useToast from "../../hooks/useToast";
 
 const LiveRecognition = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { fetchSessionById } = useSession();
+  const { showToast } = useToast();
+
   const [isCameraOn, setIsCameraOn] = useState(true);
-  const [activeSidebar, setActiveSidebar] = useState(null); // can be: 'info', 'notifications', 'attendance', or null
+  const [activeSidebar, setActiveSidebar] = useState(null);
+
+  const hasFetched = useRef(false); 
+
+  useEffect(() => {
+    if (!id || hasFetched.current) return;
+    hasFetched.current = true; 
+
+    const fetchSession = async () => {
+      try {
+        const data = await fetchSessionById(id);
+        if (data && data.open === false) {
+          showToast("This session is closed.", "warning");
+          navigate("/sessions");
+        }
+      } catch (err) {
+        console.error("Failed to fetch session:", err);
+        showToast("Failed to fetch session data.", "error");
+        navigate("/sessions");
+      }
+    };
+
+    fetchSession();
+  }, [id, fetchSessionById, navigate, showToast]);
 
   return (
     <div className="min-h-screen flex">

@@ -13,6 +13,7 @@ import com.smu.smartattendancesystem.biometrics.ImageUtils;
 import com.smu.smartattendancesystem.dto.AttendanceDTO;
 import com.smu.smartattendancesystem.dto.DetectionResultDTO;
 import com.smu.smartattendancesystem.dto.RecognitionResultDTO;
+import com.smu.smartattendancesystem.dto.StudentDTO;
 import com.smu.smartattendancesystem.dto.RecognitionResponse;
 import com.smu.smartattendancesystem.managers.AttendanceManager;
 import com.smu.smartattendancesystem.managers.RosterManager;
@@ -288,13 +289,23 @@ public class BiometricService {
 
             Attendance attendance = determineAttendance(session, top_student, result.getScore(), manualThreshold, autoThreshold);
             if (attendance == null) {  // return null if attendance was not changed
-                results.add(new RecognitionResultDTO(detected.toDTO(), top_student, result.getScore(), null));
+                results.add(new RecognitionResultDTO(detected.toDTO(), convertToDTO(top_student), result.getScore(), null));
             } else {
-                results.add(new RecognitionResultDTO(detected.toDTO(), top_student, result.getScore(), convertToDTO(attendance)));
+                results.add(new RecognitionResultDTO(detected.toDTO(), convertToDTO(top_student), result.getScore(), convertToDTO(attendance)));
             }
         }
 
         return new RecognitionResponse(warnings, results);
+    }
+
+    private StudentDTO convertToDTO(Student student) {
+        return new StudentDTO(
+                student.getId(),
+                student.getName(),
+                student.getEmail(),
+                student.getPhone(),
+                student.getClassName()
+        );
     }
 
     private AttendanceDTO convertToDTO(Attendance attendance) {

@@ -1,13 +1,13 @@
 package com.smu.smartattendancesystem.dto;
 
 public class StudentDTO {
-    private long studentId;
+    private String studentId;
     private String name;
     private String email;
     private String phone;
     private String className;
     
-    public StudentDTO(long studentId, String name, String email, String phone, String className) {
+    public StudentDTO(String studentId, String name, String email, String phone, String className) {
         this.studentId = studentId;
         this.name = name;
         this.email = email;
@@ -15,11 +15,11 @@ public class StudentDTO {
         this.className = className;
     }
 
-    public long getStudentId() {
+    public String getStudentId() {
         return studentId;
     }
 
-    public void setStudentId(long studentId) {
+    public void setStudentId(String studentId) {
         this.studentId = studentId;
     }
 

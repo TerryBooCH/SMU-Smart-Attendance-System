@@ -2,6 +2,9 @@ package com.smu.smartattendancesystem.models;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -19,6 +22,7 @@ public class FaceData extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false) // Adds a foreign key column 'student_id' linking to Student's PK id
     @JsonIgnore
+    @OnDelete(action = OnDeleteAction.CASCADE)  
     private Student student;
 
     @Column(name = "image_path", nullable = false)

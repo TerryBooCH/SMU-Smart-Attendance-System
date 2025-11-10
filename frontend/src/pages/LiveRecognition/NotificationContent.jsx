@@ -1,11 +1,11 @@
 import React from "react";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, AlertCircle } from "lucide-react";
 import useAttendance from "../../hooks/useAttendance";
 
 const NotificationContent = () => {
-  const { warnings } = useAttendance();
+  const { warnings, wsError, error } = useAttendance();
 
-  if (!warnings || warnings.length === 0) {
+  if ((!warnings || warnings.length === 0) && !wsError && !error) {
     return (
       <div className="flex flex-col items-center justify-center py-12 px-4">
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
@@ -21,6 +21,52 @@ const NotificationContent = () => {
 
   return (
     <div className="divide-y divide-gray-100">
+      {error && (
+        <div className="px-4 py-3 hover:bg-gray-50 transition-colors">
+          <div className="flex gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-4 h-4 text-red-600" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-gray-900 font-medium mb-0.5">
+                Error
+              </p>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {error}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Just now
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {wsError && (
+        <div className="px-4 py-3 hover:bg-gray-50 transition-colors">
+          <div className="flex gap-3">
+            <div className="flex-shrink-0 mt-0.5">
+              <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
+                <AlertCircle className="w-4 h-4 text-red-600" />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-gray-900 font-medium mb-0.5">
+                Connection Error
+              </p>
+              <p className="text-sm text-gray-600 leading-relaxed">
+                {wsError}
+              </p>
+              <p className="text-xs text-gray-400 mt-1">
+                Just now
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       {warnings.map((warning, index) => (
         <div
           key={index}

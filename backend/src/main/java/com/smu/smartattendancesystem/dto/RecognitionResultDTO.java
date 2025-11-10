@@ -5,11 +5,11 @@ import com.smu.smartattendancesystem.models.*;
 
 public class RecognitionResultDTO {
     private DetectionResultDTO detected;
-	private Student top_student;
+	private StudentDTO top_student;
     private double recognition_score;
     private AttendanceDTO attendance;
 
-	public RecognitionResultDTO(DetectionResultDTO detected, Student top_student, double recognition_score, AttendanceDTO attendance) {
+	public RecognitionResultDTO(DetectionResultDTO detected, StudentDTO top_student, double recognition_score, AttendanceDTO attendance) {
         this.detected = detected;
         this.top_student = top_student;
         this.recognition_score = recognition_score;
@@ -24,11 +24,11 @@ public class RecognitionResultDTO {
 		this.detected = detected;
 	}
 
-    public Student getTop_student() {
+    public StudentDTO getTop_student() {
         return top_student;
     }
 
-    public void setTop_student(Student top_student) {
+    public void setTop_student(StudentDTO top_student) {
         this.top_student = top_student;
     }
 

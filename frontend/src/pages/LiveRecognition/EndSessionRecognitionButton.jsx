@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { Power } from "lucide-react";
 import useToast from "../../hooks/useToast";
 import useSession from "../../hooks/useSession";
+import useAttendance from "../../hooks/useAttendance";
 
 const EndSessionRecognitionButton = ({ id }) => {
   const navigate = useNavigate();
   const { closeSession } = useSession();
   const { success, error } = useToast();
+  const { disconnectWebSocket } = useAttendance(); 
 
   const handleClick = async () => {
     if (!id) {
@@ -16,7 +18,12 @@ const EndSessionRecognitionButton = ({ id }) => {
     }
 
     try {
+      // ✅ Close WebSocket before ending session
+      disconnectWebSocket();
+
+      // ✅ Close session on server
       await closeSession(id);
+
       success("Session closed successfully.");
       navigate(`/session/${id}`);
     } catch (err) {

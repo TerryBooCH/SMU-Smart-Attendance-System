@@ -9,11 +9,13 @@ export const AttendanceProvider = ({ children }) => {
   const [boundingBoxes, setBoundingBoxes] = useState([]);
   const [warnings, setWarnings] = useState([]);
   const [wsError, setWsError] = useState(null);
+  const [successAutoAttendanceMarked, setSuccessAutoAttendanceMarked] = useState([]);
+  const [manualPendingList, setManualPendingList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [socket, setSocket] = useState(null);
 
-  // ✅ Connect WebSocket — wrapped in useCallback to keep stable reference
+  // ✅ Connect WebSocket
   const connectWebSocket = useCallback(
     (onMessage) => {
       if (socket) {
@@ -33,6 +35,7 @@ export const AttendanceProvider = ({ children }) => {
 
           console.log("📩 WebSocket message:", parsed);
 
+          // ❌ Error response
           if (parsed.status === "error") {
             console.error("❌ WebSocket error:", parsed.message);
             setWsError(parsed.message || "Unknown WebSocket error");
@@ -42,10 +45,12 @@ export const AttendanceProvider = ({ children }) => {
             setWsError(null);
           }
 
+          // ✅ Success response
           if (parsed.status === "success") {
             const results = parsed.result?.results;
             const warningsObj = parsed.result?.warnings;
 
+            // ⚠️ Handle warnings
             if (warningsObj && Object.keys(warningsObj).length > 0) {
               const allWarnings = Object.entries(warningsObj)
                 .map(([key, arr]) => arr.map((msg) => `${key}: ${msg}`))
@@ -56,14 +61,109 @@ export const AttendanceProvider = ({ children }) => {
               setWarnings([]);
             }
 
+            // 🟩 Handle detections and attendance updates
             if (Array.isArray(results) && results.length > 0) {
-              const boxes = results.map((r) => ({
-                ...r.detected,
-                student: r.top_student,
-                recognition_score: r.recognition_score,
-              }));
-              console.log("🟩 Updating bounding boxes:", boxes);
+              const boxes = results.map((r) => {
+                const attendanceExists = !!r.attendance;
+
+                return {
+                  ...r.detected,
+                  student: r.top_student,
+                  recognition_score: r.recognition_score ?? 0,
+                  threshold_status: attendanceExists
+                    ? "above_threshold"
+                    : "below_threshold",
+                  has_attendance: attendanceExists,
+                };
+              });
+
               setBoundingBoxes(boxes);
+              console.log("🟩 Updating bounding boxes:", boxes);
+
+              results.forEach((r) => {
+                const attendance = r.attendance;
+                const student = r.top_student;
+
+                // 🟡 Case 1: attendance is null → manual marking required
+                if (!attendance) {
+                  if (!student?.studentId) return;
+
+                  setManualPendingList((prev) => {
+                    const exists = prev.some(
+                      (s) => s.studentId === student.studentId
+                    );
+                    if (exists) return prev;
+
+                    const entry = {
+                      studentId: student.studentId,
+                      name: student.name || "Unknown Student",
+                      timestamp: new Date().toISOString(),
+                      message: `🟡 Detected ${
+                        student.name || "Unknown Student"
+                      } (ID: ${student.studentId}) — no attendance record found, manual attendance marking required.`,
+                    };
+
+                    console.log("🟡 Manual marking pending:", entry);
+                    return [...prev, entry];
+                  });
+
+                  return;
+                }
+
+                // 🟢 Case 2: attendance exists → handle normally
+                if (attendance && attendance.id) {
+                  // Update local attendance list
+                  setAttendances((prev) => {
+                    const exists = prev.some((a) => a.id === attendance.id);
+                    return exists
+                      ? prev.map((a) =>
+                          a.id === attendance.id ? attendance : a
+                        )
+                      : prev;
+                  });
+
+                  // ✅ Auto attendance success
+                  if (attendance.method === "AUTO") {
+                    // 🧹 Remove from manual pending if previously listed
+                    setManualPendingList((prev) =>
+                      prev.filter((s) => s.studentId !== attendance.studentId)
+                    );
+
+                    // ✅ Add success message if not duplicate
+                    setSuccessAutoAttendanceMarked((prev) => {
+                      const exists = prev.some(
+                        (m) => m.studentId === attendance.studentId
+                      );
+                      if (exists) return prev;
+
+                      const messageObj = {
+                        studentId: attendance.studentId,
+                        message: `✅ Attendance marked as "${
+                          attendance.status
+                        }" for ${student?.name || "Unknown Student"} in ${
+                          attendance.sessionCourseName || "Unknown Course"
+                        } (${attendance.studentClassName || "N/A"}). Confidence: ${(
+                          attendance.confidence * 100
+                        ).toFixed(1)}%. Method: ${attendance.method}.`,
+                        details: {
+                          studentName: student?.name,
+                          studentEmail: student?.email,
+                          course: attendance.sessionCourseName,
+                          className: attendance.studentClassName,
+                          status: attendance.status,
+                          confidence: attendance.confidence,
+                          method: attendance.method,
+                          timestamp: attendance.timestamp,
+                        },
+                        timestamp: new Date().toISOString(),
+                      };
+
+                      console.log("✅ Auto attendance success:", messageObj);
+                      return [...prev, messageObj];
+                    });
+                  }
+                }
+              });
             } else {
               console.log("🕒 No detections — keeping previous bounding boxes.");
             }
@@ -85,10 +185,10 @@ export const AttendanceProvider = ({ children }) => {
 
       setSocket(ws);
     },
-    [socket] // 👈 stable dependency so it won't recreate on re-renders
+    [socket]
   );
 
-  // ✅ Disconnect WebSocket — also memoized
+  // ✅ Disconnect WebSocket
   const disconnectWebSocket = useCallback(() => {
     if (socket) {
       console.log("🔌 Closing WebSocket...");
@@ -97,7 +197,7 @@ export const AttendanceProvider = ({ children }) => {
     }
   }, [socket]);
 
-  // ✅ Send recognition — memoized for stability
+  // ✅ Send recognition frame
   const sendRecognition = useCallback(
     (base64Image, sessionId) => {
       if (!socket) {
@@ -109,11 +209,6 @@ export const AttendanceProvider = ({ children }) => {
         event: "recognize",
         image: base64Image,
         session_id: sessionId,
-        detector_type: null,
-        type: null,
-        metric_name: null,
-        manualThreshold: null,
-        autoThreshold: null,
       };
 
       socket.send(JSON.stringify(payload));
@@ -122,7 +217,7 @@ export const AttendanceProvider = ({ children }) => {
     [socket]
   );
 
-  // --- Attendance API logic (unchanged) ---
+  // --- Attendance API logic ---
   const fetchAttendanceBySessionId = useCallback(async (sessionId) => {
     try {
       setLoading(true);
@@ -154,6 +249,12 @@ export const AttendanceProvider = ({ children }) => {
         setAttendances((prev) =>
           prev.map((a) => (a.id === updatedRecord.id ? updatedRecord : a))
         );
+
+        // ✅ Remove from manual pending if exists
+        setManualPendingList((prev) =>
+          prev.filter((s) => s.studentId !== studentId)
+        );
+
         return updatedRecord;
       } catch (err) {
         console.error("Error updating attendance record:", err);
@@ -167,17 +268,26 @@ export const AttendanceProvider = ({ children }) => {
   );
 
   const clearAttendances = useCallback(() => setAttendances([]), []);
+  const clearSuccessAutoAttendance = useCallback(
+    () => setSuccessAutoAttendanceMarked([]),
+    []
+  );
+  const clearManualPending = useCallback(() => setManualPendingList([]), []);
 
   const value = {
     attendances,
     boundingBoxes,
     warnings,
     wsError,
+    successAutoAttendanceMarked,
+    manualPendingList,
     loading,
     error,
     fetchAttendanceBySessionId,
     updateAttendanceStatus,
     clearAttendances,
+    clearSuccessAutoAttendance,
+    clearManualPending,
     connectWebSocket,
     disconnectWebSocket,
     sendRecognition,

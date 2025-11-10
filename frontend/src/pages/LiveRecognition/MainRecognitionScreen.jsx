@@ -1,12 +1,19 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Video, VideoOff, User } from "lucide-react";
+import React, { useEffect, useRef, useState, useContext } from "react";
+import { Video, VideoOff } from "lucide-react";
+import useAttendance from "../../hooks/useAttendance"; // ✅ Hook from AttendanceContext
+import { useParams } from "react-router-dom";
 
 const MainRecognitionScreen = ({ isCameraOn }) => {
   const videoRef = useRef(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const streamRef = useRef(null);
+  const captureIntervalRef = useRef(null);
 
+  const { sendRecognition } = useAttendance(); // ✅ Get WebSocket sender
+  const { id } = useParams(); // session ID
+
+  // --- Camera Setup ---
   useEffect(() => {
     const startCamera = async () => {
       if (!isCameraOn) {
@@ -26,7 +33,6 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
         });
 
         streamRef.current = stream;
-
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setIsLoading(false);
@@ -41,18 +47,14 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
 
     const stopCamera = () => {
       if (streamRef.current) {
-        const tracks = streamRef.current.getTracks();
-        tracks.forEach((track) => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
       }
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
+      if (videoRef.current) videoRef.current.srcObject = null;
     };
 
-    if (isCameraOn) {
-      startCamera();
-    } else {
+    if (isCameraOn) startCamera();
+    else {
       stopCamera();
       setIsLoading(false);
     }
@@ -62,9 +64,35 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
     };
   }, [isCameraOn]);
 
+  // --- Frame Capture + Send ---
+  useEffect(() => {
+    if (!isCameraOn) {
+      clearInterval(captureIntervalRef.current);
+      return;
+    }
+
+    const sendFrame = () => {
+      if (!videoRef.current || videoRef.current.readyState !== 4) return;
+
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+
+      context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+      const base64Image = canvas.toDataURL("image/jpeg", 0.8); // compress a bit
+
+      sendRecognition(base64Image, Number(id)); // ✅ send via WebSocket
+    };
+
+    // Send a frame every 5 seconds
+    captureIntervalRef.current = setInterval(sendFrame, 5000);
+
+    return () => clearInterval(captureIntervalRef.current);
+  }, [isCameraOn, sendRecognition, id]);
+
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden rounded-3xl">
-      {/* Video Feed - Full Screen */}
       <video
         ref={videoRef}
         autoPlay
@@ -74,9 +102,7 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
         style={{ display: isCameraOn && !error ? "block" : "none" }}
       />
 
-      {/* Overlay UI */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Top Bar */}
         {isCameraOn && !error && !isLoading && (
           <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 to-transparent p-6">
             <div className="flex items-center justify-between">
@@ -94,16 +120,13 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
           </div>
         )}
 
-        {/* Camera Off State */}
         {!isCameraOn && !isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black">
             <div className="text-center">
               <div className="w-20 h-20 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <VideoOff className="w-10 h-10 text-gray-400" />
               </div>
-              <h2 className="text-white text-2xl font-bold mb-3">
-                Camera is Off
-              </h2>
+              <h2 className="text-white text-2xl font-bold mb-3">Camera is Off</h2>
               <p className="text-white/70 text-lg">
                 Turn on the camera to start face recognition
               </p>
@@ -111,28 +134,22 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
           </div>
         )}
 
-        {/* Loading State */}
         {isLoading && isCameraOn && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-white text-xl font-medium">
-                Initializing camera...
-              </p>
+              <p className="text-white text-xl font-medium">Initializing camera...</p>
             </div>
           </div>
         )}
 
-        {/* Error State */}
         {error && isCameraOn && (
           <div className="absolute inset-0 flex items-center justify-center bg-black">
             <div className="text-center max-w-md px-6">
               <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <VideoOff className="w-10 h-10 text-red-400" />
               </div>
-              <h2 className="text-white text-2xl font-bold mb-3">
-                Camera Access Denied
-              </h2>
+              <h2 className="text-white text-2xl font-bold mb-3">Camera Access Denied</h2>
               <p className="text-white/70 text-lg mb-6">{error}</p>
               <p className="text-white/50 text-sm">
                 Please enable camera permissions in your browser settings

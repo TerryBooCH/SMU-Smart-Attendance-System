@@ -5,6 +5,7 @@ import MainRecognitionScreen from "./MainRecognitionScreen";
 import ControlBar from "./ControlBar";
 import useSession from "../../hooks/useSession";
 import useToast from "../../hooks/useToast";
+import useAttendance from "../../hooks/useAttendance";
 
 const LiveRecognition = () => {
   const { id } = useParams();
@@ -12,11 +13,31 @@ const LiveRecognition = () => {
   const { fetchSessionById } = useSession();
   const { showToast } = useToast();
 
+  // 👇 from AttendanceContext
+  const { connectWebSocket, disconnectWebSocket } = useAttendance();
+
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [activeSidebar, setActiveSidebar] = useState("notifications");
 
   const hasFetched = useRef(false);
 
+  // 🧩 Connect WebSocket when component mounts
+  useEffect(() => {
+    const handleMessage = (data) => {
+      console.log("📥 WS message received in LiveRecognition:", data);
+      // optionally:
+      // if (data.event === "recognized") showToast(`Recognized: ${data.name}`, "success");
+    };
+
+    connectWebSocket(handleMessage);
+
+    return () => {
+      console.log("🔌 Disconnecting WebSocket...");
+      disconnectWebSocket();
+    };
+  }, [connectWebSocket, disconnectWebSocket]);
+
+  // 🧩 Fetch session logic remains
   useEffect(() => {
     if (!id || hasFetched.current) return;
     hasFetched.current = true;

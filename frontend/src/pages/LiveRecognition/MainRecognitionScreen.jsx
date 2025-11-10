@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Video, VideoOff } from "lucide-react";
-import useAttendance from "../../hooks/useAttendance"; // ✅ Hook from AttendanceContext
+import useAttendance from "../../hooks/useAttendance";
 import { useParams } from "react-router-dom";
 
 const MainRecognitionScreen = ({ isCameraOn }) => {
@@ -10,8 +10,8 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
   const streamRef = useRef(null);
   const captureIntervalRef = useRef(null);
 
-  const { sendRecognition, boundingBoxes } = useAttendance(); // ✅ Access bounding boxes
-  const { id } = useParams(); // session ID
+  const { sendRecognition, boundingBoxes } = useAttendance();
+  const { id } = useParams();
 
   // --- Camera Setup ---
   useEffect(() => {
@@ -64,7 +64,7 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
     };
   }, [isCameraOn]);
 
-  // --- Frame Capture + Send (10 FPS) ---
+  // --- Frame Capture + Send (2 FPS) ---
   useEffect(() => {
     if (!isCameraOn) {
       clearInterval(captureIntervalRef.current);
@@ -74,7 +74,8 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
     let isSending = false;
 
     const sendFrame = () => {
-      if (!videoRef.current || videoRef.current.readyState !== 4 || isSending) return;
+      if (!videoRef.current || videoRef.current.readyState !== 4 || isSending)
+        return;
 
       isSending = true;
       const canvas = document.createElement("canvas");
@@ -83,18 +84,16 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
       canvas.height = videoRef.current.videoHeight;
 
       context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-      const base64Image = canvas.toDataURL("image/jpeg", 0.6); // lower quality for faster transfer
+      const base64Image = canvas.toDataURL("image/jpeg", 0.6);
 
       sendRecognition(base64Image, Number(id));
 
-      // throttle — mark ready after 50ms
       setTimeout(() => {
         isSending = false;
       }, 50);
     };
 
-    // 10 fps (every 100ms)
-    captureIntervalRef.current = setInterval(sendFrame, 100);
+    captureIntervalRef.current = setInterval(sendFrame, 500);
 
     return () => clearInterval(captureIntervalRef.current);
   }, [isCameraOn, sendRecognition, id]);
@@ -110,12 +109,10 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
     let scaleX, scaleY, offsetX = 0, offsetY = 0;
 
     if (videoRatio > containerRatio) {
-      // Horizontal letterboxing
       scaleY = video.clientHeight / video.videoHeight;
       scaleX = scaleY;
       offsetX = (video.clientWidth - video.videoWidth * scaleX) / 2;
     } else {
-      // Vertical letterboxing
       scaleX = video.clientWidth / video.videoWidth;
       scaleY = scaleX;
       offsetY = (video.clientHeight - video.videoHeight * scaleY) / 2;
@@ -144,17 +141,27 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
       {/* Overlay */}
       <div className="absolute inset-0 pointer-events-none">
         {/* ✅ Bounding Boxes */}
-        {boundingBoxes.map((box, idx) => (
-          <div
-            key={idx}
-            className="absolute border-4 border-green-500 bg-green-500/10 rounded-lg transition-all duration-300"
-            style={getBoxStyles(box)}
-          >
-            <div className="absolute -top-6 left-0 bg-green-600 text-white text-sm px-2 py-1 rounded shadow-md">
-              {box.student?.name || "Unknown"}
+        {boundingBoxes.map((box, idx) => {
+          const isAbove = box.threshold_status === "above_threshold";
+          const borderColor = isAbove ? "border-green-500" : "border-red-500";
+          const bgColor = isAbove ? "bg-green-500/10" : "bg-red-500/10";
+          const labelColor = isAbove ? "bg-green-600" : "bg-red-600";
+          const score = (box.recognition_score * 100).toFixed(1);
+
+          return (
+            <div
+              key={idx}
+              className={`absolute ${borderColor} ${bgColor} border-4 rounded-lg transition-all duration-300`}
+              style={getBoxStyles(box)}
+            >
+              <div
+                className={`absolute -top-7 left-0 ${labelColor} text-white text-xs px-2 py-1 rounded shadow-md`}
+              >
+                {box.student?.name || "Unknown"} — {score}%
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
 
         {/* Recognition Active Banner */}
         {isCameraOn && !error && !isLoading && (
@@ -181,7 +188,9 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
               <div className="w-20 h-20 bg-gray-700/50 rounded-full flex items-center justify-center mx-auto mb-6">
                 <VideoOff className="w-10 h-10 text-gray-400" />
               </div>
-              <h2 className="text-white text-2xl font-bold mb-3">Camera is Off</h2>
+              <h2 className="text-white text-2xl font-bold mb-3">
+                Camera is Off
+              </h2>
               <p className="text-white/70 text-lg">
                 Turn on the camera to start face recognition
               </p>
@@ -193,7 +202,9 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
           <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm">
             <div className="text-center">
               <div className="w-16 h-16 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-white text-xl font-medium">Initializing camera...</p>
+              <p className="text-white text-xl font-medium">
+                Initializing camera...
+              </p>
             </div>
           </div>
         )}
@@ -204,7 +215,9 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
               <div className="w-20 h-20 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
                 <VideoOff className="w-10 h-10 text-red-400" />
               </div>
-              <h2 className="text-white text-2xl font-bold mb-3">Camera Access Denied</h2>
+              <h2 className="text-white text-2xl font-bold mb-3">
+                Camera Access Denied
+              </h2>
               <p className="text-white/70 text-lg mb-6">{error}</p>
               <p className="text-white/50 text-sm">
                 Please enable camera permissions in your browser settings

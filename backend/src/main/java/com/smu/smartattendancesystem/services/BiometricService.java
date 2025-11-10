@@ -330,7 +330,7 @@ public class BiometricService {
 
     private StudentDTO convertToDTO(Student student) {
         return new StudentDTO(
-                student.getId(),
+                student.getStudentId(),
                 student.getName(),
                 student.getEmail(),
                 student.getPhone(),

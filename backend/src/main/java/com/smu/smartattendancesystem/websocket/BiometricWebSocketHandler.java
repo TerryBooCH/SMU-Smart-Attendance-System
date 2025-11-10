@@ -122,7 +122,7 @@ public class BiometricWebSocketHandler extends BinaryWebSocketHandler {
     private void sendMessage(WebSocketSession session, Object payload) {
         try {
             String jsonString = objectMapper.writeValueAsString(payload);
-            sendMessage(session, new TextMessage(objectMapper.writeValueAsString(jsonString)));
+            sendMessage(session, new TextMessage(jsonString));
         } catch (IOException e) {}
     }
 

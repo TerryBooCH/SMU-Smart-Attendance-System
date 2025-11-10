@@ -27,10 +27,11 @@ import com.smu.smartattendancesystem.services.BiometricService;
 public class BiometricWebSocketHandler extends BinaryWebSocketHandler {
 
     private final BiometricService biometricService;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    public BiometricWebSocketHandler(BiometricService biometricService) {
+    public BiometricWebSocketHandler(BiometricService biometricService, ObjectMapper objectMapper) {
         this.biometricService = biometricService;
+        this.objectMapper = objectMapper;
     }
 
     @Override

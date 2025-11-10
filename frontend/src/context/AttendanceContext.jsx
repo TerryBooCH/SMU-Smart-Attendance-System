@@ -6,6 +6,8 @@ const AttendanceContext = createContext();
 
 export const AttendanceProvider = ({ children }) => {
   const [attendances, setAttendances] = useState([]);
+  const [boundingBoxes, setBoundingBoxes] = useState([]);
+  const [warnings, setWarnings] = useState([]); // ✅ new state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [socket, setSocket] = useState(null);
@@ -20,15 +22,53 @@ export const AttendanceProvider = ({ children }) => {
     const ws = new SockJS("http://localhost:8080/ws/biometric");
 
     ws.onopen = () => console.log("SockJS connected");
+
     ws.onmessage = (event) => {
       try {
-        const parsed = JSON.parse(event.data);
+        let parsed = event.data;
+        parsed = JSON.parse(parsed);
+        if (typeof parsed === "string") parsed = JSON.parse(parsed);
+
         console.log("📩 WebSocket message:", parsed);
+
+        if (parsed.status === "success") {
+          // ✅ Extract results
+          const results = parsed.result?.results;
+          const warningsObj = parsed.result?.warnings;
+
+          // ✅ Handle warnings
+          if (warningsObj && Object.keys(warningsObj).length > 0) {
+            // Flatten all warning arrays into a single list of messages
+            const allWarnings = Object.entries(warningsObj)
+              .map(([key, arr]) => arr.map((msg) => `${key}: ${msg}`))
+              .flat();
+            console.warn("⚠️ Warnings received:", allWarnings);
+            setWarnings(allWarnings);
+          } else {
+            setWarnings([]); // clear when no warnings
+          }
+
+          // ✅ Handle detections
+          if (Array.isArray(results) && results.length > 0) {
+            const boxes = results.map((r) => ({
+              ...r.detected,
+              student: r.top_student,
+              recognition_score: r.recognition_score,
+            }));
+
+            console.log("🟩 Updating bounding boxes:", boxes);
+            setBoundingBoxes(boxes);
+          } else {
+            console.log("🕒 No detections — keeping previous bounding boxes.");
+          }
+        }
+
         if (onMessage) onMessage(parsed);
       } catch (err) {
         console.error("Invalid JSON from WebSocket:", event.data);
       }
     };
+
     ws.onclose = () => console.log("SockJS disconnected");
     ws.onerror = (err) => console.error("SockJS error:", err);
 
@@ -43,7 +83,7 @@ export const AttendanceProvider = ({ children }) => {
     }
   };
 
-  // ✅ Send recognition (null defaults)
+  // ✅ Send recognition frame
   const sendRecognition = (base64Image, sessionId) => {
     if (!socket) {
       console.warn("WebSocket not connected");
@@ -65,7 +105,7 @@ export const AttendanceProvider = ({ children }) => {
     console.log("📤 Sent recognition:", payload);
   };
 
-  // --- your existing API logic remains unchanged ---
+  // --- Attendance API logic ---
   const fetchAttendanceBySessionId = async (sessionId) => {
     try {
       setLoading(true);
@@ -83,7 +123,12 @@ export const AttendanceProvider = ({ children }) => {
     }
   };
 
-  const updateAttendanceStatus = async (sessionId, studentId, status, method = "MANUAL") => {
+  const updateAttendanceStatus = async (
+    sessionId,
+    studentId,
+    status,
+    method = "MANUAL"
+  ) => {
     try {
       setLoading(true);
       setError(null);
@@ -110,14 +155,16 @@ export const AttendanceProvider = ({ children }) => {
 
   const value = {
     attendances,
+    boundingBoxes,
+    warnings, // ✅ expose warnings
     loading,
     error,
     fetchAttendanceBySessionId,
     updateAttendanceStatus,
     clearAttendances,
-    connectWebSocket,      // ✅ manual connect
-    disconnectWebSocket,   // ✅ manual disconnect
-    sendRecognition,       // ✅ send message
+    connectWebSocket,
+    disconnectWebSocket,
+    sendRecognition,
   };
 
   return (

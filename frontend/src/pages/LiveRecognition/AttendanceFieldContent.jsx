@@ -20,7 +20,7 @@ const AttendanceFieldContent = ({ attendances, loading, error }) => {
   }
 
   return (
-    <div className="overflow-y-auto max-h-[400px]">
+    <div className="overflow-y-auto">
       <div className="space-y-2">
         {attendances.map((record) => {
           const statusConfig = getStatusConfig(record.status);

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useContext } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Video, VideoOff } from "lucide-react";
 import useAttendance from "../../hooks/useAttendance"; // ✅ Hook from AttendanceContext
 import { useParams } from "react-router-dom";
@@ -10,7 +10,7 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
   const streamRef = useRef(null);
   const captureIntervalRef = useRef(null);
 
-  const { sendRecognition } = useAttendance(); // ✅ Get WebSocket sender
+  const { sendRecognition, boundingBoxes } = useAttendance(); // ✅ Access bounding boxes
   const { id } = useParams(); // session ID
 
   // --- Camera Setup ---
@@ -64,35 +64,74 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
     };
   }, [isCameraOn]);
 
-  // --- Frame Capture + Send ---
+  // --- Frame Capture + Send (10 FPS) ---
   useEffect(() => {
     if (!isCameraOn) {
       clearInterval(captureIntervalRef.current);
       return;
     }
 
-    const sendFrame = () => {
-      if (!videoRef.current || videoRef.current.readyState !== 4) return;
+    let isSending = false;
 
+    const sendFrame = () => {
+      if (!videoRef.current || videoRef.current.readyState !== 4 || isSending) return;
+
+      isSending = true;
       const canvas = document.createElement("canvas");
       const context = canvas.getContext("2d");
       canvas.width = videoRef.current.videoWidth;
       canvas.height = videoRef.current.videoHeight;
 
       context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-      const base64Image = canvas.toDataURL("image/jpeg", 0.8); // compress a bit
+      const base64Image = canvas.toDataURL("image/jpeg", 0.6); // lower quality for faster transfer
 
-      sendRecognition(base64Image, Number(id)); // ✅ send via WebSocket
+      sendRecognition(base64Image, Number(id));
+
+      // throttle — mark ready after 50ms
+      setTimeout(() => {
+        isSending = false;
+      }, 50);
     };
 
-    // Send a frame every 5 seconds
-    captureIntervalRef.current = setInterval(sendFrame, 5000);
+    // 10 fps (every 100ms)
+    captureIntervalRef.current = setInterval(sendFrame, 100);
 
     return () => clearInterval(captureIntervalRef.current);
   }, [isCameraOn, sendRecognition, id]);
 
+  // --- Scale boxes to fit video display ---
+  const getBoxStyles = (box) => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth || !video.videoHeight) return {};
+
+    const videoRatio = video.videoWidth / video.videoHeight;
+    const containerRatio = video.clientWidth / video.clientHeight;
+
+    let scaleX, scaleY, offsetX = 0, offsetY = 0;
+
+    if (videoRatio > containerRatio) {
+      // Horizontal letterboxing
+      scaleY = video.clientHeight / video.videoHeight;
+      scaleX = scaleY;
+      offsetX = (video.clientWidth - video.videoWidth * scaleX) / 2;
+    } else {
+      // Vertical letterboxing
+      scaleX = video.clientWidth / video.videoWidth;
+      scaleY = scaleX;
+      offsetY = (video.clientHeight - video.videoHeight * scaleY) / 2;
+    }
+
+    return {
+      left: `${box.x * scaleX + offsetX}px`,
+      top: `${box.y * scaleY + offsetY}px`,
+      width: `${box.width * scaleX}px`,
+      height: `${box.height * scaleY}px`,
+    };
+  };
+
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden rounded-3xl">
+      {/* Video Feed */}
       <video
         ref={videoRef}
         autoPlay
@@ -102,7 +141,22 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
         style={{ display: isCameraOn && !error ? "block" : "none" }}
       />
 
+      {/* Overlay */}
       <div className="absolute inset-0 pointer-events-none">
+        {/* ✅ Bounding Boxes */}
+        {boundingBoxes.map((box, idx) => (
+          <div
+            key={idx}
+            className="absolute border-4 border-green-500 bg-green-500/10 rounded-lg transition-all duration-300"
+            style={getBoxStyles(box)}
+          >
+            <div className="absolute -top-6 left-0 bg-green-600 text-white text-sm px-2 py-1 rounded shadow-md">
+              {box.student?.name || "Unknown"}
+            </div>
+          </div>
+        ))}
+
+        {/* Recognition Active Banner */}
         {isCameraOn && !error && !isLoading && (
           <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 to-transparent p-6">
             <div className="flex items-center justify-between">
@@ -120,6 +174,7 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
           </div>
         )}
 
+        {/* Camera Off / Error / Loading */}
         {!isCameraOn && !isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black">
             <div className="text-center">

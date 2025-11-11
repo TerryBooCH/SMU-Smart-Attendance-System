@@ -57,7 +57,8 @@ INSERT INTO "session" (roster_id, course_name, start_at, end_at, is_open, late_a
 VALUES
  ((SELECT id FROM roster WHERE name='CS102 - Tutorial A'), 'CS102', '2025-10-20 09:00:00', '2025-10-20 10:00:00', 0, 15, datetime('now', 'localtime'), datetime('now', 'localtime')),
  ((SELECT id FROM roster WHERE name='CS102 - Tutorial A'), 'CS102', '2025-10-21 09:00:00', '2025-10-21 10:00:00', 0, 15, datetime('now', 'localtime'), datetime('now', 'localtime')),
- ((SELECT id FROM roster WHERE name='CS102 - Tutorial B'), 'CS102', '2025-10-22 14:00:00', '2025-10-22 15:00:00', 0, 15, datetime('now', 'localtime'), datetime('now', 'localtime'));
+ ((SELECT id FROM roster WHERE name='CS102 - Tutorial B'), 'CS102', '2025-10-22 14:00:00', '2025-10-22 15:00:00', 0, 15, datetime('now', 'localtime'), datetime('now', 'localtime')),
+ ((SELECT id FROM roster WHERE name='CS102 - Tutorial A'), 'CS102', '2025-11-12 09:20:00', '2025-11-12 10:20:00', 0, 15, datetime('now','localtime'), datetime('now','localtime'));
 
 -- ─────────────────────────────────────────────────────────
 -- 6) Attendance (SQLite-compatible timestamps)
@@ -89,6 +90,20 @@ VALUES
   (SELECT id FROM student WHERE student_id='S1000004'), 'PRESENT', 'AUTO', 0.92, '2025-10-22 14:00:50', datetime('now', 'localtime'), datetime('now', 'localtime')),
  ((SELECT id FROM "session" WHERE roster_id=(SELECT id FROM roster WHERE name='CS102 - Tutorial B') AND start_at='2025-10-22 14:00:00'),
   (SELECT id FROM student WHERE student_id='S1000005'), 'ABSENT', 'MANUAL', NULL, '2025-10-22 15:00:00', datetime('now', 'localtime'), datetime('now', 'localtime'));
+
+-- Session 4 (Tutorial A, 2025-11-12)
+INSERT INTO attendance (session_id, student_id, status, method, confidence, timestamp, created_at, updated_at)
+VALUES
+ ((SELECT id FROM "session" WHERE roster_id=(SELECT id FROM roster WHERE name='CS102 - Tutorial A') AND start_at='2025-11-12 09:20:00'),
+  (SELECT id FROM student WHERE student_id='S1000001'), 'PENDING', 'NOT MARKED', NULL, '2025-11-12 09:20:05', datetime('now','localtime'), datetime('now','localtime')),
+ ((SELECT id FROM "session" WHERE roster_id=(SELECT id FROM roster WHERE name='CS102 - Tutorial A') AND start_at='2025-11-12 09:20:00'),
+  (SELECT id FROM student WHERE student_id='S1000002'), 'PENDING', 'NOT MARKED', NULL, '2025-11-12 09:20:10', datetime('now','localtime'), datetime('now','localtime')),
+ ((SELECT id FROM "session" WHERE roster_id=(SELECT id FROM roster WHERE name='CS102 - Tutorial A') AND start_at='2025-11-12 09:20:00'),
+  (SELECT id FROM student WHERE student_id='S1000003'), 'PENDING', 'NOT MARKED', NULL, '2025-11-12 09:20:15', datetime('now','localtime'), datetime('now','localtime')),
+ ((SELECT id FROM "session" WHERE roster_id=(SELECT id FROM roster WHERE name='CS102 - Tutorial A') AND start_at='2025-11-12 09:20:00'),
+  (SELECT id FROM student WHERE student_id='S1000004'), 'PENDING', 'NOT MARKED', NULL, '2025-11-12 09:20:20', datetime('now','localtime'), datetime('now','localtime')),
+ ((SELECT id FROM "session" WHERE roster_id=(SELECT id FROM roster WHERE name='CS102 - Tutorial A') AND start_at='2025-11-12 09:20:00'),
+  (SELECT id FROM student WHERE student_id='S1000005'), 'PENDING', 'NOT MARKED', NULL, '2025-11-12 09:20:25', datetime('now','localtime'), datetime('now','localtime'));
 
 -- ─────────────────────────────────────────────────────────
 -- 7) User Accounts (Professor + TA)

@@ -40,6 +40,10 @@ public class Student extends BaseEntity {
     @OneToOne(mappedBy = "student", fetch = FetchType.LAZY)
     private User user;
 
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Attendance> attendances = new ArrayList<>();
+
     // Constructors
     public Student() {
     }
@@ -109,4 +113,11 @@ public class Student extends BaseEntity {
         this.className = className;
     }
 
+    public List<Attendance> getAttendances() {
+        return attendances;
+    }
+
+    public void setAttendances(List<Attendance> attendances) {
+        this.attendances = attendances;
+    }
 }

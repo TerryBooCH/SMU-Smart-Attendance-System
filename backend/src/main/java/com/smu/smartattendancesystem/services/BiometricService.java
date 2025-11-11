@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -85,40 +86,20 @@ public class BiometricService {
         RosterManager rosterManager,
         AttendanceManager attendanceManager,
         AttendanceRepository attendanceRepository
-    ) {
-        this.sessionManager = sessionManager;
-        this.rosterManager = rosterManager;
-        this.attendanceManager = attendanceManager;
+        ) {
+            this.sessionManager = sessionManager;
+            this.rosterManager = rosterManager;
+            this.attendanceManager = attendanceManager;
         this.attendanceRepository = attendanceRepository;
         this.allowedDetectorRecognizer = Map.of(
             "hist", detectorMap.keySet(),
             "eigen", Set.of("yolo", "mtcnn")
             // "neuralnet", Set.of("yolo", "mtcnn")
-        );
+            );
+            
+        }
         
-    }
-
-    public List<DetectionResultDTO> detect(
-        MultipartFile image, 
-        String type
-    ) throws IOException {
-        if (image == null) throw new IllegalArgumentException("No image provided.");
-
-        type = (type == null || type.isEmpty()) ? defaultDetector : type;
-        type = type.toLowerCase();
-
-        BaseDetector detector = detectorMap.get(type.toLowerCase());
-        if (detector == null) throw new IllegalArgumentException("Invalid detector type. Allowed values: " + detectorMap.keySet().stream().toList());
-
-        Mat imageMat = ImageUtils.fileToMat(image);
-        List<DetectionResult> results = detector.detect(imageMat);
-
-        return results.stream()
-                      .map(DetectionResult::toDTO)
-                      .toList();
-    }
-
-        // Checks if detector type is provided and whether a default value exists in the config
+    // Checks if detector type is provided and whether a default value exists in the config
     private String resolveDetectorType(String detector_type) {
         if (detector_type == null || detector_type.isBlank()) {
             if (!detectorMap.containsKey(defaultDetector.toLowerCase())) throw new IllegalArgumentException("Missing 'detector_type' field.");  // If a default value doesnt exist or is invalid, throw an error
@@ -155,7 +136,37 @@ public class BiometricService {
 
         return metric;
     }
+    
+    public List<DetectionResultDTO> detect(
+        MultipartFile image, 
+        String type
+    ) throws IOException {
+        if (image == null) throw new IllegalArgumentException("No image provided.");
 
+        Mat imageMat = ImageUtils.fileToMat(image);
+        type = resolveDetectorType(type);
+
+        BaseDetector detector = detectorMap.get(type);
+        if (detector == null) throw new IllegalArgumentException("Invalid detector type. Allowed values: " + detectorMap.keySet().stream().toList());
+
+        List<DetectionResult> results = detector.detect(imageMat);
+
+        return results.stream()
+                      .map(DetectionResult::toDTO)
+                      .toList();
+    }
+
+    public List<DetectionResultDTO> detect(
+        byte[] imageBytes,
+        String type
+    ) throws IOException {
+        // Convert byte[] to MultipartFile using MockMultipartFile
+        MultipartFile multipartFile = new MockMultipartFile(
+            "image", "image.jpg", "image/jpeg", imageBytes
+        );
+
+        return this.detect(multipartFile, type);
+    }
 
     private Map<Student, List<Mat>> buildDataset(Roster roster, List<Student> students, BaseDetector detector) {
         List<FaceData> faceDataList = students.stream()
@@ -296,6 +307,25 @@ public class BiometricService {
         }
 
         return new RecognitionResponse(warnings, results);
+    }
+
+    // Alternative overloaded method that takes in a byte array instead of a multipartfile
+    @Transactional
+    public RecognitionResponse recognize(
+        byte[] imageBytes,
+        long session_id,
+        String detector_type,
+        String type,
+        String metric_name,
+        Double manualThreshold,
+        Double autoThreshold
+    ) throws IOException {
+        // Convert byte[] to MultipartFile using MockMultipartFile
+        MultipartFile multipartFile = new MockMultipartFile(
+            "image", "image.jpg", "image/jpeg", imageBytes
+        );
+
+        return recognize(multipartFile, session_id, detector_type, type, metric_name, manualThreshold, autoThreshold);
     }
 
     private StudentDTO convertToDTO(Student student) {

@@ -16,6 +16,7 @@ import AttendanceDistributionChart from "./charts/AttendanceDistributionChart";
 import PerformanceMetricsChart from "./charts/PerformanceMetricsChart";
 import AttendanceRadarChart from "./charts/AttendanceRadarChart";
 import CompletionProgressChart from "./charts/CompletionProgressChart";
+import AttendanceContainer from "./AttendanceContainer";
 
 const COLORS = {
   present: "#10b981",
@@ -177,6 +178,9 @@ const MainDashboardContainer = ({ sessionId }) => {
           <StatItem label="Absent Rate" value={`${(summary.absentRate * 100).toFixed(1)}%`} color="text-rose-600" />
         </div>
       </div>
+
+      {/* Attendance Container */}
+      <AttendanceContainer sessionId={sessionId} />
     </div>
   );
 };

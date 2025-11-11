@@ -3,6 +3,9 @@ package com.smu.smartattendancesystem.models;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 @Entity
 @Table(name = "attendance", uniqueConstraints = {
         @UniqueConstraint(columnNames = { "session_id", "student_id" })
@@ -15,6 +18,7 @@ public class Attendance extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE) 
     private Student student;
 
     @Column(nullable = false)

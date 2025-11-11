@@ -1,12 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Video, VideoOff, User } from "lucide-react";
+import { Video, VideoOff } from "lucide-react";
+import useAttendance from "../../hooks/useAttendance";
+import { useParams } from "react-router-dom";
 
 const MainRecognitionScreen = ({ isCameraOn }) => {
   const videoRef = useRef(null);
   const [error, setError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const streamRef = useRef(null);
+  const captureIntervalRef = useRef(null);
 
+  const { sendRecognition, boundingBoxes } = useAttendance();
+  const { id } = useParams();
+
+  // --- Camera Setup ---
   useEffect(() => {
     const startCamera = async () => {
       if (!isCameraOn) {
@@ -26,7 +33,6 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
         });
 
         streamRef.current = stream;
-
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
           setIsLoading(false);
@@ -41,18 +47,14 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
 
     const stopCamera = () => {
       if (streamRef.current) {
-        const tracks = streamRef.current.getTracks();
-        tracks.forEach((track) => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
         streamRef.current = null;
       }
-      if (videoRef.current) {
-        videoRef.current.srcObject = null;
-      }
+      if (videoRef.current) videoRef.current.srcObject = null;
     };
 
-    if (isCameraOn) {
-      startCamera();
-    } else {
+    if (isCameraOn) startCamera();
+    else {
       stopCamera();
       setIsLoading(false);
     }
@@ -62,9 +64,71 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
     };
   }, [isCameraOn]);
 
+  // --- Frame Capture + Send (2 FPS) ---
+  useEffect(() => {
+    if (!isCameraOn) {
+      clearInterval(captureIntervalRef.current);
+      return;
+    }
+
+    let isSending = false;
+
+    const sendFrame = () => {
+      if (!videoRef.current || videoRef.current.readyState !== 4 || isSending)
+        return;
+
+      isSending = true;
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+
+      context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+      const base64Image = canvas.toDataURL("image/jpeg", 0.6);
+
+      sendRecognition(base64Image, Number(id));
+
+      setTimeout(() => {
+        isSending = false;
+      }, 50);
+    };
+
+    captureIntervalRef.current = setInterval(sendFrame, 500);
+
+    return () => clearInterval(captureIntervalRef.current);
+  }, [isCameraOn, sendRecognition, id]);
+
+  // --- Scale boxes to fit video display ---
+  const getBoxStyles = (box) => {
+    const video = videoRef.current;
+    if (!video || !video.videoWidth || !video.videoHeight) return {};
+
+    const videoRatio = video.videoWidth / video.videoHeight;
+    const containerRatio = video.clientWidth / video.clientHeight;
+
+    let scaleX, scaleY, offsetX = 0, offsetY = 0;
+
+    if (videoRatio > containerRatio) {
+      scaleY = video.clientHeight / video.videoHeight;
+      scaleX = scaleY;
+      offsetX = (video.clientWidth - video.videoWidth * scaleX) / 2;
+    } else {
+      scaleX = video.clientWidth / video.videoWidth;
+      scaleY = scaleX;
+      offsetY = (video.clientHeight - video.videoHeight * scaleY) / 2;
+    }
+
+    return {
+      left: `${box.x * scaleX + offsetX}px`,
+      top: `${box.y * scaleY + offsetY}px`,
+      width: `${box.width * scaleX}px`,
+      height: `${box.height * scaleY}px`,
+    };
+  };
+
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden rounded-3xl">
-      {/* Video Feed - Full Screen */}
+      {/* Video Feed */}
       <video
         ref={videoRef}
         autoPlay
@@ -74,9 +138,32 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
         style={{ display: isCameraOn && !error ? "block" : "none" }}
       />
 
-      {/* Overlay UI */}
+      {/* Overlay */}
       <div className="absolute inset-0 pointer-events-none">
-        {/* Top Bar */}
+        {/* ✅ Bounding Boxes */}
+        {boundingBoxes.map((box, idx) => {
+          const isAbove = box.threshold_status === "above_threshold";
+          const borderColor = isAbove ? "border-green-500" : "border-red-500";
+          const bgColor = isAbove ? "bg-green-500/10" : "bg-red-500/10";
+          const labelColor = isAbove ? "bg-green-600" : "bg-red-600";
+          const score = (box.recognition_score * 100).toFixed(1);
+
+          return (
+            <div
+              key={idx}
+              className={`absolute ${borderColor} ${bgColor} border-4 rounded-lg transition-all duration-300`}
+              style={getBoxStyles(box)}
+            >
+              <div
+                className={`absolute -top-7 left-0 ${labelColor} text-white text-xs px-2 py-1 rounded shadow-md`}
+              >
+                {box.student?.name || "Unknown"} — {score}%
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Recognition Active Banner */}
         {isCameraOn && !error && !isLoading && (
           <div className="absolute top-0 left-0 right-0 bg-gradient-to-b from-black/60 to-transparent p-6">
             <div className="flex items-center justify-between">
@@ -94,7 +181,7 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
           </div>
         )}
 
-        {/* Camera Off State */}
+        {/* Camera Off / Error / Loading */}
         {!isCameraOn && !isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black">
             <div className="text-center">
@@ -111,7 +198,6 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
           </div>
         )}
 
-        {/* Loading State */}
         {isLoading && isCameraOn && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/80 backdrop-blur-sm">
             <div className="text-center">
@@ -123,7 +209,6 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
           </div>
         )}
 
-        {/* Error State */}
         {error && isCameraOn && (
           <div className="absolute inset-0 flex items-center justify-center bg-black">
             <div className="text-center max-w-md px-6">

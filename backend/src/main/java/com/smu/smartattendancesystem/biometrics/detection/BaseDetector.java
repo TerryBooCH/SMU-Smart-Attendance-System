@@ -36,8 +36,8 @@ public abstract class BaseDetector {
         return results;
     }
 
-    public List<DetectionResult> nonMaximumSuppression(List<DetectionResult> results) {
-        return nonMaximumSuppression(results, iou_threshold);
+    public List<DetectionResult> nonMaximumSuppression(List<DetectionResult> candidates) {
+        return nonMaximumSuppression(candidates, iou_threshold);
     }
 
     public abstract List<DetectionResult> detect(Mat image);

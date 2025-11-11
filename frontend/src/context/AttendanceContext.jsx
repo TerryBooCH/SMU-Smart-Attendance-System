@@ -9,7 +9,8 @@ export const AttendanceProvider = ({ children }) => {
   const [boundingBoxes, setBoundingBoxes] = useState([]);
   const [warnings, setWarnings] = useState([]);
   const [wsError, setWsError] = useState(null);
-  const [successAutoAttendanceMarked, setSuccessAutoAttendanceMarked] = useState([]);
+  const [successAutoAttendanceMarked, setSuccessAutoAttendanceMarked] =
+    useState([]);
   const [manualPendingList, setManualPendingList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -100,7 +101,9 @@ export const AttendanceProvider = ({ children }) => {
                       timestamp: new Date().toISOString(),
                       message: `🟡 Detected ${
                         student.name || "Unknown Student"
-                      } (ID: ${student.studentId}) — no attendance record found, manual attendance marking required.`,
+                      } (ID: ${
+                        student.studentId
+                      }) — recognition confidence below threshold, manual attendance marking required.`,
                     };
 
                     console.log("🟡 Manual marking pending:", entry);
@@ -142,9 +145,11 @@ export const AttendanceProvider = ({ children }) => {
                           attendance.status
                         }" for ${student?.name || "Unknown Student"} in ${
                           attendance.sessionCourseName || "Unknown Course"
-                        } (${attendance.studentClassName || "N/A"}). Confidence: ${(
-                          attendance.confidence * 100
-                        ).toFixed(1)}%. Method: ${attendance.method}.`,
+                        } (${
+                          attendance.studentClassName || "N/A"
+                        }). Confidence: ${(attendance.confidence * 100).toFixed(
+                          1
+                        )}%. Method: ${attendance.method}.`,
                         details: {
                           studentName: student?.name,
                           studentEmail: student?.email,
@@ -165,7 +170,9 @@ export const AttendanceProvider = ({ children }) => {
                 }
               });
             } else {
-              console.log("🕒 No detections — keeping previous bounding boxes.");
+              console.log(
+                "🕒 No detections — keeping previous bounding boxes."
+              );
             }
           }
 
@@ -222,7 +229,9 @@ export const AttendanceProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await attendanceService.getAttendanceBySessionId(sessionId);
+      const response = await attendanceService.getAttendanceBySessionId(
+        sessionId
+      );
       const records = response.records || [];
       setAttendances(records);
       return records;
@@ -267,6 +276,14 @@ export const AttendanceProvider = ({ children }) => {
     []
   );
 
+  // ✅ Utility: Remove specific manual pending item by studentId
+  const removeManualPendingByStudentId = useCallback((studentId) => {
+    setManualPendingList((prev) =>
+      prev.filter((s) => s.studentId !== studentId)
+    );
+  }, []);
+
+  // ✅ Clear helpers
   const clearAttendances = useCallback(() => setAttendances([]), []);
   const clearSuccessAutoAttendance = useCallback(
     () => setSuccessAutoAttendanceMarked([]),
@@ -288,6 +305,7 @@ export const AttendanceProvider = ({ children }) => {
     clearAttendances,
     clearSuccessAutoAttendance,
     clearManualPending,
+    removeManualPendingByStudentId, // 🆕 Expose the helper
     connectWebSocket,
     disconnectWebSocket,
     sendRecognition,

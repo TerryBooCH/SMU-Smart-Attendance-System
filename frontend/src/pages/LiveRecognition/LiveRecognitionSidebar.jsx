@@ -85,7 +85,7 @@ const LiveRecognitionSidebar = ({ id, activeSidebar, setActiveSidebar }) => {
             </>
           )}
 
-          {activeSidebar === "notifications" && <NotificationContent />}
+          {activeSidebar === "notifications" && <NotificationContent id={id} />}
 
           {activeSidebar === "attendance" && (
             <AttendanceFieldContent

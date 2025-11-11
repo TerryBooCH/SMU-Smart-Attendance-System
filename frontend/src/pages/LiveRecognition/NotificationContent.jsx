@@ -3,7 +3,7 @@ import { AlertTriangle, AlertCircle, CheckCircle2 } from "lucide-react";
 import useAttendance from "../../hooks/useAttendance";
 import ManualPendingCard from "./ManualPendingCard"; // 🆕 import
 
-const NotificationContent = () => {
+const NotificationContent = ({id}) => {
   const { warnings, wsError, error, successAutoAttendanceMarked, manualPendingList } =
     useAttendance();
 
@@ -46,7 +46,7 @@ const NotificationContent = () => {
       {manualPendingList &&
         manualPendingList.length > 0 &&
         manualPendingList.map((entry, index) => (
-          <ManualPendingCard key={`manual-${entry.studentId}-${index}`} entry={entry} />
+          <ManualPendingCard key={`manual-${entry.studentId}-${index}`} entry={entry} sessionId={id} />
         ))}
 
       {/* ✅ Auto Attendance Success */}

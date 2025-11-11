@@ -70,7 +70,7 @@ public class EigenFaceRecognizer extends BaseRecognizer {
     }
 
     public double[] transform(Mat face) {
-        Mat resized = letterbox_resize(face, new Scalar(128));
+        Mat resized = letterbox_resize(face, new Scalar(image_size));
         Mat grey = greyscale(resized);
         Mat normalized = normalize(grey);
         double[] flat = flatten(normalized);

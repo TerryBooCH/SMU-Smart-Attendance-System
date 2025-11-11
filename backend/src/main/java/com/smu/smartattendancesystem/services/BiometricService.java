@@ -43,16 +43,13 @@ public class BiometricService {
         "haar", new CascadeDetector("src/main/resources/weights/haarcascade_frontalface_alt.xml"),
         "lbp", new CascadeDetector("src/main/resources/weights/lbpcascade_frontalface_improved.xml"),
         "yolo", new YoloDetector("src/main/resources/weights/yolov8n-face.onnx", 640)
-        // "mtcnn", new YoloDetector(...)
     );
 
-    private final Set<String> validRecognizers = Set.of("hist", "eigen");
+    private final Set<String> validRecognizers = Set.of("hist", "eigen", "neuralnet");
     private final Map<String, BaseRecognizer> recognizerMap = Map.of(
         "hist", new HistogramRecognizer(128),
         "eigen_yolo", EigenFaceRecognizer.fromConfig("src/main/resources/weights/yolo_eigenface.config"),
-        "eigen_mtcnn", EigenFaceRecognizer.fromConfig("src/main/resources/weights/mtcnn_eigenface.config")
-        // "neuralnet_yolo", new NeuralNetRecognizer(...)
-        // "neuralnet_mtcnn", new NeuralNetRecognizer(...)
+        "neuralnet_yolo", new NeuralNetRecognizer("src/main/resources/weights/yolo_NN_recognizer.onnx", 128)
     );
 
     private final Map<String, Set<String>> allowedDetectorRecognizer;
@@ -93,11 +90,10 @@ public class BiometricService {
         this.attendanceRepository = attendanceRepository;
         this.allowedDetectorRecognizer = Map.of(
             "hist", detectorMap.keySet(),
-            "eigen", Set.of("yolo", "mtcnn")
-            // "neuralnet", Set.of("yolo", "mtcnn")
-            );
-            
-        }
+            "eigen", Set.of("yolo"),
+            "neuralnet", Set.of("yolo")
+        );
+    }
         
     // Checks if detector type is provided and whether a default value exists in the config
     private String resolveDetectorType(String detector_type) {

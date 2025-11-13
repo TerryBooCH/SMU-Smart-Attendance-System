@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { validateUpdateStudentForm } from "../../utils/validateForm";
 import useStudent from "../../hooks/useStudent";
 import { useToast } from "../../hooks/useToast";
@@ -17,6 +17,19 @@ const UpdateStudentDetailsForm = ({ student }) => {
 
   const [formErrors, setFormErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (student) {
+      setFormValues({
+        name: student.name || "",
+        email: student.email || "",
+        phone: student.phone || "",
+        className: student.className || "",
+      });
+      setFormErrors({});
+      setIsSubmitting(false);
+    }
+  }, [student]);
 
   const handleReset = () => {
     setFormValues({
@@ -151,7 +164,7 @@ const UpdateStudentDetailsForm = ({ student }) => {
                   name="email"
                   value={formValues.email}
                   onChange={handleChange}
-                  required 
+                  required
                   disabled={isSubmitting}
                   placeholder="student@example.com"
                   className={`font-lexend w-full px-4 py-2.5 border text-sm rounded-xl bg-white text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all ${

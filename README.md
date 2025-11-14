@@ -29,7 +29,8 @@ The backend uses a **runtime database** that **starts automatically when the bac
 6. [Running the Application](#running-the-application)  
    - [Run Backend](#run-backend)
    - [Run Frontend](#run-frontend)
-7. [Additional Notes](#additional-notes)
+7. [Common Errors](#common-errors)
+8. [Additional Notes](#additional-notes)
 
 ---
 
@@ -88,7 +89,7 @@ SMU-Smart-Attendance-System/
 ## Environment Variables
 
 The frontend requires a `.env` file for configuration.  
-An example file (`.env.example`) is provided.
+An example file (`.env.example`) is provided with the correct default values.
 
 Create your environment file:
 ```bash
@@ -96,10 +97,12 @@ cd frontend
 cp .env.example .env
 ```
 
-Update the `.env` file with your backend API URL:
+The `.env` file will contain:
 ```env
 VITE_API_URL=<YOUR_BACKEND_API_URL>
 ```
+
+**Note:** If you are running the backend on the default URL (e.g., `http://localhost:8080`), simply copying `.env.example` to `.env` is sufficient—no modifications are needed. Only edit the `VITE_API_URL` if your backend is running on a different host or port.
 
 ---
 
@@ -140,6 +143,50 @@ npm run dev
 Frontend will run at: `http://localhost:5173`
 
 Make sure the `.env` file contains the correct backend API URL.
+
+---
+
+## Common Errors
+
+### **Error: `JAVA_HOME` not set**
+**Cause:** Java JDK not properly installed or environment variable not configured.  
+**Fix:** 
+```bash
+# Windows
+setx JAVA_HOME "C:\Program Files\Java\jdk-<version>"
+
+# macOS/Linux
+export JAVA_HOME=/path/to/jdk
+```
+
+### **Error: `mvn: command not found`**
+**Cause:** Maven not installed or not in PATH.  
+**Fix:** Verify Maven installation and add to PATH, then restart terminal.
+
+### **Error: `npm: command not found`**
+**Cause:** Node.js/npm not installed or not in PATH.  
+**Fix:** Install Node.js from official website or use a package manager.
+
+### **Error: Port already in use**
+**Cause:** Another application is using the required port.  
+**Fix:** 
+- Kill the process using the port
+- Change the port in application configuration
+
+### **Error: Cannot connect to backend**
+**Cause:** Backend not running or incorrect URL in `.env` file.  
+**Fix:** 
+- Ensure backend is running
+- Verify `VITE_API_URL` in `.env` matches backend URL
+
+### **Error: `Module not found` in frontend**
+**Cause:** Dependencies not installed properly.  
+**Fix:** 
+```bash
+cd frontend
+rm -rf node_modules package-lock.json
+npm install
+```
 
 ---
 

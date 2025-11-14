@@ -18,10 +18,10 @@ The backend uses a **runtime database** that **starts automatically when the bac
 1. [Project Structure](#project-structure)  
 2. [Prerequisites](#prerequisites)  
 3. [Installing Prerequisites](#installing-prerequisites)  
-   - [Java JDK](#java-jdk)
-   - [Apache Maven](#apache-maven)
-   - [Node.js & npm](#nodejs--npm)
-   - [Git (Optional)](#git-optional)
+   - [Java JDK (version: <YOUR_JDK_VERSION_HERE>)](#java-jdk-version-your_jdk_version_here)
+   - [Apache Maven (version: <YOUR_MAVEN_VERSION_HERE>)](#apache-maven-version-your_maven_version_here)
+   - [Node.js & npm (version: <YOUR_NODE_VERSION_HERE>)](#nodejs--npm-version-your_node_version_here)
+   - [Git (Optional) (version: <YOUR_GIT_VERSION_HERE>)](#git-optional-version-your_git_version_here)
 4. [Environment Variables](#environment-variables)  
 5. [Setting Up the Application](#setting-up-the-application)  
    - [Backend Setup](#backend-setup)
@@ -72,10 +72,10 @@ SMU-Smart-Attendance-System/
 
 ## Installing Prerequisites
 
-### **Java JDK**
+### **Java JDK (version: <YOUR_JDK_VERSION_HERE>)**
 <YOUR_INSTALLATION_INSTRUCTIONS_HERE>
 
-### **Apache Maven**
+### **Apache Maven (version: <YOUR_MAVEN_VERSION_HERE>)**
 <YOUR_INSTALLATION_INSTRUCTIONS_HERE>
 
 #### **Adding Maven to PATH**
@@ -109,10 +109,10 @@ After installing Maven, you need to add it to your system PATH.
 ```
 4. Verify installation: `mvn -version`
 
-### **Node.js & npm**
+### **Node.js & npm (version: <YOUR_NODE_VERSION_HERE>)**
 <YOUR_INSTALLATION_INSTRUCTIONS_HERE>
 
-### **Git (Optional)**
+### **Git (Optional) (version: <YOUR_GIT_VERSION_HERE>)**
 <YOUR_INSTALLATION_INSTRUCTIONS_HERE>
 
 ---

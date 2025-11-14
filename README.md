@@ -18,9 +18,9 @@ The backend uses a **runtime database** that **starts automatically when the bac
 1. [Project Structure](#project-structure)  
 2. [Prerequisites](#prerequisites)  
 3. [Installing Prerequisites](#installing-prerequisites)  
-   - [Node.js & npm](#nodejs--npm)
    - [Java JDK](#java-jdk)
    - [Apache Maven](#apache-maven)
+   - [Node.js & npm](#nodejs--npm)
    - [Git (Optional)](#git-optional)
 4. [Environment Variables](#environment-variables)  
 5. [Setting Up the Application](#setting-up-the-application)  
@@ -77,6 +77,37 @@ SMU-Smart-Attendance-System/
 
 ### **Apache Maven**
 <YOUR_INSTALLATION_INSTRUCTIONS_HERE>
+
+#### **Adding Maven to PATH**
+
+After installing Maven, you need to add it to your system PATH.
+
+**Windows:**
+1. Open **System Properties** → **Advanced** → **Environment Variables**
+2. Under **System Variables**, find and select **Path**, then click **Edit**
+3. Click **New** and add the path to Maven's `bin` directory (e.g., `C:\apache-maven-<version>\bin`)
+4. Click **OK** to save changes
+5. Open a new command prompt and verify: `mvn -version`
+
+**macOS/Linux:**
+1. Open your shell configuration file:
+```bash
+   # For bash
+   nano ~/.bash_profile
+   
+   # For zsh
+   nano ~/.zshrc
+```
+2. Add the following lines:
+```bash
+   export M2_HOME=/path/to/apache-maven-<version>
+   export PATH=$M2_HOME/bin:$PATH
+```
+3. Save the file and reload the configuration:
+```bash
+   source ~/.bash_profile  # or source ~/.zshrc
+```
+4. Verify installation: `mvn -version`
 
 ### **Node.js & npm**
 <YOUR_INSTALLATION_INSTRUCTIONS_HERE>
@@ -161,7 +192,7 @@ export JAVA_HOME=/path/to/jdk
 
 ### **Error: `mvn: command not found`**
 **Cause:** Maven not installed or not in PATH.  
-**Fix:** Verify Maven installation and add to PATH, then restart terminal.
+**Fix:** Verify Maven installation and add to PATH (see [Adding Maven to PATH](#adding-maven-to-path)), then restart terminal.
 
 ### **Error: `npm: command not found`**
 **Cause:** Node.js/npm not installed or not in PATH.  

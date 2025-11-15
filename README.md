@@ -228,11 +228,16 @@ spring.jpa.hibernate.ddl-auto=create
 spring.sql.init.mode=always
 ```     
 3. Restart the backend server to recreate the database and load sample data.
-4. After the reset, set the database to persistent mode again byt changing the properties back to:
+4. After the reset, set the database to persistent mode again by changing the properties back to:
 ```properties
 spring.jpa.hibernate.ddl-auto=create
 spring.sql.init.mode=always
 ```     
+5. Remove the `.faces` folder located in the `/backend` directory to clear all pre-existing face data stored locally everytime the database is reset.
+```
+cd .\backend\
+rm .\faces\
+```
 
 ---
 

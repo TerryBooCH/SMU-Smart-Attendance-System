@@ -136,7 +136,7 @@ After installing Maven, you need to add it to your system PATH. Using the follow
 4. Verify installation: `mvn -version`
 
 ### Node.js & npm (version: 22.19.0, version: 10.9.3)
-1. Download Node.js LTS from https://nodejs.org
+1. Install Node.js version 22.19.0 from https://nodejs.org (or any closest LTS version that is available)
 2. Install and ensure "Add to PATH" is checked
 3. Open a new command prompt and verify: `node -v` and `npm -v`
 
@@ -191,7 +191,7 @@ npm install
 ## 6. Setting Up the Database
 
 The backend uses an SQLite database (attendance.db) that requires no installation or external setup.
-However, depending on whether this is your first run or you want persistent data, you must configure the following Spring Boot properties:
+However, depending on whether this is your first run or you want persistent data, you must configure the following Spring Boot properties in the `application.properties` file located in `backend/src/main/resources/application.properties`:
 ```properties
 spring.jpa.hibernate.ddl-auto
 spring.sql.init.mode
@@ -201,7 +201,7 @@ These settings control how tables are created and whether sample data is loaded.
 ### First run (Create Tables & Load Sample Data)
 Use this on the very first run or whenever you want to completely regenerate the schema.
 
-In the `application.properties` file (located in `backend/src/main/resources/application.properties`), set:
+In the `application.properties` file, set:
 ```properties
 spring.jpa.hibernate.ddl-auto=create
 spring.sql.init.mode=always

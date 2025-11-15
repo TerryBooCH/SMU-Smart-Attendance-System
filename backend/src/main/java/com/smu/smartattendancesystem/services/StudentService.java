@@ -216,10 +216,11 @@ public class StudentService {
 
         // Sync new username and email to linked user account
         User user = savedStudent.getUser();
-        user.setName(savedStudent.getName());
-        user.setEmail(savedStudent.getEmail());
-
-        userManager.updateUser(user);
+        if (user != null) {
+            user.setName(savedStudent.getName());
+            user.setEmail(savedStudent.getEmail());
+            userManager.updateUser(user);
+        } 
 
         // Create and return the DTO object combining student and face data
         FaceDataDTO face = faceDataService.getLatestFaceData(savedStudent.getStudentId())

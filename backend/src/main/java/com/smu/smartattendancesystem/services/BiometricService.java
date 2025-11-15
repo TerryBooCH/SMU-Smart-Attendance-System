@@ -203,6 +203,77 @@ public class BiometricService {
 
     }
 
+    private Optional<Mat> loadBestCrop(FaceData faceData, BaseDetector detector) {
+        String path = basePath.resolve(root).resolve(faceData.getImagePath()).toString();
+        Mat img = Imgcodecs.imread(path);
+        if (img.empty()) return Optional.empty();
+
+        return detector.detect(img).stream()
+            .max(Comparator.naturalOrder()) // best detection
+            .map(det -> ImageUtils.crop(det, img));
+    }
+
+    // Build dataset for non-vector recognizers
+    private Map<Student, List<Mat>> buildImageDataset(List<FaceData> faceDataList, BaseDetector detector) {
+        Map<Student, List<Mat>> dataset = new HashMap<>();
+
+        for (FaceData fd : faceDataList) {
+            loadBestCrop(fd, detector).ifPresent(crop ->
+                dataset.computeIfAbsent(fd.getStudent(), s -> new ArrayList<>())
+                    .add(crop)
+            );
+        }
+        return dataset;
+    }
+
+    // Build dataset for vector recognizers (including DB caching)
+    private Map<Student, List<double[]>> buildVectorDataset(
+        List<FaceData> faceDataList,
+        String detectorType,
+        String recognizerType,
+        BaseDetector detector,
+        VectorRecognizer recognizer
+    ) {
+        Map<Student, List<double[]>> dataset = new HashMap<>();
+
+        // Loop through each facedata and check if a embedding has already been computed for the corresponding facedata
+        // If it has, skip the computation and add the saved embedding
+        // If not, compute the embedding and save it to the database so it does not have to be recomputed in the future. 
+        for (FaceData fd : faceDataList) {
+            Optional<Embedding> optEmbedding = embeddingRepository.findByDetectorAndRecognizerAndFaceData(detectorType, recognizerType, fd);
+
+            double[] embedding;
+
+            if (optEmbedding.isPresent()) {
+                embedding = optEmbedding.get().getVector();
+            } else {
+                // Compute + save
+                Optional<Mat> cropOpt = loadBestCrop(fd, detector);
+                if (cropOpt.isEmpty()) continue;
+
+                embedding = recognizer.transform(cropOpt.get());
+                embeddingRepository.save(new Embedding(detectorType, recognizerType, fd, embedding));
+            }
+
+            dataset.computeIfAbsent(fd.getStudent(), s -> new ArrayList<>()).add(embedding);
+        }
+
+        return dataset;
+    }
+
+    private void addMissingReferenceWarnings(
+        Map<String, List<String>> warnings,
+        List<Student> students,
+        Map<Student, ?> dataset
+    ) {
+        for (Student student : students) {
+            if (!dataset.containsKey(student)) {
+                warnings.computeIfAbsent("no_ref_face", k -> new ArrayList<>())
+                    .add(String.format("Student #%d: %s", student.getId(), student.getName()));
+            }
+        }
+    }
+
     public RecognitionResponse recognize(
         MultipartFile image,
         long session_id, 
@@ -248,110 +319,40 @@ public class BiometricService {
         // Obtain bounding boxes from camera frame
         List<DetectionResult> detectionResults = detector.detect(imageMat);
 
-        // Check if recognizer produces a embedding vector which is used for recognition
-        if (recognizer instanceof VectorRecognizer) {
-            VectorRecognizer vectorRecognizer = (VectorRecognizer) recognizer;
+        List<RecognitionResultDTO> results = new ArrayList<>();
+
+        // Check if recognizer produces a embedding vector which is used for recognition. Eg. EigenFace/NeuralNet
+        if (recognizer instanceof VectorRecognizer vectorRecognizer) {
             vectorRecognizer.setMetric(metric);
 
-            // Loop through each facedata and check if a embedding has already been computed for the corresponding facedata
-            // If it has, skip the computation and add the saved embedding
-            // If not, compute the embedding and save it to the database so it does not have to be recomputed in the future. 
-            Map<Student, List<double[]>> embeddings = new HashMap<>();
+            Map<Student, List<double[]>> vectors = buildVectorDataset(faceDataList, detector_type, type, detector, vectorRecognizer);
 
-            for (FaceData faceData : faceDataList) {
-                Optional<Embedding> optEmbedding = embeddingRepository.findByDetectorAndRecognizerAndFaceDataId(detector_type, type, faceData.getId());
-                Embedding embedding;
-
-                if (optEmbedding.isPresent()) {
-                    embedding = optEmbedding.get();
-                } else {
-                    // Try to read from the image at the specified path
-                    Mat face = Imgcodecs.imread(basePath.resolve(root).resolve(faceData.getImagePath()).toString());
-                    if (face.empty()) continue;
-
-                    // Obtain all detections and obtain the best one based on score and area
-                    List<DetectionResult> detections = detector.detect(face);
-                    Optional<DetectionResult> bestDetection = detections.stream()
-                        .max(Comparator.naturalOrder());
-
-                    if (bestDetection.isEmpty()) continue;
-                    Mat cropped = ImageUtils.crop(bestDetection.get(), face);
-
-                    // Convert the cropped image into a embedding vector
-                    double[] vector = vectorRecognizer.transform(cropped);
-                    
-                    // Save to the DB if it doesnt exist yet
-                    embedding = new Embedding(detector_type, type, faceData, vector);
-                    embeddingRepository.save(embedding);
-                }
-
-                embeddings.computeIfAbsent(faceData.getStudent(), s -> new ArrayList<>())
-                    .add(embedding.getVector());
-            }
-
-            List<RecognitionResultDTO> results = new ArrayList<>();
-            for (DetectionResult detected : detectionResults) {
-                Mat query = ImageUtils.crop(detected, imageMat);
-
-                RecognitionResult result = vectorRecognizer.recognizeVectors(query, embeddings);
-                Student top_student = result.getStudent();
+            for (DetectionResult det : detectionResults) {
+                Mat query = ImageUtils.crop(det, imageMat);
+                RecognitionResult result = vectorRecognizer.recognizeVectors(query, vectors);
+                Student best = result.getStudent();
                 double score = result.getScore();
 
-                // Attendance can be null if no attendance was updated; confidence below threshold.
-                Attendance attendance = updateAttendance(session, top_student, score, manualThreshold, autoThreshold);  
-                results.add(new RecognitionResultDTO(detected.toDTO(), convertToDTO(top_student), result.getScore(), convertToDTO(attendance)));
+                Attendance att = updateAttendance(session, best, score, manualThreshold, autoThreshold);
+                results.add(new RecognitionResultDTO(det.toDTO(), convertToDTO(best), score, convertToDTO(att)));
             }
+            addMissingReferenceWarnings(warnings, students, vectors);
+        } else {  // Recognizer does not produce a embedding vector. Eg. HistogramRecognizer
+            Map<Student, List<Mat>> dataset = buildImageDataset(faceDataList, detector);
 
-            return new RecognitionResponse(warnings, results);
-
-
-        } else {  // Recognizer does not produce vectors, eg. HistogramRecognizer
-            Map<Student, List<Mat>> dataset = new HashMap<>();
-
-            for (FaceData faceData : faceDataList) {
-                Mat face = Imgcodecs.imread(basePath.resolve(root).resolve(faceData.getImagePath()).toString());
-                if (face.empty()) continue;
-
-                // Obtain all detections and obtain the best one based on score and area
-                List<DetectionResult> detections = detector.detect(face);
-                Optional<DetectionResult> bestDetection = detections.stream()
-                    .max(Comparator.naturalOrder());
-
-                if (bestDetection.isEmpty()) continue;
-                Mat cropped = ImageUtils.crop(bestDetection.get(), face);
-
-                dataset.computeIfAbsent(faceData.getStudent(), s -> new ArrayList<>())
-                    .add(cropped);
-            }
-
-            List<RecognitionResultDTO> results = new ArrayList<>();
-            for (DetectionResult detected : detectionResults) {
-                Mat query = ImageUtils.crop(detected, imageMat);
-
+            for (DetectionResult det : detectionResults) {
+                Mat query = ImageUtils.crop(det, imageMat);
                 RecognitionResult result = recognizer.recognize(query, dataset);
-                Student top_student = result.getStudent();
+                Student best = result.getStudent();
                 double score = result.getScore();
 
-                // Attendance can be null if no attendance was updated; confidence below threshold.
-                Attendance attendance = updateAttendance(session, top_student, score, manualThreshold, autoThreshold);  
-                results.add(new RecognitionResultDTO(detected.toDTO(), convertToDTO(top_student), result.getScore(), convertToDTO(attendance)));
+                Attendance att = updateAttendance(session, best, score, manualThreshold, autoThreshold);
+                results.add(new RecognitionResultDTO(det.toDTO(), convertToDTO(best), score, convertToDTO(att)));
             }
-
-            return new RecognitionResponse(warnings, results);
+            addMissingReferenceWarnings(warnings, students, dataset);
         }
 
-
-        // Check if any students do not have any reference images to compare against for recognition in the dataset
-        // for (Student student : students) {
-        //     if (dataset.containsKey(student)) continue;
-            
-        //     warnings.computeIfAbsent(
-        //         "no_ref_face", 
-        //         k -> new ArrayList<>()
-        //     ).add(
-        //         String.format("Student #%d: %s", student.getId(), student.getName())
-        //     );
-        // }
+        return new RecognitionResponse(warnings, results);
     }
 
     // Alternative overloaded method that takes in a byte array instead of a multipartfile

@@ -5,10 +5,6 @@ import org.opencv.imgproc.Imgproc;
 import com.smu.smartattendancesystem.biometrics.metrics.*;
 
 public class HistogramRecognizer extends BaseRecognizer {
-    public HistogramRecognizer(int img_size, BaseMetric metric) {
-        super(img_size, metric);
-    }
-    
     public HistogramRecognizer(int img_size) {
         super(img_size);
     }

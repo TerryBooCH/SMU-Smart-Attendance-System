@@ -14,7 +14,7 @@ import com.fasterxml.jackson.core.type.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smu.smartattendancesystem.biometrics.metrics.*;
 
-public class EigenFaceRecognizer extends BaseRecognizer {
+public class EigenFaceRecognizer extends VectorRecognizer {
     private PCA pca;
 
 	public EigenFaceRecognizer(PCA pca, int image_size, BaseMetric metric) {

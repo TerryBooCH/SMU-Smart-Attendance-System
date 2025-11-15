@@ -12,6 +12,7 @@ import smile.math.matrix.Matrix;
 import com.fasterxml.jackson.core.json.*;
 import com.fasterxml.jackson.core.type.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.smu.smartattendancesystem.biometrics.ImageUtils;
 import com.smu.smartattendancesystem.biometrics.metrics.*;
 
 public class EigenFaceRecognizer extends VectorRecognizer {
@@ -70,10 +71,10 @@ public class EigenFaceRecognizer extends VectorRecognizer {
     }
 
     public double[] transform(Mat face) {
-        Mat resized = letterbox_resize(face, new Scalar(image_size));
-        Mat grey = greyscale(resized);
-        Mat normalized = normalize(grey);
-        double[] flat = flatten(normalized);
+        Mat resized = ImageUtils.letterbox_resize(face, this.image_size, new Scalar(image_size));
+        Mat grey = ImageUtils.greyscale(resized);
+        Mat normalized = ImageUtils.normalize(grey);
+        double[] flat = ImageUtils.flatten(normalized);
 
         double[] result = pca.apply(flat);
         return result;

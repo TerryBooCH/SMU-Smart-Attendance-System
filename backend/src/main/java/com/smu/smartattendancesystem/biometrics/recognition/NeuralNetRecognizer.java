@@ -7,6 +7,7 @@ import org.opencv.dnn.Net;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 
+import com.smu.smartattendancesystem.biometrics.ImageUtils;
 import com.smu.smartattendancesystem.biometrics.metrics.BaseMetric;
 
 import java.nio.file.Path;
@@ -28,7 +29,7 @@ public class NeuralNetRecognizer extends VectorRecognizer {
     }
 
     public double[] transform(Mat face) {
-        Mat resized = letterbox_resize(face, new Scalar(image_size));
+        Mat resized = ImageUtils.letterbox_resize(face, this.image_size, new Scalar(image_size));
         Mat blob = Dnn.blobFromImage(
             resized,
             1.0 / 255.0,  // normalize image

@@ -11,7 +11,7 @@ import com.smu.smartattendancesystem.biometrics.metrics.BaseMetric;
 
 import java.nio.file.Path;
 
-public class NeuralNetRecognizer extends BaseRecognizer {
+public class NeuralNetRecognizer extends VectorRecognizer {
     private Path modelPath;
     private Net model;
 

@@ -1,20 +1,22 @@
 package com.smu.smartattendancesystem.biometrics.recognition;
 
+import com.smu.smartattendancesystem.models.Student;
+
 public class RecognitionResult {
-    private int index;
+    private Student student;
 	private double score;
 
-    public RecognitionResult(int index, double score) {
-        this.index = index;
+    public RecognitionResult(Student student, double score) {
+        this.student = student;
         this.score = score;
     }
 
-    public int getIndex() {
-        return this.index;
+    public Student getStudent() {
+        return this.student;
     }
 
-    public void setIndex(int index) {
-		this.index = index;
+    public void setStudent(Student student) {
+		this.student = student;
 	}
 
     public double getScore() {

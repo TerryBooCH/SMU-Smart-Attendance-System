@@ -21,6 +21,7 @@ import com.smu.smartattendancesystem.managers.RosterManager;
 import com.smu.smartattendancesystem.managers.SessionManager;
 import com.smu.smartattendancesystem.models.*;
 import com.smu.smartattendancesystem.repositories.AttendanceRepository;
+import com.smu.smartattendancesystem.repositories.EmbeddingRepository;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -39,6 +40,7 @@ public class BiometricService {
     private final RosterManager rosterManager;
     private final AttendanceManager attendanceManager;
     private final AttendanceRepository attendanceRepository;
+    private final EmbeddingRepository embeddingRepository;
 
     private final Map<String, BaseDetector> detectorMap = Map.of(
         "haar", new CascadeDetector("src/main/resources/weights/haarcascade_frontalface_alt.xml"),
@@ -87,12 +89,15 @@ public class BiometricService {
         SessionManager sessionManager, 
         RosterManager rosterManager,
         AttendanceManager attendanceManager,
-        AttendanceRepository attendanceRepository
+        AttendanceRepository attendanceRepository,
+        EmbeddingRepository embeddingRepository
     ) {
         this.sessionManager = sessionManager;
         this.rosterManager = rosterManager;
         this.attendanceManager = attendanceManager;
         this.attendanceRepository = attendanceRepository;
+        this.embeddingRepository = embeddingRepository;
+
         this.allowedDetectorRecognizer = Map.of(
             "hist", detectorMap.keySet(),  // hist works with all detectors
             "eigen", Set.of("yolo"),       // eigen only works with yolo
@@ -192,38 +197,22 @@ public class BiometricService {
         return this.detect(multipartFile, type);
     }
 
-    private Map<Student, List<Mat>> buildDataset(Roster roster, List<Student> students, BaseDetector detector) {
+    // Given a roster, return the facedata of all students associated with that roster
+    private List<FaceData> getFaceData(Roster roster) {
+        List<Student> students = roster.getStudents();
+
         List<FaceData> faceDataList = students.stream()
             .flatMap(s -> s.getFaceDataList().stream())
             .toList();
-        
-        if (faceDataList.isEmpty()) {
-            throw new IllegalArgumentException(String.format("No reference images found for recognition (Roster #%d)", roster.getId()));
-        }
 
-        Map<Student, List<Mat>> dataset = new LinkedHashMap<>(); 
-        for (FaceData faceData : faceDataList) {
-            Student student = faceData.getStudent();
-            Mat face = Imgcodecs.imread(basePath.resolve(this.root).resolve(faceData.getImagePath()).toString());
+        if (faceDataList.isEmpty()) throw new IllegalArgumentException(String.format("No reference images found for recognition (Roster #%d)", roster.getId()));
 
-            if (face.empty()) continue;
+        return faceDataList;
+    } 
 
-            // Obtain all detections and obtain the best one based on score and area
-            List<DetectionResult> detections = detector.detect(face);
-            Optional<DetectionResult> bestDetection = detections.stream()
-                .max(Comparator.naturalOrder());
 
-            if (bestDetection.isEmpty()) continue;
-
-            Mat cropped = ImageUtils.crop(bestDetection.get(), face);
-
-            // Check if the student exists in the hashmap, if not, add them to the array list
-            dataset.computeIfAbsent(student, k -> new ArrayList<>()).add(cropped);
-        }
-        return dataset;
-    }
-
-    private Attendance determineAttendance(Session session, Student student, double score, Double manualThreshold, Double autoThreshold) {
+    // Returns null if attendance was not updated.
+    private Attendance updateAttendance(Session session, Student student, double score, Double manualThreshold, Double autoThreshold) {
         Duration lateAfter = Duration.ofMinutes(session.getLateAfterMinutes());
         Duration elapsed = Duration.between(session.getStartAt(), LocalDateTime.now());
 
@@ -239,6 +228,78 @@ public class BiometricService {
             );
         } else {
             return null;
+        }
+
+    }
+
+    private Optional<Mat> loadBestCrop(FaceData faceData, BaseDetector detector) {
+        String path = basePath.resolve(root).resolve(faceData.getImagePath()).toString();
+        Mat img = Imgcodecs.imread(path);
+        if (img.empty()) return Optional.empty();
+
+        return detector.detect(img).stream()
+            .max(Comparator.naturalOrder()) // best detection
+            .map(det -> ImageUtils.crop(det, img));
+    }
+
+    // Build dataset for non-vector recognizers
+    private Map<Student, List<Mat>> buildImageDataset(List<FaceData> faceDataList, BaseDetector detector) {
+        Map<Student, List<Mat>> dataset = new HashMap<>();
+
+        for (FaceData fd : faceDataList) {
+            loadBestCrop(fd, detector).ifPresent(crop ->
+                dataset.computeIfAbsent(fd.getStudent(), s -> new ArrayList<>())
+                    .add(crop)
+            );
+        }
+        return dataset;
+    }
+
+    // Build dataset for vector recognizers (including DB caching)
+    private Map<Student, List<double[]>> buildVectorDataset(
+        List<FaceData> faceDataList,
+        String detectorType,
+        String recognizerType,
+        BaseDetector detector,
+        VectorRecognizer recognizer
+    ) {
+        Map<Student, List<double[]>> dataset = new HashMap<>();
+
+        // Loop through each facedata and check if a embedding has already been computed for the corresponding facedata
+        // If it has, skip the computation and add the saved embedding
+        // If not, compute the embedding and save it to the database so it does not have to be recomputed in the future. 
+        for (FaceData fd : faceDataList) {
+            Optional<Embedding> optEmbedding = embeddingRepository.findByDetectorAndRecognizerAndFaceData(detectorType, recognizerType, fd);
+
+            double[] embedding;
+
+            if (optEmbedding.isPresent()) {
+                embedding = optEmbedding.get().getVector();
+            } else {
+                // Compute + save
+                Optional<Mat> cropOpt = loadBestCrop(fd, detector);
+                if (cropOpt.isEmpty()) continue;
+
+                embedding = recognizer.transform(cropOpt.get());
+                embeddingRepository.save(new Embedding(detectorType, recognizerType, fd, embedding));
+            }
+
+            dataset.computeIfAbsent(fd.getStudent(), s -> new ArrayList<>()).add(embedding);
+        }
+
+        return dataset;
+    }
+
+    private void addMissingReferenceWarnings(
+        Map<String, List<String>> warnings,
+        List<Student> students,
+        Map<Student, ?> dataset
+    ) {
+        for (Student student : students) {
+            if (!dataset.containsKey(student)) {
+                warnings.computeIfAbsent("no_ref_face", k -> new ArrayList<>())
+                    .add(String.format("Student #%d: %s", student.getId(), student.getName()));
+            }
         }
     }
 
@@ -274,12 +335,7 @@ public class BiometricService {
             type,
             recognizerMap.get(type + "_" + detector_type)
         );
-        
-        if (recognizer == null) {
-            throw new IllegalArgumentException("Invalid recognizer type. Allowed values: " + validRecognizers);
-        }
-
-        recognizer.setMetric(metric);
+        if (recognizer == null) throw new IllegalArgumentException("Invalid recognizer type. Allowed values: " + validRecognizers);
         
         // Check session exists before linking to roster
         Optional<Session> optSession = this.sessionManager.getSession(session_id);
@@ -290,53 +346,43 @@ public class BiometricService {
         Session session = optSession.get();
         Roster roster = session.getRoster();
         List<Student> students = roster.getStudents();
-        
-        Map<Student, List<Mat>> dataset = buildDataset(roster, students, detector);
 
-        // Check if any students do not have any reference images to compare against for recognition in the dataset
-        for (Student student : students) {
-            if (dataset.containsKey(student)) continue;
-            
-            warnings.computeIfAbsent(
-                "no_ref_face", 
-                k -> new ArrayList<>()
-            ).add(
-                String.format("Student #%d: %s", student.getId(), student.getName())
-            );
-        }
+        List<FaceData> faceDataList = getFaceData(roster);
 
+        // Obtain bounding boxes from camera frame
         List<DetectionResult> detectionResults = detector.detect(imageMat);
 
-        // Loop through each detection result and then pass the cropped image to the recognizer. 
         List<RecognitionResultDTO> results = new ArrayList<>();
-        for (DetectionResult detected : detectionResults) {
-            Mat queryFace = ImageUtils.crop(detected, imageMat);
 
-            RecognitionResult result = recognizer.recognize(
-                queryFace,
-                dataset.values().stream()
-                    .flatMap(List::stream)
-                    .toList()
-            );
+        // Check if recognizer produces a embedding vector which is used for recognition. Eg. EigenFace/NeuralNet
+        if (recognizer instanceof VectorRecognizer vectorRecognizer) {
+            vectorRecognizer.setMetric(metric);
 
-            // Obtain top student from index
-            Student top_student = null;
-            int index = result.getIndex();
-            for (Map.Entry<Student, List<Mat>> entry : dataset.entrySet()) {
-                int size = entry.getValue().size();
-                if (index < size) {
-                    top_student = entry.getKey();
-                    break;
-                }
-                index -= size;
+            Map<Student, List<double[]>> vectors = buildVectorDataset(faceDataList, detector_type, type, detector, vectorRecognizer);
+
+            for (DetectionResult det : detectionResults) {
+                Mat query = ImageUtils.crop(det, imageMat);
+                RecognitionResult result = vectorRecognizer.recognizeVectors(query, vectors);
+                Student best = result.getStudent();
+                double score = result.getScore();
+
+                Attendance att = updateAttendance(session, best, score, manualThreshold, autoThreshold);
+                results.add(new RecognitionResultDTO(det.toDTO(), convertToDTO(best), score, convertToDTO(att)));
             }
+            addMissingReferenceWarnings(warnings, students, vectors);
+        } else {  // Recognizer does not produce a embedding vector. Eg. HistogramRecognizer
+            Map<Student, List<Mat>> dataset = buildImageDataset(faceDataList, detector);
 
-            Attendance attendance = determineAttendance(session, top_student, result.getScore(), manualThreshold, autoThreshold);
-            if (attendance == null) {  // return null if attendance was not changed
-                results.add(new RecognitionResultDTO(detected.toDTO(), convertToDTO(top_student), result.getScore(), null));
-            } else {
-                results.add(new RecognitionResultDTO(detected.toDTO(), convertToDTO(top_student), result.getScore(), convertToDTO(attendance)));
+            for (DetectionResult det : detectionResults) {
+                Mat query = ImageUtils.crop(det, imageMat);
+                RecognitionResult result = recognizer.recognize(query, dataset);
+                Student best = result.getStudent();
+                double score = result.getScore();
+
+                Attendance att = updateAttendance(session, best, score, manualThreshold, autoThreshold);
+                results.add(new RecognitionResultDTO(det.toDTO(), convertToDTO(best), score, convertToDTO(att)));
             }
+            addMissingReferenceWarnings(warnings, students, dataset);
         }
 
         return new RecognitionResponse(warnings, results);
@@ -362,6 +408,8 @@ public class BiometricService {
     }
 
     private StudentDTO convertToDTO(Student student) {
+        if (student == null) return null;
+
         return new StudentDTO(
                 student.getStudentId(),
                 student.getName(),
@@ -372,6 +420,8 @@ public class BiometricService {
     }
 
     private AttendanceDTO convertToDTO(Attendance attendance) {
+        if (attendance == null) return null;
+
         return new AttendanceDTO(
                 attendance.getId(),
                 attendance.getCreatedAt(),

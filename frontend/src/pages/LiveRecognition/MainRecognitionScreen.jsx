@@ -93,7 +93,7 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
       }, 50);
     };
 
-    captureIntervalRef.current = setInterval(sendFrame, 500);
+    captureIntervalRef.current = setInterval(sendFrame, 250);
 
     return () => clearInterval(captureIntervalRef.current);
   }, [isCameraOn, sendRecognition, id]);
@@ -151,7 +151,7 @@ const MainRecognitionScreen = ({ isCameraOn }) => {
           return (
             <div
               key={idx}
-              className={`absolute ${borderColor} ${bgColor} border-4 rounded-lg transition-all duration-300`}
+              className={`absolute ${borderColor} ${bgColor} border-4 rounded-lg transition-all duration-[0.25s]`}
               style={getBoxStyles(box)}
             >
               <div

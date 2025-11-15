@@ -4,43 +4,34 @@ import java.util.*;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 import com.smu.smartattendancesystem.biometrics.metrics.*;
+import com.smu.smartattendancesystem.models.Student;
 import com.smu.smartattendancesystem.biometrics.detection.DetectionResult;
 
 public abstract class BaseRecognizer {
     static { nu.pattern.OpenCV.loadLocally(); }
     protected static final Path basePath = Paths.get(System.getProperty("user.dir"));
     protected int image_size;
-    protected BaseMetric metric;
 
-	public BaseRecognizer(int image_size, BaseMetric metric) {
+	public BaseRecognizer(int image_size) {
         this.image_size = image_size;
-        this.metric = metric;
-    }
-
-    public BaseRecognizer(int image_size) {
-        this(image_size, new CosineSimilarity());
     }
 
     // Returns the index of the face has the highest similarity with
-    public RecognitionResult recognize(Mat face, List<Mat> dataset) {
-        List<Double> scores = computeScore(face, dataset);
-        int bestIndex = 0;
-        for (int i = 1; i < scores.size(); i++) {
-            if (scores.get(i) > scores.get(bestIndex)) {
-                bestIndex = i;
+    public RecognitionResult recognize(Mat face, Map<Student, List<Mat>> dataset) {
+        Student bestStudent = null;
+        double bestScore = Double.NEGATIVE_INFINITY;
+
+        for (Map.Entry<Student, List<Mat>> entry : dataset.entrySet()) {
+            for (Mat sample : entry.getValue()) {
+                double score = computeScore(face, sample);
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestStudent = entry.getKey();
+                }
             }
         }
 
-        return new RecognitionResult(bestIndex, scores.get(bestIndex));
-    }
-
-    public List<Double> computeScore(Mat face, List<Mat> dataset) {
-        List<Double> scores = new ArrayList<>();
-
-        for (Mat sample : dataset) {
-            scores.add(computeScore(face, sample));
-        }
-        return scores;
+        return new RecognitionResult(bestStudent, bestScore);
     }
 
     // The higher the score, the more similar the recognizer thinks the faces are.
@@ -108,12 +99,4 @@ public abstract class BaseRecognizer {
         }
         return flat;
     }
-
-    public BaseMetric getMetric() {
-		return metric;
-	}
-
-	public void setMetric(BaseMetric metric) {
-		this.metric = metric;
-	}
 }

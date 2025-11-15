@@ -26,15 +26,15 @@ The backend uses a **runtime database** that **starts automatically when the bac
 5. [Setting Up the Application](#setting-up-the-application)  
    - [Backend Setup](#backend-setup)  
    - [Frontend Setup](#frontend-setup)
-6. [Login Credentials](#login-credentials)
-7. [Model Configurations](#model-configurations)
+6. [Setting Up the Database](#setting-up-the-database)
+7. [Running the Application](#running-the-application)  
+   - [Run Backend](#run-backend)  
+   - [Run Frontend](#run-frontend)
+8. [Login Credentials](#login-credentials)
+9. [Model Configurations](#model-configurations)
     - [Detector Model Descriptions](#detector-model-descriptions)
     - [Recognizer Model Descriptions](#recognizer-model-descriptions)
     - [Things to take note](#things-to-take-note)
-8. [Setting Up the Database](#setting-up-the-database)
-9. [Running the Application](#running-the-application)  
-   - [Run Backend](#run-backend)  
-   - [Run Frontend](#run-frontend)
 10. [Common Errors](#common-errors)
 11. [Additional Notes](#additional-notes)
 
@@ -188,43 +188,7 @@ npm install
 
 ---
 
-## 6. Login Credentials
-
-These accounts are used on the main login page of the app.
-
-- **Professor account**  
-  - Email: `dr.lim@example.com`  
-  - Password: `prof123`
-
-- **Teaching Assistant account**  
-  - Email: `john.lee@example.com`  
-  - Password: `ta123`
-
-- **Sample student accounts**  
-  By default, each student’s login credentials are:
-  - **Email:** the student’s email in the `student` table  
-  - **Password:** the student’s `student_id`  
-
-  Example:
-
-  ```text
-  Email: lisheng@example.com
-  Password: S1000001
-    ```
-
----
-
-## 7. Model Configurations
-
-### Detector Model Descriptions
-
-### Recognizer Model Descriptions
-
-### Things to take note
-
----
-
-## 8. Setting Up the Database
+## 6. Setting Up the Database
 
 The backend uses an SQLite database (attendance.db) that requires no installation or external setup.
 However, depending on whether this is your first run or you want persistent data, you must configure the following Spring Boot properties:
@@ -272,7 +236,7 @@ spring.sql.init.mode=always
 
 ---
 
-## 9. Running the Application
+## 7. Running the Application
 
 ### Run Backend
 ```bash
@@ -291,6 +255,42 @@ npm run dev
 Frontend will run at: `http://localhost:5173`
 
 Make sure the `.env` file contains the correct backend API URL.
+
+---
+
+## 8. Login Credentials
+
+These accounts are used on the main login page of the app.
+
+- **Professor account**  
+  - Email: `dr.lim@example.com`  
+  - Password: `prof123`
+
+- **Teaching Assistant account**  
+  - Email: `john.lee@example.com`  
+  - Password: `ta123`
+
+- **Sample student accounts**  
+  By default, each student’s login credentials are:
+  - **Email:** the student’s email in the `student` table  
+  - **Password:** the student’s `student_id`  
+
+  Example:
+
+  ```text
+  Email: lisheng@example.com
+  Password: S1000001
+    ```
+
+---
+
+## 9. Model Configurations
+
+### Detector Model Descriptions
+
+### Recognizer Model Descriptions
+
+### Things to take note
 
 ---
 

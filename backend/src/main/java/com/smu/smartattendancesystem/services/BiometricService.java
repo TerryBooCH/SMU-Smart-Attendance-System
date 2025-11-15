@@ -1,6 +1,7 @@
 package com.smu.smartattendancesystem.services;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.nio.file.*;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
@@ -262,15 +263,29 @@ public class BiometricService {
     }
 
     private void addMissingReferenceWarnings(
-        Map<String, List<String>> warnings,
+        Map<String, String> warnings,
         List<Student> students,
         Map<Student, ?> dataset
     ) {
+        List<Student> missingStudents = new ArrayList<>();
+
         for (Student student : students) {
             if (!dataset.containsKey(student)) {
-                warnings.computeIfAbsent("no_ref_face", k -> new ArrayList<>())
-                    .add(String.format("Student #%d: %s", student.getId(), student.getName()));
+                missingStudents.add(student);
             }
+        }
+
+        if (missingStudents.size() == students.size()) {
+            throw new IllegalArgumentException("Reference images did not contain any faces.");
+        } else 
+        if (!missingStudents.isEmpty()) {
+            warnings.put(
+                "Missing Reference Images", 
+                "No faces were detected in the reference images of the following students: " +
+                missingStudents.stream()
+                    .map(s -> s.getName() + " #" + s.getStudentId())
+                    .collect(Collectors.joining(", "))
+            );
         }
     }
 
@@ -283,7 +298,7 @@ public class BiometricService {
         Double manualThreshold,
         Double autoThreshold
     ) throws IOException {
-        Map<String, List<String>> warnings = new LinkedHashMap<>();
+        Map<String, String> warnings = new LinkedHashMap<>();
         if (image == null) throw new IllegalArgumentException("No image provided.");
         
         Mat imageMat = ImageUtils.fileToMat(image);

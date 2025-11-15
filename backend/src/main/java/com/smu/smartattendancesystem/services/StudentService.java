@@ -142,8 +142,8 @@ public class StudentService {
     // Initialize user accounts for the students populated in the DB
     @Transactional
     public void initUserAccounts() {
-        // Only run to initialize students if there are no students in the database
-        if (!studentManager.getAllStudents().isEmpty()) {
+        // Only initialize if no users exist
+        if (userManager.countUsers() > 2) {
             return; 
         }
 

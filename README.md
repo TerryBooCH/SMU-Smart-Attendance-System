@@ -61,7 +61,7 @@ SMU-Smart-Attendance-System/
 - Apache Maven (**version: 3.9.11**)  
 
 ### **Frontend Requirements**
-- Node.js (**version: <YOUR_NODE_VERSION_HERE>**)  
+- Node.js (**version: 22.19.0**)  
 - npm (**version: <YOUR_NPM_VERSION_HERE>**)  
 
 ### **Optional Tools**
@@ -129,12 +129,12 @@ After installing Maven, you need to add it to your system PATH. Using the follow
 ```
 4. Verify installation: `mvn -version`
 
-### **Node.js & npm (version: <YOUR_NODE_VERSION_HERE>)**
+### **Node.js & npm (version: 22.19.0)**
 1. Download Node.js LTS from https://nodejs.org
 2. Install and ensure "Add to PATH" is checked
 3. Open a new command prompt and verify: `node -v` and `npm -v`
 
-### **Git (Optional) (version: <YOUR_GIT_VERSION_HERE>)**
+### **Git (Optional) (version: 2.44.0)**
 1. Download Git for Windows installer from:  
    https://git-scm.com/download/win
 2. Run the installer and keep the **default options** (this will install Git Bash and add Git to PATH).

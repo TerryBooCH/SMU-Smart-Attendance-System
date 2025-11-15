@@ -9,6 +9,7 @@ import java.io.IOException;
 import com.smu.smartattendancesystem.biometrics.detection.*;
 import com.smu.smartattendancesystem.biometrics.metrics.*;
 import com.smu.smartattendancesystem.biometrics.recognition.*;
+import com.smu.smartattendancesystem.controllers.ConfigController;
 import com.smu.smartattendancesystem.biometrics.ImageUtils;
 import com.smu.smartattendancesystem.dto.AttendanceDTO;
 import com.smu.smartattendancesystem.dto.DetectionResultDTO;
@@ -62,73 +63,96 @@ public class BiometricService {
     @Value("${faces.root}")
     private String root;
 
-    @Value("${faces.detection.defaultDetector:yolo}")
-    private String defaultDetector;
-
-    @Value("${faces.recognition.defaultRecognizer:eigen}")
-    private String defaultRecognizer;
-    
     @Value("${faces.recognition.defaultMetric:cosine}")
     private String defaultMetric;
 
     @Value("${faces.recognition.manualThreshold:0.5}")
     private Double defaultManualThreshold;
 
-    @Value("${faces.recognition.autoThreshold:0.8}")
-    private Double defaultAutoThreshold;
+    private Double getCurrentAutoThreshold() {
+        return ConfigController.getCurrentRecognitionThreshold();
+    }
+
+    private String getCurrentDefaultDetector() {
+        return ConfigController.getCurrentDefaultDetector();
+    }
+
+    private String getCurrentDefaultRecognizer() {
+        return ConfigController.getCurrentDefaultRecognizer();
+    }
 
     private final Path basePath = Paths.get(System.getProperty("user.dir"));
+    
     public BiometricService(
         SessionManager sessionManager, 
         RosterManager rosterManager,
         AttendanceManager attendanceManager,
         AttendanceRepository attendanceRepository
-        ) {
-            this.sessionManager = sessionManager;
-            this.rosterManager = rosterManager;
-            this.attendanceManager = attendanceManager;
+    ) {
+        this.sessionManager = sessionManager;
+        this.rosterManager = rosterManager;
+        this.attendanceManager = attendanceManager;
         this.attendanceRepository = attendanceRepository;
         this.allowedDetectorRecognizer = Map.of(
-            "hist", detectorMap.keySet(),
-            "eigen", Set.of("yolo"),
-            "neuralnet", Set.of("yolo")
+            "hist", detectorMap.keySet(),  // hist works with all detectors
+            "eigen", Set.of("yolo"),       // eigen only works with yolo
+            "neuralnet", Set.of("yolo")    // neuralnet only works with yolo
         );
     }
         
     // Checks if detector type is provided and whether a default value exists in the config
     private String resolveDetectorType(String detector_type) {
         if (detector_type == null || detector_type.isBlank()) {
-            if (!detectorMap.containsKey(defaultDetector.toLowerCase())) throw new IllegalArgumentException("Missing 'detector_type' field.");  // If a default value doesnt exist or is invalid, throw an error
-            
-            detector_type = defaultDetector;
+            detector_type = getCurrentDefaultDetector();
         }
         detector_type = detector_type.toLowerCase();
-
+        
+        if (!detectorMap.containsKey(detector_type)) {
+            throw new IllegalArgumentException("Invalid detector type. Allowed values: " + detectorMap.keySet());
+        }
+        
         return detector_type;
     }
 
     // Checks if recognizer type is provided and whether a default value exists in the config
     private String resolveRecognizerType(String recognizer_type) {
         if (recognizer_type == null || recognizer_type.isBlank()) {
-            if (!validRecognizers.contains(defaultRecognizer.toLowerCase())) throw new IllegalArgumentException("Missing 'type' field.");
-
-            recognizer_type = defaultRecognizer;
+            recognizer_type = getCurrentDefaultRecognizer();
         }
         recognizer_type = recognizer_type.toLowerCase();
+
+        if (!validRecognizers.contains(recognizer_type)) {
+            throw new IllegalArgumentException("Invalid recognizer type. Allowed values: " + validRecognizers);
+        }
 
         return recognizer_type;
     }
 
+    // Validates detector-recognizer compatibility
+    private void validateDetectorRecognizerCompatibility(String detector_type, String recognizer_type) {
+        Set<String> allowedDetectors = allowedDetectorRecognizer.get(recognizer_type);
+        if (allowedDetectors == null || !allowedDetectors.contains(detector_type)) {
+            throw new UnsupportedOperationException(
+                String.format("Recognizer '%s' is not compatible with detector '%s'. Allowed detectors for this recognizer: %s", 
+                    recognizer_type, detector_type, allowedDetectorRecognizer.get(recognizer_type)
+                )
+            );
+        }
+    }
+
     private BaseMetric resolveMetric(String metric_name) {
         if (metric_name == null || metric_name.isEmpty()) {
-            if (!metricMap.containsKey(defaultMetric.toLowerCase())) throw new IllegalArgumentException("Missing 'metric' field.");
-
+            if (!metricMap.containsKey(defaultMetric.toLowerCase())) {
+                throw new IllegalArgumentException("Missing 'metric' field.");
+            }
             metric_name = defaultMetric;
         }
         metric_name = metric_name.toLowerCase();
 
         BaseMetric metric = metricMap.get(metric_name);
-        if (metric == null) throw new IllegalArgumentException("Invalid metric. Allowed values: " + metricMap.keySet().stream().toList());
+        if (metric == null) {
+            throw new IllegalArgumentException("Invalid metric. Allowed values: " + metricMap.keySet().stream().toList());
+        }
 
         return metric;
     }
@@ -137,13 +161,17 @@ public class BiometricService {
         MultipartFile image, 
         String type
     ) throws IOException {
-        if (image == null) throw new IllegalArgumentException("No image provided.");
+        if (image == null) {
+            throw new IllegalArgumentException("No image provided.");
+        }
 
         Mat imageMat = ImageUtils.fileToMat(image);
         type = resolveDetectorType(type);
 
         BaseDetector detector = detectorMap.get(type);
-        if (detector == null) throw new IllegalArgumentException("Invalid detector type. Allowed values: " + detectorMap.keySet().stream().toList());
+        if (detector == null) {
+            throw new IllegalArgumentException("Invalid detector type. Allowed values: " + detectorMap.keySet().stream().toList());
+        }
 
         List<DetectionResult> results = detector.detect(imageMat);
 
@@ -169,7 +197,9 @@ public class BiometricService {
             .flatMap(s -> s.getFaceDataList().stream())
             .toList();
         
-        if (faceDataList.isEmpty()) throw new IllegalArgumentException(String.format("No reference images found for recognition (Roster #%d)", roster.getId()));
+        if (faceDataList.isEmpty()) {
+            throw new IllegalArgumentException(String.format("No reference images found for recognition (Roster #%d)", roster.getId()));
+        }
 
         Map<Student, List<Mat>> dataset = new LinkedHashMap<>(); 
         for (FaceData faceData : faceDataList) {
@@ -185,7 +215,7 @@ public class BiometricService {
 
             if (bestDetection.isEmpty()) continue;
 
-            Mat cropped = ImageUtils.crop(bestDetection.get(), face);;
+            Mat cropped = ImageUtils.crop(bestDetection.get(), face);
 
             // Check if the student exists in the hashmap, if not, add them to the array list
             dataset.computeIfAbsent(student, k -> new ArrayList<>()).add(cropped);
@@ -198,7 +228,8 @@ public class BiometricService {
         Duration elapsed = Duration.between(session.getStartAt(), LocalDateTime.now());
 
         manualThreshold = (manualThreshold == null) ? defaultManualThreshold : manualThreshold;
-        autoThreshold = (autoThreshold == null) ? defaultAutoThreshold : autoThreshold;
+        // Use the dynamic method instead of the field
+        autoThreshold = (autoThreshold == null) ? getCurrentAutoThreshold() : autoThreshold;
 
         if (score > autoThreshold) {
             String status = elapsed.compareTo(lateAfter) <= 0 ? "PRESENT" : "LATE";
@@ -209,7 +240,6 @@ public class BiometricService {
         } else {
             return null;
         }
-
     }
 
     public RecognitionResponse recognize(
@@ -222,33 +252,40 @@ public class BiometricService {
         Double autoThreshold
     ) throws IOException {
         Map<String, List<String>> warnings = new LinkedHashMap<>();
-        if (image == null) throw new IllegalArgumentException("No image provided.");
+        if (image == null) {
+            throw new IllegalArgumentException("No image provided.");
+        }
         
         Mat imageMat = ImageUtils.fileToMat(image);
         detector_type = resolveDetectorType(detector_type);
         type = resolveRecognizerType(type);
-        BaseMetric metric = resolveMetric(metric_name);
         
-        if (!allowedDetectorRecognizer.get(type).contains(detector_type)) throw new UnsupportedOperationException(
-            String.format("Recognizer '%s' is not compatible with detector '%s'. Allowed detectors for this recognizer: %s", 
-                type, detector_type, allowedDetectorRecognizer.get(type)
-            )
-        );
-
+        // Validate detector-recognizer compatibility
+        validateDetectorRecognizerCompatibility(detector_type, type);
+        
+        BaseMetric metric = resolveMetric(metric_name);
         BaseDetector detector = detectorMap.get(detector_type);
-        if (detector == null) throw new IllegalArgumentException("Invalid detector type. Allowed values: " + detectorMap.keySet().stream().toList());
+        
+        if (detector == null) {
+            throw new IllegalArgumentException("Invalid detector type. Allowed values: " + detectorMap.keySet().stream().toList());
+        }
         
         BaseRecognizer recognizer = recognizerMap.getOrDefault(
             type,
             recognizerMap.get(type + "_" + detector_type)
         );
-        if (recognizer == null) throw new IllegalArgumentException("Invalid recognizer type. Allowed values: " + validRecognizers);
+        
+        if (recognizer == null) {
+            throw new IllegalArgumentException("Invalid recognizer type. Allowed values: " + validRecognizers);
+        }
 
         recognizer.setMetric(metric);
         
         // Check session exists before linking to roster
         Optional<Session> optSession = this.sessionManager.getSession(session_id);
-        if (optSession.isEmpty()) throw new IllegalArgumentException("Session ID does not exist.");
+        if (optSession.isEmpty()) {
+            throw new IllegalArgumentException("Session ID does not exist.");
+        }
         
         Session session = optSession.get();
         Roster roster = session.getRoster();
@@ -355,23 +392,11 @@ public class BiometricService {
         );
     }
     
-    public void setDefaultDetector(String defaultDetector) {
-        this.defaultDetector = defaultDetector;
-    }
-
-    public void setDefaultRecognizer(String defaultRecognizer) {
-        this.defaultRecognizer = defaultRecognizer;
-    }
-
     public void setDefaultMetric(String defaultMetric) {
         this.defaultMetric = defaultMetric;
     }
 
     public void setDefaultManualThreshold(Double defaultManualThreshold) {
         this.defaultManualThreshold = defaultManualThreshold;
-    }
-
-    public void setDefaultAutoThreshold(Double defaultAutoThreshold) {
-        this.defaultAutoThreshold = defaultAutoThreshold;
     }
 }

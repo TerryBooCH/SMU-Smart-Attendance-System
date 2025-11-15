@@ -18,23 +18,29 @@ The backend uses a **runtime database** that **starts automatically when the bac
 1. [Project Structure](#project-structure)  
 2. [Prerequisites](#prerequisites)  
 3. [Installing Prerequisites](#installing-prerequisites)  
-   - [Java JDK (version: <YOUR_JDK_VERSION_HERE>)](#java-jdk-version-your_jdk_version_here)
-   - [Apache Maven (version: <YOUR_MAVEN_VERSION_HERE>)](#apache-maven-version-your_maven_version_here)
-   - [Node.js & npm (version: <YOUR_NODE_VERSION_HERE>)](#nodejs--npm-version-your_node_version_here)
-   - [Git (Optional) (version: <YOUR_GIT_VERSION_HERE>)](#git-optional-version-your_git_version_here)
+   - [Java JDK (version: 21)](#java-jdk-version-21)  
+   - [Apache Maven (version: 3911)](#apache-maven-version-3911)  
+   - [Node.js & npm (version: 22.19.0, 10.9.3)](#nodejs--npm-version-22190-version-1093)   
+   - [Git (Optional) (version: 2.44.0)](#git-optional-version-2440)
 4. [Environment Variables](#environment-variables)  
 5. [Setting Up the Application](#setting-up-the-application)  
-   - [Backend Setup](#backend-setup)
+   - [Backend Setup](#backend-setup)  
    - [Frontend Setup](#frontend-setup)
-6. [Running the Application](#running-the-application)  
-   - [Run Backend](#run-backend)
+6. [Setting Up the Database](#setting-up-the-database)
+7. [Running the Application](#running-the-application)  
+   - [Run Backend](#run-backend)  
    - [Run Frontend](#run-frontend)
-7. [Common Errors](#common-errors)
-8. [Additional Notes](#additional-notes)
+8. [Login Credentials](#login-credentials)
+9. [Model Configurations](#model-configurations)
+    - [Detector Model Descriptions](#detector-model-descriptions)
+    - [Recognizer Model Descriptions](#recognizer-model-descriptions)
+    - [Things to take note](#things-to-take-note)
+10. [Common Errors](#common-errors)
+11. [Additional Notes](#additional-notes)
 
 ---
 
-## Project Structure
+## 1. Project Structure
 ```
 SMU-Smart-Attendance-System/
 │
@@ -54,25 +60,25 @@ SMU-Smart-Attendance-System/
 
 ---
 
-## Prerequisites
+## 2. Prerequisites
 
-### **Backend Requirements**
+### Backend Requirements
 - Java JDK (**version: 21**)  
 - Apache Maven (**version: 3.9.11**)  
 
-### **Frontend Requirements**
+### Frontend Requirements
 - Node.js (**version: 22.19.0**)  
-- npm (**version: <YOUR_NPM_VERSION_HERE>**)  
+- npm (**version: 10.9.3**)  
 
-### **Optional Tools**
+### Optional Tools
 - Git (**version: 2.44.0**)  
 - IDE (VSCode)
 
 ---
 
-## Installing Prerequisites
+## 3. Installing Prerequisites
 
-### **Java JDK (version: 21)**
+### Java JDK (version: 21)
 1. Download JDK 21 (LTS) from: https://www.oracle.com/asean/java/technologies/downloads/#java21
 2. Run the installer and install to:
    C:\Program Files\Java\jdk-21
@@ -88,12 +94,12 @@ SMU-Smart-Attendance-System/
    javac -version
    echo %JAVA_HOME%
 
-### **Apache Maven (version: 3.9.11)**
+### Apache Maven (version: 3.9.11)
 1. Download the binary ZIP (`apache-maven-3.9.11-bin.zip`) from:  
    https://maven.apache.org/download.cgi
 2. Extract the ZIP to a folder, for example: `C:\Program Files\Apache\maven\apache-maven-3.9.11`
 
-#### **Adding Maven to PATH**
+#### Adding Maven to PATH
 
 After installing Maven, you need to add it to your system PATH. Using the following file path (`C:\Program Files\Apache\maven\apache-maven-3.9.11`) as an example:
 
@@ -129,12 +135,12 @@ After installing Maven, you need to add it to your system PATH. Using the follow
 ```
 4. Verify installation: `mvn -version`
 
-### **Node.js & npm (version: 22.19.0)**
-1. Download Node.js LTS from https://nodejs.org
+### Node.js & npm (version: 22.19.0, version: 10.9.3)
+1. Install Node.js version 22.19.0 from https://nodejs.org (or any closest LTS version that is available)
 2. Install and ensure "Add to PATH" is checked
 3. Open a new command prompt and verify: `node -v` and `npm -v`
 
-### **Git (Optional) (version: 2.44.0)**
+### Git (Optional) (version: 2.44.0)
 1. Download Git for Windows installer from:  
    https://git-scm.com/download/win
 2. Run the installer and keep the **default options** (this will install Git Bash and add Git to PATH).
@@ -143,7 +149,7 @@ After installing Maven, you need to add it to your system PATH. Using the follow
    git --version
 ---
 
-## Environment Variables
+## 4. Environment Variables
 
 The frontend requires a `.env` file for configuration.  
 An example file (`.env.example`) is provided with the correct default values.
@@ -163,9 +169,9 @@ VITE_API_URL=<YOUR_BACKEND_API_URL>
 
 ---
 
-## Setting Up the Application
+## 5. Setting Up the Application
 
-### **Backend Setup**
+### Backend Setup
 Install backend dependencies:
 ```bash
 cd backend
@@ -173,7 +179,7 @@ mvn dependency:resolve
 mvn clean install
 ```
 
-### **Frontend Setup**
+### Frontend Setup
 Install dependencies:
 ```bash
 cd frontend
@@ -182,9 +188,57 @@ npm install
 
 ---
 
-## Running the Application
+## 6. Setting Up the Database
 
-### **Run Backend**
+The backend uses an SQLite database (attendance.db) that requires no installation or external setup.
+However, depending on whether this is your first run or you want persistent data, you must configure the following Spring Boot properties in the `application.properties` file located in `backend/src/main/resources/application.properties`:
+```properties
+spring.jpa.hibernate.ddl-auto
+spring.sql.init.mode
+```
+These settings control how tables are created and whether sample data is loaded.
+
+### First run (Create Tables & Load Sample Data)
+Use this on the very first run or whenever you want to completely regenerate the schema.
+
+In the `application.properties` file, set:
+```properties
+spring.jpa.hibernate.ddl-auto=create
+spring.sql.init.mode=always
+```
+
+This will drop existing tables (if any), create new tables, and load the sample data from `data.sql`.
+
+### Persistency (run without resetting existing data)
+Use this for subsequent runs after the initial setup, to prevent the database from resetting every time the backend restarts.
+
+In the `application.properties` file, set:
+```properties
+spring.jpa.hibernate.ddl-auto=none
+spring.sql.init.mode=never
+```
+This will ensure that the schema is not re-created and sample data is not re-loaded, preserving existing data.
+
+### Resetting the Database
+To reset the database and reload sample data, you can:
+1. Delete the existing `attendance.db` file located in the backend directory.
+2. Set the properties to:
+```properties
+spring.jpa.hibernate.ddl-auto=create
+spring.sql.init.mode=always
+```     
+3. Restart the backend server to recreate the database and load sample data.
+4. After the reset, set the database to persistent mode again byt changing the properties back to:
+```properties
+spring.jpa.hibernate.ddl-auto=create
+spring.sql.init.mode=always
+```     
+
+---
+
+## 7. Running the Application
+
+### Run Backend
 ```bash
 cd backend
 mvn spring-boot:run
@@ -192,7 +246,7 @@ mvn spring-boot:run
 
 Backend will start at: `http://localhost:<8080>`
 
-### **Run Frontend**
+### Run Frontend
 ```bash
 cd frontend
 npm run dev
@@ -204,9 +258,45 @@ Make sure the `.env` file contains the correct backend API URL.
 
 ---
 
-## Common Errors
+## 8. Login Credentials
 
-### **Error: `JAVA_HOME` not set**
+These accounts are used on the main login page of the app.
+
+- **Professor account**  
+  - Email: `dr.lim@example.com`  
+  - Password: `prof123`
+
+- **Teaching Assistant account**  
+  - Email: `john.lee@example.com`  
+  - Password: `ta123`
+
+- **Sample student accounts**  
+  By default, each student’s login credentials are:
+  - **Email:** the student’s email in the `student` table  
+  - **Password:** the student’s `student_id`  
+
+  Example:
+
+  ```text
+  Email: lisheng@example.com
+  Password: S1000001
+    ```
+
+---
+
+## 9. Model Configurations
+
+### Detector Model Descriptions
+
+### Recognizer Model Descriptions
+
+### Things to take note
+
+---
+
+## 10. Common Errors
+
+### Error: `JAVA_HOME` not set
 **Cause:** Java JDK not properly installed or environment variable not configured.  
 **Fix:** 
 ```bash
@@ -217,27 +307,27 @@ setx JAVA_HOME "C:\Program Files\Java\jdk-<version>"
 export JAVA_HOME=/path/to/jdk
 ```
 
-### **Error: `mvn: command not found`**
+### Error: `mvn: command not found`
 **Cause:** Maven not installed or not in PATH.  
 **Fix:** Verify Maven installation and add to PATH (see [Adding Maven to PATH](#adding-maven-to-path)), then restart terminal.
 
-### **Error: `npm: command not found`**
+### Error: `npm: command not found`
 **Cause:** Node.js/npm not installed or not in PATH.  
 **Fix:** Install Node.js from official website or use a package manager.
 
-### **Error: Port already in use**
+### Error: Port already in use
 **Cause:** Another application is using the required port.  
 **Fix:** 
 - Kill the process using the port
 - Change the port in application configuration
 
-### **Error: Cannot connect to backend**
+### Error: Cannot connect to backend
 **Cause:** Backend not running or incorrect URL in `.env` file.  
 **Fix:** 
 - Ensure backend is running
 - Verify `VITE_API_URL` in `.env` matches backend URL
 
-### **Error: `Module not found` in frontend**
+### Error: `Module not found` in frontend
 **Cause:** Dependencies not installed properly.  
 **Fix:** 
 ```bash
@@ -248,31 +338,6 @@ npm install
 
 ---
 
-## Additional Notes
-
-### **Database Behavior**
-By default, the backend uses an SQLite database located in `attendance.db`. No setup, installation, or configuration needed, and it starts automatically when the backend starts.
-
-#### **First Run (Initialize Schema)**
-To create the database schema for the first time:
-- Set `spring.jpa.hibernate.ddl-auto=create`
-- Run the backend once (Hibernate will generate all tables)
-- After the schema is created, switch back to persistent mode
-
-#### **Persistent Mode (Recommended for normal use)**
-To ensure that your data will not reset on each restart:
-- Set `spring.jpa.hibernate.ddl-auto=none`  
-  → Prevents Hibernate from recreating or modifying tables
-- Set `spring.sql.init.mode=never`  
-  → Prevents Spring from re-running `schema.sql` / `data.sql`
-
-#### **Reset the Database**
-If you want to wipe everything and recreate the schema:
-1. Delete `attendance.db`
-2. Set: `spring.jpa.hibernate.ddl-auto=create`
-3. Set: `spring.sql.init.mode=always`
-4. Run the backend once  
-5. Switch back to: `spring.jpa.hibernate.ddl-auto=none`
-6. Switch back to: `spring.sql.init.mode=never`
+## 11. Additional Notes
 
 ---

@@ -142,8 +142,8 @@ public class StudentService {
     // Initialize user accounts for the students populated in the DB
     @Transactional
     public void initUserAccounts() {
-        // Only run to initialize students if there are no students in the database
-        if (!studentManager.getAllStudents().isEmpty()) {
+        // Only initialize if no users exist
+        if (userManager.countUsers() > 2) {
             return; 
         }
 
@@ -216,10 +216,11 @@ public class StudentService {
 
         // Sync new username and email to linked user account
         User user = savedStudent.getUser();
-        user.setName(savedStudent.getName());
-        user.setEmail(savedStudent.getEmail());
-
-        userManager.updateUser(user);
+        if (user != null) {
+            user.setName(savedStudent.getName());
+            user.setEmail(savedStudent.getEmail());
+            userManager.updateUser(user);
+        } 
 
         // Create and return the DTO object combining student and face data
         FaceDataDTO face = faceDataService.getLatestFaceData(savedStudent.getStudentId())

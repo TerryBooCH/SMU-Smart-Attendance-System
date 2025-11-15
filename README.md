@@ -57,35 +57,55 @@ SMU-Smart-Attendance-System/
 ## Prerequisites
 
 ### **Backend Requirements**
-- Java JDK (**version: <YOUR_JDK_VERSION_HERE>**)  
-- Apache Maven (**version: <YOUR_MAVEN_VERSION_HERE>**)  
+- Java JDK (**version: 21**)  
+- Apache Maven (**version: 3.9.11**)  
 
 ### **Frontend Requirements**
 - Node.js (**version: <YOUR_NODE_VERSION_HERE>**)  
 - npm (**version: <YOUR_NPM_VERSION_HERE>**)  
 
 ### **Optional Tools**
-- Git (**version: <YOUR_GIT_VERSION_HERE>**)  
+- Git (**version: 2.44.0**)  
 - IDE (VSCode)
 
 ---
 
 ## Installing Prerequisites
 
-### **Java JDK (version: <YOUR_JDK_VERSION_HERE>)**
-<YOUR_INSTALLATION_INSTRUCTIONS_HERE>
+### **Java JDK (version: 21)**
+1. Download JDK 21 (LTS) from: https://www.oracle.com/asean/java/technologies/downloads/#java21
+2. Run the installer and install to:
+   C:\Program Files\Java\jdk-21
+3. Set JAVA_HOME:
+   - Open System Properties → Advanced → Environment Variables
+   - Add a new system variable:
+       JAVA_HOME = C:\Program Files\Java\jdk-21
+4. Add Java to PATH:
+   - Edit the system variable “Path”
+   - Add: %JAVA_HOME%\bin
+5. Verify installation:
+   java -version
+   javac -version
+   echo %JAVA_HOME%
 
-### **Apache Maven (version: <YOUR_MAVEN_VERSION_HERE>)**
-<YOUR_INSTALLATION_INSTRUCTIONS_HERE>
+### **Apache Maven (version: 3.9.11)**
+1. Download the binary ZIP (`apache-maven-3.9.11-bin.zip`) from:  
+   https://maven.apache.org/download.cgi
+2. Extract the ZIP to a folder, for example: `C:\Program Files\Apache\maven\apache-maven-3.9.11`
 
 #### **Adding Maven to PATH**
 
-After installing Maven, you need to add it to your system PATH.
+After installing Maven, you need to add it to your system PATH. Using the following file path (`C:\Program Files\Apache\maven\apache-maven-3.9.11`) as an example:
 
 **Windows:**
 1. Open **System Properties** → **Advanced** → **Environment Variables**
-2. Under **System Variables**, find and select **Path**, then click **Edit**
-3. Click **New** and add the path to Maven's `bin` directory (e.g., `C:\apache-maven-<version>\bin`)
+2. Under **System Variables**, click **New** and add:
+   - Variable name: `M2_HOME`
+   - Variable value: `C:\Program Files\Apache\maven\apache-maven-3.9.11`
+3. Click **OK** to save changes
+4. Add Maven to the PATH under **System Variables**:
+   - Select the `Path` variable and click **Edit**
+   - Click **New** and add: `%M2_HOME%\bin` or `C:\Program Files\Apache\maven\apache-maven-3.9.11\bin`
 4. Click **OK** to save changes
 5. Open a new command prompt and verify: `mvn -version`
 
@@ -110,11 +130,17 @@ After installing Maven, you need to add it to your system PATH.
 4. Verify installation: `mvn -version`
 
 ### **Node.js & npm (version: <YOUR_NODE_VERSION_HERE>)**
-<YOUR_INSTALLATION_INSTRUCTIONS_HERE>
+1. Download Node.js LTS from https://nodejs.org
+2. Install and ensure "Add to PATH" is checked
+3. Open a new command prompt and verify: `node -v` and `npm -v`
 
 ### **Git (Optional) (version: <YOUR_GIT_VERSION_HERE>)**
-<YOUR_INSTALLATION_INSTRUCTIONS_HERE>
-
+1. Download Git for Windows installer from:  
+   https://git-scm.com/download/win
+2. Run the installer and keep the **default options** (this will install Git Bash and add Git to PATH).
+3. After installation, open **Command Prompt** or **Git Bash** and verify:
+   ```bash
+   git --version
 ---
 
 ## Environment Variables
@@ -143,6 +169,7 @@ VITE_API_URL=<YOUR_BACKEND_API_URL>
 Install backend dependencies:
 ```bash
 cd backend
+mvn dependency:resolve
 mvn clean install
 ```
 
@@ -163,7 +190,7 @@ cd backend
 mvn spring-boot:run
 ```
 
-Backend will start at: `http://localhost:<PORT>`
+Backend will start at: `http://localhost:<8080>`
 
 ### **Run Frontend**
 ```bash
@@ -223,11 +250,29 @@ npm install
 
 ## Additional Notes
 
-### **Runtime Database**
-The backend uses a runtime (in-memory) database, meaning:
-- It starts automatically when the backend starts
-- No setup, installation, or configuration needed
-- Data resets every time the backend restarts
-- To add persistence to the backend: <INSERT_STEPS_HERE>
+### **Database Behavior**
+By default, the backend uses an SQLite database located in `attendance.db`. No setup, installation, or configuration needed, and it starts automatically when the backend starts.
+
+#### **First Run (Initialize Schema)**
+To create the database schema for the first time:
+- Set `spring.jpa.hibernate.ddl-auto=create`
+- Run the backend once (Hibernate will generate all tables)
+- After the schema is created, switch back to persistent mode
+
+#### **Persistent Mode (Recommended for normal use)**
+To ensure that your data will not reset on each restart:
+- Set `spring.jpa.hibernate.ddl-auto=none`  
+  → Prevents Hibernate from recreating or modifying tables
+- Set `spring.sql.init.mode=never`  
+  → Prevents Spring from re-running `schema.sql` / `data.sql`
+
+#### **Reset the Database**
+If you want to wipe everything and recreate the schema:
+1. Delete `attendance.db`
+2. Set: `spring.jpa.hibernate.ddl-auto=create`
+3. Set: `spring.sql.init.mode=always`
+4. Run the backend once  
+5. Switch back to: `spring.jpa.hibernate.ddl-auto=none`
+6. Switch back to: `spring.sql.init.mode=never`
 
 ---

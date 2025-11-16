@@ -46,6 +46,7 @@ public class ConfigController {
         } catch (Exception e) {
             LoggerFacade.severe(
                     "Unexpected error while fetching recognition threshold: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     createErrorResponse("An error occurred while fetching recognition threshold"));
         }
@@ -101,11 +102,13 @@ public class ConfigController {
                     .body(createErrorResponse(e.getMessage()));
         } catch (IOException e) {
             LoggerFacade.severe("IO error while updating recognition threshold: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Failed to update configuration file"));
         } catch (Exception e) {
             LoggerFacade.severe(
                     "Unexpected error while updating recognition threshold: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     createErrorResponse("An error occurred while updating recognition threshold"));
         }
@@ -124,6 +127,7 @@ public class ConfigController {
         } catch (Exception e) {
             LoggerFacade
                     .severe("Unexpected error while fetching default detector: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while fetching default detector"));
         }
@@ -185,11 +189,13 @@ public class ConfigController {
                     .body(createErrorResponse(e.getMessage()));
         } catch (IOException e) {
             LoggerFacade.severe("IO error while updating default detector: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Failed to update configuration file"));
         } catch (Exception e) {
             LoggerFacade
                     .severe("Unexpected error while updating default detector: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while updating default detector"));
         }
@@ -208,6 +214,7 @@ public class ConfigController {
         } catch (Exception e) {
             LoggerFacade.severe(
                     "Unexpected error while fetching default recognizer: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     createErrorResponse("An error occurred while fetching default recognizer"));
         }
@@ -265,17 +272,18 @@ public class ConfigController {
                     .body(createErrorResponse(e.getMessage()));
         } catch (IOException e) {
             LoggerFacade.severe("IO error while updating default recognizer: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Failed to update configuration file"));
         } catch (Exception e) {
             LoggerFacade.severe(
                     "Unexpected error while updating default recognizer: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     createErrorResponse("An error occurred while updating default recognizer"));
         }
     }
 
-    // The rest of the methods remain the same...
     private void updatePropertiesFileWithFormat(String key, String value) throws IOException {
         List<String> lines = new ArrayList<>();
         boolean propertyUpdated = false;
@@ -434,6 +442,7 @@ public class ConfigController {
         } catch (Exception e) {
             LoggerFacade.warning("Could not load configuration from properties, using defaults: "
                     + e.getMessage());
+            e.printStackTrace();
             currentRecognitionThreshold = 0.5;
             currentDefaultDetector = "yolo";
             currentDefaultRecognizer = "eigen";

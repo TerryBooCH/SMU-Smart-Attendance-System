@@ -19,10 +19,15 @@ const LiveRecognitionSidebar = ({ id, activeSidebar, setActiveSidebar }) => {
   const hasFetchedSession = useRef(false);
   const hasFetchedAttendance = useRef(false);
 
-  // Fetch session info (when sidebar is info)
+  // Fetch session info (for info AND notifications)
   useEffect(() => {
-    if (activeSidebar === "info" && id && !hasFetchedSession.current) {
+    if (
+      (activeSidebar === "info" || activeSidebar === "notifications") &&
+      id &&
+      !hasFetchedSession.current
+    ) {
       hasFetchedSession.current = true;
+
       fetchSessionById(id)
         .then((data) => {
           setSessionData(data);
@@ -38,6 +43,7 @@ const LiveRecognitionSidebar = ({ id, activeSidebar, setActiveSidebar }) => {
   useEffect(() => {
     if (activeSidebar === "attendance" && id && !hasFetchedAttendance.current) {
       hasFetchedAttendance.current = true;
+
       fetchAttendanceBySessionId(id).catch((err) => {
         console.error("Failed to fetch attendance:", err);
         hasFetchedAttendance.current = false; // allow retry
@@ -56,6 +62,7 @@ const LiveRecognitionSidebar = ({ id, activeSidebar, setActiveSidebar }) => {
   return (
     <div className="w-77 transition-all duration-300 ease-in-out flex-shrink-0">
       <nav className="fixed top-0 right-0 h-screen bg-white border-l border-[#cecece] flex flex-col w-77">
+        
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 min-h-[5rem]">
           <h2 className="text-lg font-semibold text-gray-800">
@@ -72,6 +79,8 @@ const LiveRecognitionSidebar = ({ id, activeSidebar, setActiveSidebar }) => {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 text-sm text-gray-700">
+          
+          {/* INFO SIDEBAR */}
           {activeSidebar === "info" && (
             <>
               {sessionLoading && <p>Loading session data...</p>}
@@ -85,8 +94,12 @@ const LiveRecognitionSidebar = ({ id, activeSidebar, setActiveSidebar }) => {
             </>
           )}
 
-          {activeSidebar === "notifications" && <NotificationContent id={id} />}
+          {/* NOTIFICATIONS SIDEBAR */}
+          {activeSidebar === "notifications" && (
+            <NotificationContent id={id} sessionData={sessionData} />
+          )}
 
+          {/* ATTENDANCE SIDEBAR */}
           {activeSidebar === "attendance" && (
             <AttendanceFieldContent
               attendances={attendances}

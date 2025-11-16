@@ -3,10 +3,21 @@ import { HandIcon, XCircle, CheckCircle } from "lucide-react";
 import useAttendance from "../../hooks/useAttendance";
 import useToast from "../../hooks/useToast";
 
-const ManualPendingCard = ({ entry, sessionId }) => {
+const ManualPendingCard = ({ entry, sessionId, sessionData }) => {
   const { removeManualPendingByStudentId, updateAttendanceStatus } = useAttendance();
   const { success, error } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
+
+  // --- Determine status for UI BEFORE clicking ---
+  const detectionTime = new Date(entry.timestamp);
+  const sessionStart = new Date(sessionData.startAt);
+
+  const lateCutoff = new Date(
+    sessionStart.getTime() + sessionData.lateAfterMinutes * 60 * 1000
+  );
+
+  const predictedStatus = detectionTime > lateCutoff ? "LATE" : "PRESENT";
+  const isLate = predictedStatus === "LATE";
 
   const handleCancel = () => {
     removeManualPendingByStudentId(entry.studentId);
@@ -16,9 +27,20 @@ const ManualPendingCard = ({ entry, sessionId }) => {
   const handleMarkPresent = async () => {
     try {
       setIsUpdating(true);
-      await updateAttendanceStatus(sessionId, entry.studentId, "PRESENT", "MANUAL");
+
+      await updateAttendanceStatus(
+        sessionId,
+        entry.studentId,
+        predictedStatus,
+        "MANUAL"
+      );
+
       removeManualPendingByStudentId(entry.studentId);
-      success(`Marked ${entry.name || "student"} as Present`);
+      success(
+        `Marked ${entry.name || "student"} as ${
+          predictedStatus === "LATE" ? "Late" : "Present"
+        }`
+      );
     } catch (err) {
       console.error("Error marking attendance:", err);
       error(err.message || "Failed to update attendance");
@@ -30,6 +52,7 @@ const ManualPendingCard = ({ entry, sessionId }) => {
   return (
     <div className="px-4 py-3 hover:bg-yellow-50 transition-colors border-b border-yellow-100">
       <div className="flex gap-3">
+
         {/* Icon */}
         <div className="flex-shrink-0 mt-0.5">
           <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -42,7 +65,9 @@ const ManualPendingCard = ({ entry, sessionId }) => {
           <p className="text-sm text-gray-900 font-medium mb-0.5">
             Manual Marking Required
           </p>
+
           <p className="text-sm text-gray-700 leading-relaxed">{entry.message}</p>
+
           <p className="text-xs text-gray-400 mt-1">
             Detected at{" "}
             {new Date(entry.timestamp).toLocaleTimeString([], {
@@ -53,6 +78,7 @@ const ManualPendingCard = ({ entry, sessionId }) => {
 
           {/* Buttons */}
           <div className="mt-3 flex gap-2">
+            {/* Cancel */}
             <button
               onClick={handleCancel}
               disabled={isUpdating}
@@ -62,15 +88,24 @@ const ManualPendingCard = ({ entry, sessionId }) => {
               Cancel
             </button>
 
+            {/* Present / Late Button (Dynamic UI) */}
             <button
               onClick={handleMarkPresent}
               disabled={isUpdating}
-              className={`inline-flex items-center gap-1 text-sm text-white bg-green-600 hover:bg-green-700 rounded-md px-3 py-1.5 transition-colors ${
-                isUpdating ? "opacity-70 cursor-not-allowed" : ""
+              className={`inline-flex items-center gap-1 text-sm text-white rounded-md px-3 py-1.5 transition-colors ${
+                isUpdating
+                  ? "opacity-70 cursor-not-allowed"
+                  : isLate
+                  ? "bg-yellow-500 hover:bg-yellow-600"
+                  : "bg-green-600 hover:bg-green-700"
               }`}
             >
               <CheckCircle className="w-4 h-4" />
-              {isUpdating ? "Updating..." : "Mark Present"}
+              {isUpdating
+                ? "Updating..."
+                : isLate
+                ? "Mark Late"
+                : "Mark Present"}
             </button>
           </div>
         </div>

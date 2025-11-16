@@ -287,6 +287,15 @@ export const AttendanceProvider = ({ children }) => {
   );
   const clearManualPending = useCallback(() => setManualPendingList([]), []);
 
+  // ✅ Clear everything related to live recognition
+  const clearLiveRecognitionState = useCallback(() => {
+    setBoundingBoxes([]);
+    setWarnings({});
+    setWsError(null);
+    setSuccessAutoAttendanceMarked([]);
+    setManualPendingList([]);
+  }, []);
+
   const value = {
     attendances,
     boundingBoxes,
@@ -305,6 +314,7 @@ export const AttendanceProvider = ({ children }) => {
     connectWebSocket,
     disconnectWebSocket,
     sendRecognition,
+    clearLiveRecognitionState,
   };
 
   return (

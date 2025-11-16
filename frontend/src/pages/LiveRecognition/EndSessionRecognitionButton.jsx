@@ -9,7 +9,9 @@ const EndSessionRecognitionButton = ({ id }) => {
   const navigate = useNavigate();
   const { closeSession } = useSession();
   const { success, error } = useToast();
-  const { disconnectWebSocket } = useAttendance(); 
+
+  // ⬅️ New: bring in clearLiveRecognitionState
+  const { disconnectWebSocket, clearLiveRecognitionState } = useAttendance();
 
   const handleClick = async () => {
     if (!id) {
@@ -18,13 +20,14 @@ const EndSessionRecognitionButton = ({ id }) => {
     }
 
     try {
-      // ✅ Close WebSocket before ending session
       disconnectWebSocket();
 
-      // ✅ Close session on server
+      clearLiveRecognitionState();
+
       await closeSession(id);
 
       success("Session closed successfully.");
+
       navigate(`/session/${id}`);
     } catch (err) {
       console.error("Error closing session:", err);

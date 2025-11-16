@@ -292,10 +292,59 @@ These accounts are used on the main login page of the app.
 ## 9. Model Configurations
 
 ### Detector Model Descriptions
+| Detector        | Description                                                            | Strengths                                                                  | Weaknesses                                               |
+| --------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------- |
+| **HaarCascade** | Classical detector using Haar-like features and boosted classifiers.   | • Fast on CPU<br>• Good for frontal faces<br>• Lightweight                 | • Struggles with angled faces<br>• Sensitive to lighting |
+| **LBPCascade**  | Uses Local Binary Patterns for texture-based detection.                | • Robust to lighting changes<br>• Very fast<br>• Good for embedded systems | • Lower accuracy vs deep-learning models                 |
+| **YOLOv8-Face** | Modern deep learning detector trained specifically for face detection. | • High accuracy<br>• Handles multiple/angled faces<br>• Real-time on GPU   | • Heavier model<br>• Requires more compute               |
 
 ### Recognizer Model Descriptions
+| **Recognizer**     | **Description**                                                                                        | **Strengths**                                                                  | **Weaknesses**                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| **Histogram**      | Compares grayscale intensity histograms to estimate facial similarity.                                 | • Very lightweight<br>• Extremely fast                                         | • Low accuracy<br>• Highly sensitive to lighting and pose                    |
+| **EigenFace**      | Uses PCA to project faces into a lower-dimensional “eigenface” space for comparison.                   | • Computationally efficient<br>• Works best on well-aligned, consistent images | • Sensitive to shadows, expressions, and variations<br>• Less robust overall |
+| **Neural Network** | Uses a CNN trained with triplet loss to learn embeddings where similar faces cluster together.         | • High accuracy<br>• More robust to pose, lighting, and expression changes     | • Requires substantial training data<br>• Higher computational cost          |
+
+### Recognition Thresholds
+
+For recognizers that generate embedding vectors (such as **EigenFace** and **Neural Network** models), similarity is computed using **Cosine Similarity**, which ranges from **–1 to 1**:
+
+| Cosine Similarity | Meaning                             |
+| ----------------- | ------------------------------------------ |
+| 1.0               | Vectors point in the same direction        |
+| 0.0               | No directional similarity                  |
+| -1.0              | Opposite directions                        |
+
+In practice, thresholds are chosen to decide whether two embeddings belong to the same person:
+
+| Cosine Similarity | Interpretation                             |
+| ----------------- | ------------------------------------------ |
+| **0.80 – 1.00**   | Very likely the same person                |
+| **0.50 – 0.79**   | Possibly the same person — borderline zone |
+| **< 0.50**        | Likely different people                    |
 
 ### Things to take note
+
+#### Recognition Threshoolds
+- Different models produce embeddings with different distributions, so thresholds should be **validated per deployment** instead of relying on a universal value.
+- Lighting, pose, occlusions, and camera quality can influence similarity scores.
+- Histogram-based recognition does **not** use vectors, so these thresholds do not apply.
+
+#### Vector Caching
+Histogram-based recognizers do not generate embedding vectors, so nothing can be cached in the database.
+Because of this:
+- Each time a new frame is sent for recognition, the system must recompute histograms for every dataset image.
+- This leads to significantly slower recognition speeds, especially as the dataset grows.
+- Embedding-based systems (Eigenface, Neural Net) avoid this issue because their vectors can be precomputed and cached.
+
+#### Model Compatibility
+Haar Cascade and LBP Cascade detectors are generally less accurate than modern deep-learning detectors like YOLO. As a result, we chose not to train more complex recognizers (EigenFace or Neural Network) on their outputs.
+Detection errors from these less reliable detectors would propagate into the recognizer, reducing overall recognition accuracy.
+|                           | YOLO | Haar Cascade | LBP Cascade | 
+| ------------------------- | ---- | ------------ | ----------- |
+| **Histogram**             | ✅   | ✅           | ✅         |
+| **Eigenface**             | ✅    | ❌          | ❌         |
+| **Neural Net**            | ✅    | ❌          | ❌         |
 
 ---
 

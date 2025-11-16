@@ -1,6 +1,5 @@
 package com.smu.smartattendancesystem.controllers;
 
-
 import java.io.IOException;
 import java.util.*;
 
@@ -29,17 +28,14 @@ public class BiometricController {
             @RequestParam(name = "type", required = false) String type) {
         try {
             List<DetectionResultDTO> results = this.biometricService.detect(image, type);
-            LoggerFacade.info("Biometric detection successful - Type: " + type + ", File: "
-                    + image.getOriginalFilename() + ", Results: " + results.size());
+            LoggerFacade.info("Detection successful - " + results.size() + " results");
             return ResponseEntity.ok(results);
         } catch (IllegalArgumentException e) {
-            LoggerFacade.warning("Invalid biometric detection request - Type: " + type + ", File: "
-                    + image.getOriginalFilename() + " - " + e.getMessage());
+            LoggerFacade.warning("Invalid detection request: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error during biometric detection - Type: " + type
-                    + ", File: " + image.getOriginalFilename() + " - " + e.getMessage());
+            LoggerFacade.severe("Detection error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while detecting."));
         }
@@ -57,11 +53,16 @@ public class BiometricController {
         try {
             RecognitionResponse response = biometricService.recognize(image, session_id,
                     detector_type, type, metric_name, manual_threshold, auto_threshold);
+
+            LoggerFacade.info("Recognition successful for session " + session_id);
             return ResponseEntity.ok().body(response);
         } catch (IllegalArgumentException e) {
+            LoggerFacade.warning("Invalid recognition request: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
+            LoggerFacade
+                    .severe("Recognition error for session " + session_id + ": " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while recognizing."));

@@ -6,12 +6,15 @@ import ControlBar from "./ControlBar";
 import useSession from "../../hooks/useSession";
 import useToast from "../../hooks/useToast";
 import useAttendance from "../../hooks/useAttendance";
+import { useConfigStore } from "../../store/configStore";
 
 const LiveRecognition = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { fetchSessionById } = useSession();
   const { showToast } = useToast();
+
+  const { loadConfigs } = useConfigStore();
 
   // 👇 from AttendanceContext
   const { connectWebSocket, disconnectWebSocket } = useAttendance();
@@ -20,6 +23,10 @@ const LiveRecognition = () => {
   const [activeSidebar, setActiveSidebar] = useState("notifications");
 
   const hasFetched = useRef(false);
+
+  useEffect(() => {
+    loadConfigs();
+  }, []);
 
   // 🧩 Connect WebSocket when component mounts
   useEffect(() => {

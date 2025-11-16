@@ -36,7 +36,7 @@ The backend uses a **runtime database** that **starts automatically when the bac
     - [Recognizer Model Descriptions](#recognizer-model-descriptions)
     - [Things to take note](#things-to-take-note)
 10. [Common Errors](#common-errors)
-11. [Additional Notes](#additional-notes)
+11. [Appendix](#appendix)
 
 ---
 
@@ -292,6 +292,7 @@ These accounts are used on the main login page of the app.
 ## 9. Model Configurations
 
 ### Detector Model Descriptions
+Recommended detector: **YOLOv8-Face**
 | Detector        | Description                                                            | Strengths                                                                  | Weaknesses                                               |
 | --------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------- |
 | **HaarCascade** | Classical detector using Haar-like features and boosted classifiers.   | • Fast on CPU<br>• Good for frontal faces<br>• Lightweight                 | • Struggles with angled faces<br>• Sensitive to lighting |
@@ -299,24 +300,19 @@ These accounts are used on the main login page of the app.
 | **YOLOv8-Face** | Modern deep learning detector trained specifically for face detection. | • High accuracy<br>• Handles multiple/angled faces<br>• Real-time on GPU   | • Heavier model<br>• Requires more compute               |
 
 ### Recognizer Model Descriptions
+Recommended recognizer: **Neural Network**
 | **Recognizer**     | **Description**                                                                                        | **Strengths**                                                                  | **Weaknesses**                                                               |
 | ------------------ | ------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
 | **Histogram**      | Compares grayscale intensity histograms to estimate facial similarity.                                 | • Very lightweight<br>• Extremely fast                                         | • Low accuracy<br>• Highly sensitive to lighting and pose                    |
 | **EigenFace**      | Uses PCA to project faces into a lower-dimensional “eigenface” space for comparison.                   | • Computationally efficient<br>• Works best on well-aligned, consistent images | • Sensitive to shadows, expressions, and variations<br>• Less robust overall |
-| **Neural Network** | Uses a CNN trained with triplet loss to learn embeddings where similar faces cluster together.         | • High accuracy<br>• More robust to pose, lighting, and expression changes     | • Requires substantial training data<br>• Higher computational cost          |
+| **Neural Network** | Uses a CNN encoder trained with triplet loss to learn embeddings where similar faces cluster together. | • High accuracy<br>• More robust to pose, lighting, and expression changes     | • Requires substantial training data<br>• Higher computational cost          |
 
 ### Recognition Thresholds
 
-For recognizers that generate embedding vectors (such as **EigenFace** and **Neural Network** models), similarity is computed using **Cosine Similarity**, which ranges from **–1 to 1**:
+For recognizers that generate embedding vectors (such as **EigenFace** and **Neural Network** models), similarity is computed using **Cosine Similarity**, which ranges from **–1 to 1**
+In practice, thresholds are chosen to decide whether two embeddings belong to the same person. 
 
-| Cosine Similarity | Meaning                             |
-| ----------------- | ------------------------------------------ |
-| 1.0               | Vectors point in the same direction        |
-| 0.0               | No directional similarity                  |
-| -1.0              | Opposite directions                        |
-
-In practice, thresholds are chosen to decide whether two embeddings belong to the same person:
-
+Recommended threshold: **0.80**
 | Cosine Similarity | Interpretation                             |
 | ----------------- | ------------------------------------------ |
 | **0.80 – 1.00**   | Very likely the same person                |
@@ -392,6 +388,10 @@ npm install
 
 ---
 
-## 11. Additional Notes
+## 11. Appendix
 
+* **Presentation Slides:** [Canva Slides](https://www.canva.com/design/DAG4HoE3phw/M5kY-IdeFoksTVHt4eF23A/edit?utm_content=DAG4HoE3phw&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)
+* **Database Diagram:** [DB Diagram](https://dbdiagram.io/d/6918f8376735e11170fcd4048f8376735e11170fcd404)
+* **UML Diagram (Entities):** [Lucidchart Diagram](https://lucid.app/lucidchart/be99d782-36b2-464f-a9ef-f22bfc7a52df/edit?viewport_loc=-2204%2C-845%2C4989%2C2364%2CHWEp-vi-RSFO&invitationId=inv_be795449-8455-4551-a2c8-a032378f650b)
+* **UML Diagram (Facial Recognition):** [Lucidchart Diagram](https://lucid.app/lucidchart/037d1ba1-5f9e-45dc-bdcd-cecc3859f2aa/edit?viewport_loc=-2136%2C-738%2C4452%2C2010%2C0_0&invitationId=inv_850e6e1c-1f8b-4b42-b11f-44dcda81eb76)
 ---

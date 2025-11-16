@@ -82,7 +82,7 @@ const ThresholdConfigContainer = () => {
               </p>
 
               <p className="text-xs text-gray-500 mt-1">
-                Recommended value: <strong>0.85</strong>
+                Recommended value: <strong>0.80</strong>
               </p>
             </div>
 

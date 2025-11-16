@@ -237,7 +237,7 @@ const CreateStudentForm = () => {
               className={`font-lexend bg-white border border-[#cecece] text-gray-900 text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 ${
                 formErrors.phone ? "border-red-500" : "border-gray-300"
               } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
-              placeholder="+65 1234 5678"
+              placeholder="12345678"
             />
             {formErrors.phone && (
               <p className="mt-2 text-sm text-red-600 font-lexend">

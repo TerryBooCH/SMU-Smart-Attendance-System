@@ -43,8 +43,7 @@ public class UserManager {
     // Get permission level by user ID
     // Use case: check user permissions without loading entire user object
     public Optional<Integer> getPermissionLevelById(Long id) {
-        return userRepo.findById(id)
-                .map(User::getPermissionLevel);
+        return userRepo.findById(id).map(User::getPermissionLevel);
     }
 
     // UPDATE: Update user details

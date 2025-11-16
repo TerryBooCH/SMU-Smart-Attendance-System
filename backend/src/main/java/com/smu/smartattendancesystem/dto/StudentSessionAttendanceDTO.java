@@ -19,24 +19,15 @@ public class StudentSessionAttendanceDTO {
     private String method;
     private Double confidence;
     private LocalDateTime timestamp;
-    private Integer arrivalOffsetMinutes; // minutes difference from startAt ( how early/late student is (0 = on
-                                                // time, +5 = 5 minutes late, -3 = 3
+    private Integer arrivalOffsetMinutes; // minutes difference from startAt ( how early/late
+                                          // student is (0 = on
+                                          // time, +5 = 5 minutes late, -3 = 3
     // minutes early))
 
-    public StudentSessionAttendanceDTO(
-            Long sessionId,
-            String courseName,
-            Long rosterId,
-            String rosterName,
-            LocalDateTime startAt,
-            LocalDateTime endAt,
-            int lateAfterMinutes,
-            boolean isOpen,
-            String status,
-            String method,
-            Double confidence,
-            LocalDateTime timestamp,
-            Integer arrivalOffsetMinutes) {
+    public StudentSessionAttendanceDTO(Long sessionId, String courseName, Long rosterId,
+            String rosterName, LocalDateTime startAt, LocalDateTime endAt, int lateAfterMinutes,
+            boolean isOpen, String status, String method, Double confidence,
+            LocalDateTime timestamp, Integer arrivalOffsetMinutes) {
         this.sessionId = sessionId;
         this.courseName = courseName;
         this.rosterId = rosterId;

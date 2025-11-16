@@ -45,15 +45,16 @@ public class BatchImportService {
     private FaceDataService faceDataService;
 
     // Validates student fields according to the defined patterns
-    private List<String> validateStudentFields(String studentId, String name, String email, 
-                                                 String phone, String className) {
+    private List<String> validateStudentFields(String studentId, String name, String email,
+            String phone, String className) {
         List<String> validationErrors = new ArrayList<>();
 
         // Validate Student ID
         if (studentId == null || studentId.isEmpty()) {
             validationErrors.add("Student ID is required");
         } else if (!STUDENT_ID_PATTERN.matcher(studentId).matches()) {
-            validationErrors.add("Student ID must start with a capital letter followed by 7 numbers (e.g., S1234567)");
+            validationErrors.add(
+                    "Student ID must start with a capital letter followed by 7 numbers (e.g., S1234567)");
         }
 
         // Validate Name
@@ -83,7 +84,8 @@ public class BatchImportService {
         if (className == null || className.isEmpty()) {
             validationErrors.add("Class is required");
         } else if (!CLASS_NAME_PATTERN.matcher(className).matches()) {
-            validationErrors.add("Class must start with 2 letters followed by 3 numbers (e.g., AB123)");
+            validationErrors
+                    .add("Class must start with 2 letters followed by 3 numbers (e.g., AB123)");
         }
 
         return validationErrors;
@@ -94,8 +96,8 @@ public class BatchImportService {
         List<Map<String, Object>> errors = new ArrayList<>();
         int lineNumber = 0;
 
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(file.getInputStream()))) {
+        try (BufferedReader reader =
+                new BufferedReader(new InputStreamReader(file.getInputStream()))) {
 
             String line;
             reader.readLine(); // Skip header
@@ -104,14 +106,16 @@ public class BatchImportService {
             while ((line = reader.readLine()) != null) {
                 lineNumber++;
 
-                if (line.trim().isEmpty()) continue; // Skip empty lines
+                if (line.trim().isEmpty())
+                    continue; // Skip empty lines
 
                 String[] parts = line.split(",");
                 if (parts.length < 5) {
                     Map<String, Object> error = new LinkedHashMap<>();
                     error.put("line", lineNumber);
                     error.put("data", line);
-                    error.put("reason", "Invalid format: Expected 5 columns (studentId, name, email, phone, className)");
+                    error.put("reason",
+                            "Invalid format: Expected 5 columns (studentId, name, email, phone, className)");
                     errors.add(error);
                     continue;
                 }
@@ -123,12 +127,14 @@ public class BatchImportService {
                 String className = parts[4].trim();
 
                 // Validate fields
-                List<String> validationErrors = validateStudentFields(studentId, name, email, phone, className);
+                List<String> validationErrors =
+                        validateStudentFields(studentId, name, email, phone, className);
                 if (!validationErrors.isEmpty()) {
                     Map<String, Object> error = new LinkedHashMap<>();
                     error.put("line", lineNumber);
                     error.put("data", line);
-                    error.put("reason", "Validation failed: " + String.join(", ", validationErrors));
+                    error.put("reason",
+                            "Validation failed: " + String.join(", ", validationErrors));
                     errors.add(error);
                     continue;
                 }
@@ -151,14 +157,14 @@ public class BatchImportService {
                     errors.add(error);
                     continue;
                 }
-                
+
                 try {
                     Student student = new Student(studentId, name, email, phone, className);
                     Student savedStudent = studentService.createStudent(student);
 
                     // Get face data if available
-                    FaceDataDTO face = faceDataService.getLatestFaceData(savedStudent.getStudentId())
-                            .orElse(null);
+                    FaceDataDTO face = faceDataService
+                            .getLatestFaceData(savedStudent.getStudentId()).orElse(null);
                     StudentWithFaceDTO dto = StudentWithFaceDTO.from(savedStudent, face);
                     importedStudents.add(dto);
 
@@ -199,10 +205,11 @@ public class BatchImportService {
         int successCount = 0;
         int lineNumber = 0;
 
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
+        try (BufferedReader reader =
+                new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             String header = reader.readLine(); // consume header
             lineNumber++;
-            
+
             if (header == null) {
                 throw new RuntimeException("CSV file is empty");
             }
@@ -211,14 +218,16 @@ public class BatchImportService {
             while ((line = reader.readLine()) != null) {
                 lineNumber++;
 
-                if (line.trim().isEmpty()) continue;
+                if (line.trim().isEmpty())
+                    continue;
 
                 String[] parts = line.split(",");
                 if (parts.length != 2) {
                     Map<String, Object> error = new LinkedHashMap<>();
                     error.put("line", lineNumber);
                     error.put("data", line);
-                    error.put("reason", "Invalid format: Expected exactly 2 columns (rosterId, studentId)");
+                    error.put("reason",
+                            "Invalid format: Expected exactly 2 columns (rosterId, studentId)");
                     errors.add(error);
                     continue;
                 }
@@ -240,8 +249,8 @@ public class BatchImportService {
                     Map<String, Object> error = new LinkedHashMap<>();
                     error.put("line", lineNumber);
                     error.put("data", line);
-                    error.put("reason", "Invalid student ID format: " + studentId + 
-                             " (must start with a capital letter followed by 7 numbers, e.g., S1234567)");
+                    error.put("reason", "Invalid student ID format: " + studentId
+                            + " (must start with a capital letter followed by 7 numbers, e.g., S1234567)");
                     errors.add(error);
                     continue;
                 }
@@ -263,7 +272,8 @@ public class BatchImportService {
                     Map<String, Object> error = new LinkedHashMap<>();
                     error.put("line", lineNumber);
                     error.put("data", line);
-                    error.put("reason", "Duplicate student in import: " + studentId + " (student already added to another roster in this import)");
+                    error.put("reason", "Duplicate student in import: " + studentId
+                            + " (student already added to another roster in this import)");
                     errors.add(error);
                     continue;
                 }
@@ -315,13 +325,10 @@ public class BatchImportService {
         for (Long rosterId : affectedRosterIds) {
             try {
                 Roster roster = rosterService.getRosterById(rosterId);
-                RosterSummaryDTO summary = new RosterSummaryDTO(
-                    roster.getId(),
-                    roster.getName(),
-                    roster.getCreatedAt(),
-                    roster.getUpdatedAt(),
-                    (roster.getStudentRosters() != null) ? roster.getStudentRosters().size() : 0
-                );
+                RosterSummaryDTO summary = new RosterSummaryDTO(roster.getId(), roster.getName(),
+                        roster.getCreatedAt(), roster.getUpdatedAt(),
+                        (roster.getStudentRosters() != null) ? roster.getStudentRosters().size()
+                                : 0);
                 rosterSummaries.add(summary);
             } catch (Exception e) {
                 // Skip if roster can't be retrieved

@@ -43,15 +43,10 @@ public class JwtService {
 
         long currentTime = System.currentTimeMillis();
 
-        return Jwts.builder()
-                .subject(user.getEmail())
-                .claim("name", user.getName())
+        return Jwts.builder().subject(user.getEmail()).claim("name", user.getName())
                 .claim("perm", user.getPermissionLevel())
-                .claim("studentId", user.getLinkedStudentId())
-                .issuedAt(new Date(currentTime))
-                .expiration(new Date(currentTime + expirationMs))
-                .signWith(key, HS256)
-                .compact();
+                .claim("studentId", user.getLinkedStudentId()).issuedAt(new Date(currentTime))
+                .expiration(new Date(currentTime + expirationMs)).signWith(key, HS256).compact();
 
     }
 
@@ -59,23 +54,15 @@ public class JwtService {
     public String refreshToken(String oldToken) {
         Claims claims = getClaims(oldToken);
         long now = System.currentTimeMillis();
-        return Jwts.builder()
-                .subject(claims.getSubject())
-                .claims(claims)
-                .issuedAt(new Date(now))
-                .expiration(new Date(now + expirationMs))
-                .signWith(key, HS256)
-                .compact();
+        return Jwts.builder().subject(claims.getSubject()).claims(claims).issuedAt(new Date(now))
+                .expiration(new Date(now + expirationMs)).signWith(key, HS256).compact();
     }
 
     // Validate JWT token
     public boolean validateJwtToken(String token) {
         try {
             @SuppressWarnings("unused")
-            Jws<Claims> claims = Jwts.parser()
-                    .verifyWith(key)
-                    .build()
-                    .parseSignedClaims(token);
+            Jws<Claims> claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
             return true;
         } catch (SecurityException e) {
             System.out.println("Invalid JWT signature: " + e.getMessage());
@@ -93,11 +80,7 @@ public class JwtService {
 
     // Extract payload from JWT token
     public Claims getClaims(String token) {
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
+        return Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
     }
 
     // Extract email from JWT token

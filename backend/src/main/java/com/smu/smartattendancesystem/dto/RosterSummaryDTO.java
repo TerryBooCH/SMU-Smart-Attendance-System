@@ -9,7 +9,8 @@ public class RosterSummaryDTO {
     private LocalDateTime updatedAt;
     private int studentCount;
 
-    public RosterSummaryDTO(Long id, String name, LocalDateTime createdAt, LocalDateTime updatedAt, int studentCount) {
+    public RosterSummaryDTO(Long id, String name, LocalDateTime createdAt, LocalDateTime updatedAt,
+            int studentCount) {
         this.id = id;
         this.name = name;
         this.createdAt = createdAt;

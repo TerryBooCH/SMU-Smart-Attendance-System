@@ -23,11 +23,11 @@ public class ConfigController {
     private static final Set<String> VALID_DETECTORS = Set.of("haar", "lbp", "yolo");
     private static final Set<String> VALID_RECOGNIZERS = Set.of("eigen", "hist", "neuralnet");
     private static final Set<String> HIST_ONLY_DETECTORS = Set.of("haar", "lbp");
-    
+
     private static double currentRecognitionThreshold = 0.5; // default value
     private static String currentDefaultDetector = "yolo"; // default value
     private static String currentDefaultRecognizer = "eigen"; // default value
-    
+
     // Initialize with current values from properties file
     static {
         loadCurrentConfigs();
@@ -39,14 +39,15 @@ public class ConfigController {
         try {
             Map<String, Object> response = new HashMap<>();
             response.put("threshold", currentRecognitionThreshold);
-            
+
             LoggerFacade.info("Fetched recognition threshold: " + currentRecognitionThreshold);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while fetching recognition threshold: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while fetching recognition threshold"));
+            LoggerFacade.severe(
+                    "Unexpected error while fetching recognition threshold: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    createErrorResponse("An error occurred while fetching recognition threshold"));
         }
     }
 
@@ -55,41 +56,45 @@ public class ConfigController {
     public ResponseEntity<?> updateRecognitionThreshold(@RequestBody Map<String, String> request) {
         try {
             String newThresholdStr = request.get("threshold");
-            
+
             if (newThresholdStr == null || newThresholdStr.isBlank()) {
-                LoggerFacade.warning("Failed to update recognition threshold: threshold value is required");
+                LoggerFacade.warning(
+                        "Failed to update recognition threshold: threshold value is required");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(createErrorResponse("Threshold value is required"));
             }
-            
+
             double newThreshold;
             try {
                 newThreshold = Double.parseDouble(newThresholdStr);
             } catch (NumberFormatException e) {
-                LoggerFacade.warning("Failed to update recognition threshold: threshold must be a valid number");
+                LoggerFacade.warning(
+                        "Failed to update recognition threshold: threshold must be a valid number");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(createErrorResponse("Threshold must be a valid number"));
             }
-            
+
             // Updated range validation from -1.0 to 1.0
             if (newThreshold < -1.0 || newThreshold > 1.0) {
-                LoggerFacade.warning("Failed to update recognition threshold: threshold must be between -1.0 and 1.0");
+                LoggerFacade.warning(
+                        "Failed to update recognition threshold: threshold must be between -1.0 and 1.0");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(createErrorResponse("Threshold must be between -1.0 and 1.0"));
             }
-            
+
             // Update properties file while preserving format and comments
-            updatePropertiesFileWithFormat("faces.recognition.autoThreshold", String.valueOf(newThreshold));
-            
+            updatePropertiesFileWithFormat("faces.recognition.autoThreshold",
+                    String.valueOf(newThreshold));
+
             // Update the in-memory value
             currentRecognitionThreshold = newThreshold;
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("threshold", newThreshold);
-            
+
             LoggerFacade.info("Updated recognition threshold to: " + newThreshold);
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalArgumentException e) {
             LoggerFacade.warning("Invalid recognition threshold update request: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -99,9 +104,10 @@ public class ConfigController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Failed to update configuration file"));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while updating recognition threshold: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while updating recognition threshold"));
+            LoggerFacade.severe(
+                    "Unexpected error while updating recognition threshold: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    createErrorResponse("An error occurred while updating recognition threshold"));
         }
     }
 
@@ -111,12 +117,13 @@ public class ConfigController {
         try {
             Map<String, Object> response = new HashMap<>();
             response.put("defaultDetector", currentDefaultDetector);
-            
+
             LoggerFacade.info("Fetched default detector: " + currentDefaultDetector);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while fetching default detector: " + e.getMessage());
+            LoggerFacade
+                    .severe("Unexpected error while fetching default detector: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while fetching default detector"));
         }
@@ -127,45 +134,51 @@ public class ConfigController {
     public ResponseEntity<?> updateDefaultDetector(@RequestBody Map<String, String> request) {
         try {
             String newDetector = request.get("defaultDetector");
-            
+
             if (newDetector == null || newDetector.isBlank()) {
-                LoggerFacade.warning("Failed to update default detector: detector value is required");
+                LoggerFacade
+                        .warning("Failed to update default detector: detector value is required");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(createErrorResponse("Detector value is required"));
             }
-            
+
             newDetector = newDetector.toLowerCase();
             if (!VALID_DETECTORS.contains(newDetector)) {
-                LoggerFacade.warning("Failed to update default detector: invalid detector type. Allowed values: " + VALID_DETECTORS);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(createErrorResponse("Invalid detector type. Allowed values: " + VALID_DETECTORS));
+                LoggerFacade.warning(
+                        "Failed to update default detector: invalid detector type. Allowed values: "
+                                + VALID_DETECTORS);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createErrorResponse(
+                        "Invalid detector type. Allowed values: " + VALID_DETECTORS));
             }
-            
+
             // Check if we need to auto-adjust the recognizer
             boolean recognizerAdjusted = false;
-            
-            if (HIST_ONLY_DETECTORS.contains(newDetector) && !"hist".equals(currentDefaultRecognizer)) {
+
+            if (HIST_ONLY_DETECTORS.contains(newDetector)
+                    && !"hist".equals(currentDefaultRecognizer)) {
                 // Auto-adjust to hist for haar/lbp detectors
                 currentDefaultRecognizer = "hist";
                 recognizerAdjusted = true;
-                
+
                 // Update recognizer in properties file
-                updatePropertiesFileWithFormat("faces.recognition.defaultRecognizer", currentDefaultRecognizer);
-                
-                LoggerFacade.info("Auto-adjusted default recognizer to 'hist' for detector: " + newDetector);
+                updatePropertiesFileWithFormat("faces.recognition.defaultRecognizer",
+                        currentDefaultRecognizer);
+
+                LoggerFacade.info(
+                        "Auto-adjusted default recognizer to 'hist' for detector: " + newDetector);
             }
-            
+
             // Update detector in properties file
             updatePropertiesFileWithFormat("faces.detection.defaultDetector", newDetector);
             currentDefaultDetector = newDetector;
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("defaultDetector", newDetector);
             response.put("defaultRecognizer", currentDefaultRecognizer);
-            
+
             LoggerFacade.info("Updated default detector to: " + newDetector);
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalArgumentException e) {
             LoggerFacade.warning("Invalid default detector update request: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -175,7 +188,8 @@ public class ConfigController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Failed to update configuration file"));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while updating default detector: " + e.getMessage());
+            LoggerFacade
+                    .severe("Unexpected error while updating default detector: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while updating default detector"));
         }
@@ -187,14 +201,15 @@ public class ConfigController {
         try {
             Map<String, Object> response = new HashMap<>();
             response.put("defaultRecognizer", currentDefaultRecognizer);
-            
+
             LoggerFacade.info("Fetched default recognizer: " + currentDefaultRecognizer);
             return ResponseEntity.ok(response);
-            
+
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while fetching default recognizer: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while fetching default recognizer"));
+            LoggerFacade.severe(
+                    "Unexpected error while fetching default recognizer: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    createErrorResponse("An error occurred while fetching default recognizer"));
         }
     }
 
@@ -203,44 +218,47 @@ public class ConfigController {
     public ResponseEntity<?> updateDefaultRecognizer(@RequestBody Map<String, String> request) {
         try {
             String newRecognizer = request.get("defaultRecognizer");
-            
+
             if (newRecognizer == null || newRecognizer.isBlank()) {
-                LoggerFacade.warning("Failed to update default recognizer: recognizer value is required");
+                LoggerFacade.warning(
+                        "Failed to update default recognizer: recognizer value is required");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(createErrorResponse("Recognizer value is required"));
             }
-            
+
             newRecognizer = newRecognizer.toLowerCase();
             if (!VALID_RECOGNIZERS.contains(newRecognizer)) {
-                LoggerFacade.warning("Failed to update default recognizer: invalid recognizer type. Allowed values: " + VALID_RECOGNIZERS);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(createErrorResponse("Invalid recognizer type. Allowed values: " + VALID_RECOGNIZERS));
+                LoggerFacade.warning(
+                        "Failed to update default recognizer: invalid recognizer type. Allowed values: "
+                                + VALID_RECOGNIZERS);
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(createErrorResponse(
+                        "Invalid recognizer type. Allowed values: " + VALID_RECOGNIZERS));
             }
-            
+
             // Validate detector-recognizer compatibility
-            if (HIST_ONLY_DETECTORS.contains(currentDefaultDetector) && !"hist".equals(newRecognizer)) {
+            if (HIST_ONLY_DETECTORS.contains(currentDefaultDetector)
+                    && !"hist".equals(newRecognizer)) {
                 String errorMessage = String.format(
-                    "Detector '%s' can only use 'hist' recognizer. Please change detector to 'yolo' first to use other recognizers.",
-                    currentDefaultDetector
-                );
+                        "Detector '%s' can only use 'hist' recognizer. Please change detector to 'yolo' first to use other recognizers.",
+                        currentDefaultDetector);
                 LoggerFacade.warning("Failed to update default recognizer: " + errorMessage);
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(createErrorResponse(errorMessage));
             }
-            
+
             // Update properties file while preserving format and comments
             updatePropertiesFileWithFormat("faces.recognition.defaultRecognizer", newRecognizer);
-            
+
             // Update the in-memory value
             currentDefaultRecognizer = newRecognizer;
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("defaultDetector", currentDefaultDetector);
             response.put("defaultRecognizer", newRecognizer);
-            
+
             LoggerFacade.info("Updated default recognizer to: " + newRecognizer);
             return ResponseEntity.ok(response);
-            
+
         } catch (IllegalArgumentException e) {
             LoggerFacade.warning("Invalid default recognizer update request: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -250,9 +268,10 @@ public class ConfigController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("Failed to update configuration file"));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while updating default recognizer: " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while updating default recognizer"));
+            LoggerFacade.severe(
+                    "Unexpected error while updating default recognizer: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    createErrorResponse("An error occurred while updating default recognizer"));
         }
     }
 
@@ -260,7 +279,7 @@ public class ConfigController {
     private void updatePropertiesFileWithFormat(String key, String value) throws IOException {
         List<String> lines = new ArrayList<>();
         boolean propertyUpdated = false;
-        
+
         // Read all lines from the file
         try (BufferedReader reader = new BufferedReader(new FileReader(PROPERTIES_FILE_PATH))) {
             String line;
@@ -272,7 +291,7 @@ public class ConfigController {
                     if (equalsIndex != -1) {
                         String beforeEquals = line.substring(0, equalsIndex + 1);
                         String afterEquals = line.substring(equalsIndex + 1);
-                        
+
                         // Check if there's a comment after the value
                         int commentIndex = afterEquals.indexOf('#');
                         String newLine;
@@ -296,22 +315,24 @@ public class ConfigController {
                 }
             }
         }
-        
+
         // If property wasn't found, add it to the Facial Detection/Recognition Config section
         if (!propertyUpdated) {
             boolean inFacialSection = false;
             boolean added = false;
             List<String> newLines = new ArrayList<>();
-            
+
             for (String line : lines) {
                 newLines.add(line);
-                
+
                 // Check if we're in the Facial Detection/Recognition Config section
                 if (line.trim().equals("# Facial Detection/Recognition Config")) {
                     inFacialSection = true;
                 } else if (inFacialSection && !added) {
-                    // Add the property after the section header, before the next section or empty line
-                    if (line.trim().isEmpty() || (line.trim().startsWith("# ") && !line.trim().startsWith("# Facial"))) {
+                    // Add the property after the section header, before the next section or empty
+                    // line
+                    if (line.trim().isEmpty() || (line.trim().startsWith("# ")
+                            && !line.trim().startsWith("# Facial"))) {
                         newLines.add(key + "=" + value);
                         added = true;
                         inFacialSection = false;
@@ -326,7 +347,7 @@ public class ConfigController {
                     }
                 }
             }
-            
+
             // If we didn't find a good place, add at the end of facial section or file
             if (!added) {
                 // Try to find the facial section and add at the end
@@ -338,17 +359,16 @@ public class ConfigController {
                         foundFacialSection = true;
                     } else if (foundFacialSection) {
                         // Check if this is the last line of the facial section
-                        if (i + 1 >= lines.size() || 
-                            (!lines.get(i + 1).trim().startsWith("faces.") && 
-                             !lines.get(i + 1).trim().isEmpty() && 
-                             !lines.get(i + 1).trim().startsWith("# Facial"))) {
+                        if (i + 1 >= lines.size() || (!lines.get(i + 1).trim().startsWith("faces.")
+                                && !lines.get(i + 1).trim().isEmpty()
+                                && !lines.get(i + 1).trim().startsWith("# Facial"))) {
                             newLines.add(key + "=" + value);
                             added = true;
                             foundFacialSection = false;
                         }
                     }
                 }
-                
+
                 // If still not added, add at the end of file
                 if (!added) {
                     newLines.add("");
@@ -356,10 +376,10 @@ public class ConfigController {
                     newLines.add(key + "=" + value);
                 }
             }
-            
+
             lines = newLines;
         }
-        
+
         // Write all lines back to the file
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(PROPERTIES_FILE_PATH))) {
             for (String line : lines) {
@@ -367,7 +387,7 @@ public class ConfigController {
                 writer.newLine();
             }
         }
-        
+
         LoggerFacade.info("Successfully updated properties file with " + key + "=" + value);
     }
 
@@ -398,19 +418,22 @@ public class ConfigController {
                     }
                 }
             }
-            
+
             // Validate loaded configuration for compatibility
-            if (HIST_ONLY_DETECTORS.contains(currentDefaultDetector) && !"hist".equals(currentDefaultRecognizer)) {
-                LoggerFacade.warning("Invalid configuration: Detector " + currentDefaultDetector + " can only use 'hist' recognizer. Auto-adjusting to hist.");
+            if (HIST_ONLY_DETECTORS.contains(currentDefaultDetector)
+                    && !"hist".equals(currentDefaultRecognizer)) {
+                LoggerFacade.warning("Invalid configuration: Detector " + currentDefaultDetector
+                        + " can only use 'hist' recognizer. Auto-adjusting to hist.");
                 currentDefaultRecognizer = "hist";
                 // Optionally update the properties file here as well
             }
-            
-            LoggerFacade.info("Loaded configuration from properties - Detector: " + currentDefaultDetector + 
-                            ", Recognizer: " + currentDefaultRecognizer + 
-                            ", Threshold: " + currentRecognitionThreshold);
+
+            LoggerFacade.info("Loaded configuration from properties - Detector: "
+                    + currentDefaultDetector + ", Recognizer: " + currentDefaultRecognizer
+                    + ", Threshold: " + currentRecognitionThreshold);
         } catch (Exception e) {
-            LoggerFacade.warning("Could not load configuration from properties, using defaults: " + e.getMessage());
+            LoggerFacade.warning("Could not load configuration from properties, using defaults: "
+                    + e.getMessage());
             currentRecognitionThreshold = 0.5;
             currentDefaultDetector = "yolo";
             currentDefaultRecognizer = "eigen";
@@ -421,11 +444,11 @@ public class ConfigController {
     public static double getCurrentRecognitionThreshold() {
         return currentRecognitionThreshold;
     }
-    
+
     public static String getCurrentDefaultDetector() {
         return currentDefaultDetector;
     }
-    
+
     public static String getCurrentDefaultRecognizer() {
         return currentDefaultRecognizer;
     }

@@ -7,13 +7,15 @@ import java.time.LocalDateTime;
 public abstract class BaseEntity {
 
     @Id // Marks the primary key
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Uses database's auto-increment to generate IDs
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // Uses database's auto-increment to
+                                                        // generate IDs
     private Long id;
 
     @Column(updatable = false) // Once set, can't be changed
     private LocalDateTime createdAt = LocalDateTime.now(); // Current time upon creation
 
-    private LocalDateTime updatedAt = LocalDateTime.now(); // Current time upon creation, can be updated
+    private LocalDateTime updatedAt = LocalDateTime.now(); // Current time upon creation, can be
+                                                           // updated
 
 
     @PreUpdate // Called before an update query is executed
@@ -22,15 +24,15 @@ public abstract class BaseEntity {
     }
 
     // Getters
-    public Long getId() { 
-        return id; 
+    public Long getId() {
+        return id;
     }
 
-    public LocalDateTime getCreatedAt() { 
-        return createdAt; 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public LocalDateTime getUpdatedAt() { 
-        return updatedAt; 
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 }

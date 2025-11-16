@@ -9,10 +9,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 @Entity
-@Table(
-    name = "embeddings",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"detector", "recognizer", "face_data_id"})
-)
+@Table(name = "embeddings", uniqueConstraints = @UniqueConstraint(
+        columnNames = {"detector", "recognizer", "face_data_id"}))
 public class Embedding extends BaseEntity {
 
     @Column(nullable = false)
@@ -28,7 +26,7 @@ public class Embedding extends BaseEntity {
 
     @JdbcTypeCode(SqlTypes.VARBINARY)
     @Column(nullable = false)
-    private byte[] vector;   // stored as BLOB
+    private byte[] vector; // stored as BLOB
 
 
     public Embedding() {}

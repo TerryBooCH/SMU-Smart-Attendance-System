@@ -22,7 +22,8 @@ public class StudentService {
     private final UserManager userManager;
     private final FaceDataService faceDataService;
 
-    public StudentService(StudentManager studentManager, UserManager userManager, FaceDataService faceDataService) {
+    public StudentService(StudentManager studentManager, UserManager userManager,
+            FaceDataService faceDataService) {
         this.studentManager = studentManager;
         this.userManager = userManager;
         this.faceDataService = faceDataService;
@@ -38,8 +39,16 @@ public class StudentService {
 
         for (Student s : students) {
             // Retrieve latest face data for the student
-            FaceDataDTO face = faceDataService.getLatestFaceData(s.getStudentId())
-                    .orElse(null); // returns null if no face data exists for the student
+            FaceDataDTO face = faceDataService.getLatestFaceData(s.getStudentId()).orElse(null); // returns
+                                                                                                 // null
+                                                                                                 // if
+                                                                                                 // no
+                                                                                                 // face
+                                                                                                 // data
+                                                                                                 // exists
+                                                                                                 // for
+                                                                                                 // the
+                                                                                                 // student
 
             // Create the DTO object combining student and face data
             StudentWithFaceDTO dto = StudentWithFaceDTO.from(s, face);
@@ -61,15 +70,15 @@ public class StudentService {
         Student student = optStudent.get();
 
         // Retrieve latest face data for a student
-        FaceDataDTO face = faceDataService.getLatestFaceData(student.getStudentId())
-                .orElse(null);
+        FaceDataDTO face = faceDataService.getLatestFaceData(student.getStudentId()).orElse(null);
 
         // Create and return the DTO object combining student and face data
         return StudentWithFaceDTO.from(student, face);
     }
 
     @Transactional
-    public Student createStudent(Student student) throws IllegalArgumentException, IllegalStateException {
+    public Student createStudent(Student student)
+            throws IllegalArgumentException, IllegalStateException {
         // Validate student object
         if (student == null) {
             throw new IllegalArgumentException("Invalid request");
@@ -94,12 +103,14 @@ public class StudentService {
         if (student.getClassName() == null || student.getClassName().isBlank()) {
             throw new IllegalArgumentException("Class is required");
         } else if (!student.getClassName().trim().matches("^[A-Z]{2}\\d{3}$")) {
-            throw new IllegalArgumentException("Class must start with 2 letters followed by 3 numbers (e.g., AB123)");
+            throw new IllegalArgumentException(
+                    "Class must start with 2 letters followed by 3 numbers (e.g., AB123)");
         }
 
         // Validate email (simple format)
         if (student.getEmail() == null || student.getEmail().isBlank()) {
-            throw new IllegalArgumentException("Student email is required to create a user account");
+            throw new IllegalArgumentException(
+                    "Student email is required to create a user account");
         } else if (!student.getEmail().trim().matches("^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$")) {
             throw new IllegalArgumentException("Enter a valid email address");
         }
@@ -116,10 +127,12 @@ public class StudentService {
 
         // Check for duplicates
         if (studentManager.getStudentByStudentId(student.getStudentId()).isPresent()) {
-            throw new IllegalStateException("Student already exists with ID: " + student.getStudentId());
+            throw new IllegalStateException(
+                    "Student already exists with ID: " + student.getStudentId());
         }
         if (userManager.getUserByEmail(student.getEmail()).isPresent()) {
-            throw new IllegalStateException("User already exists with email: " + student.getEmail());
+            throw new IllegalStateException(
+                    "User already exists with email: " + student.getEmail());
         }
 
         // Save the student to the database
@@ -127,11 +140,7 @@ public class StudentService {
 
         // Create a corresponding user account
         String defPassword = student.getStudentId(); // Set default password to studentId
-        User newUser = new User(
-                savedStudent.getName(),
-                savedStudent.getEmail(),
-                defPassword,
-                0,
+        User newUser = new User(savedStudent.getName(), savedStudent.getEmail(), defPassword, 0,
                 savedStudent);
         newUser.setStudent(savedStudent); // Link user to student
         userManager.createUser(newUser); // Save user to database
@@ -144,7 +153,7 @@ public class StudentService {
     public void initUserAccounts() {
         // Only initialize if no users exist
         if (userManager.countUsers() > 2) {
-            return; 
+            return;
         }
 
         // Retrieve all students from the database
@@ -152,12 +161,7 @@ public class StudentService {
 
         for (Student s : students) {
             String defPassword = s.getStudentId(); // Set default password to studentId
-            User newUser = new User(
-                    s.getName(),
-                    s.getEmail(),
-                    defPassword,
-                    0,
-                    s);
+            User newUser = new User(s.getName(), s.getEmail(), defPassword, 0, s);
             newUser.setStudent(s); // Link user to student
             userManager.createUser(newUser); // Save user to database
         }
@@ -195,7 +199,8 @@ public class StudentService {
             } else {
                 // Validate format (must be exactly 8 digits)
                 if (!phone.matches("^\\d{8}$")) {
-                    throw new IllegalArgumentException("Phone number must be exactly 8 digits (e.g., 81234567)");
+                    throw new IllegalArgumentException(
+                            "Phone number must be exactly 8 digits (e.g., 81234567)");
                 }
                 existingStudent.setPhone(phone.trim());
             }
@@ -220,11 +225,11 @@ public class StudentService {
             user.setName(savedStudent.getName());
             user.setEmail(savedStudent.getEmail());
             userManager.updateUser(user);
-        } 
+        }
 
         // Create and return the DTO object combining student and face data
-        FaceDataDTO face = faceDataService.getLatestFaceData(savedStudent.getStudentId())
-                .orElse(null);
+        FaceDataDTO face =
+                faceDataService.getLatestFaceData(savedStudent.getStudentId()).orElse(null);
         return StudentWithFaceDTO.from(savedStudent, face);
     }
 
@@ -274,8 +279,16 @@ public class StudentService {
 
         for (Student s : students) {
             // Retrieve latest face data for the student
-            FaceDataDTO face = faceDataService.getLatestFaceData(s.getStudentId())
-                    .orElse(null); // returns null if no face data exists for the student
+            FaceDataDTO face = faceDataService.getLatestFaceData(s.getStudentId()).orElse(null); // returns
+                                                                                                 // null
+                                                                                                 // if
+                                                                                                 // no
+                                                                                                 // face
+                                                                                                 // data
+                                                                                                 // exists
+                                                                                                 // for
+                                                                                                 // the
+                                                                                                 // student
 
             // Create the DTO object combining student and face data
             StudentWithFaceDTO dto = StudentWithFaceDTO.from(s, face);

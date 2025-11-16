@@ -45,8 +45,7 @@ public class Student extends BaseEntity {
     private List<Attendance> attendances = new ArrayList<>();
 
     // Constructors
-    public Student() {
-    }
+    public Student() {}
 
     public Student(String studentId, String name, String email, String phone, String className) {
         this.studentId = studentId;

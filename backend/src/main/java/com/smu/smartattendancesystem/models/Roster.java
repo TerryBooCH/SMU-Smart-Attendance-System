@@ -17,7 +17,7 @@ public class Roster extends BaseEntity {
 
     // Constructors
     public Roster() {}
-    
+
     public Roster(String name) {
         this.name = name;
     }
@@ -42,9 +42,7 @@ public class Roster extends BaseEntity {
     // Get all Students (for API use)
     @Transient
     public List<Student> getStudents() {
-        return studentRosters.stream()
-                .map(StudentRoster::getStudent)
-                .collect(Collectors.toList());
+        return studentRosters.stream().map(StudentRoster::getStudent).collect(Collectors.toList());
     }
 
     // Add a single student to roster

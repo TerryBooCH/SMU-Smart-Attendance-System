@@ -30,7 +30,8 @@ public class SessionController {
     private final RosterManager rosterManager;
     private final AttendanceManager attendanceManager;
 
-    public SessionController(SessionManager sessionManager, RosterManager rosterManager, AttendanceManager attendanceManager) {
+    public SessionController(SessionManager sessionManager, RosterManager rosterManager,
+            AttendanceManager attendanceManager) {
         this.sessionManager = sessionManager;
         this.rosterManager = rosterManager;
         this.attendanceManager = attendanceManager;
@@ -51,7 +52,8 @@ public class SessionController {
             // Load roster if provided
             if (session.getRoster() != null && session.getRoster().getId() != null) {
                 Roster roster = rosterManager.getRoster(session.getRoster().getId())
-                        .orElseThrow(() -> new EntityNotFoundException("Roster not found with ID: " + session.getRoster().getId()));
+                        .orElseThrow(() -> new EntityNotFoundException(
+                                "Roster not found with ID: " + session.getRoster().getId()));
                 session.setRoster(roster);
             }
 
@@ -63,16 +65,18 @@ public class SessionController {
                 List<Student> students = savedSession.getRoster().getStudents();
 
                 if (!students.isEmpty()) {
-                    List<Attendance> attendances = students.stream()
-                            .map(student -> new Attendance(savedSession, student, "PENDING", "NOT MARKED", null))
-                            .toList();
+                    List<Attendance> attendances =
+                            students.stream().map(student -> new Attendance(savedSession, student,
+                                    "PENDING", "NOT MARKED", null)).toList();
 
                     attendanceManager.saveAll(attendances);
-                    LoggerFacade.info("Initialized attendance for " + students.size() + " students in session " + savedSession.getId() + ".");
+                    LoggerFacade.info("Initialized attendance for " + students.size()
+                            + " students in session " + savedSession.getId() + ".");
                 }
             }
 
-            LoggerFacade.info("Created Session " + savedSession.getId() + " titled: " + savedSession.getCourseName());
+            LoggerFacade.info("Created Session " + savedSession.getId() + " titled: "
+                    + savedSession.getCourseName());
             return ResponseEntity.status(HttpStatus.CREATED).body(toDTO(savedSession));
 
         } catch (EntityNotFoundException e) {
@@ -84,14 +88,15 @@ public class SessionController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (DataIntegrityViolationException e) {
-            LoggerFacade.warning("Data integrity violation while creating session: " + e.getMessage());
+            LoggerFacade
+                    .warning("Data integrity violation while creating session: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse("Database constraint violated"));
         } catch (Exception e) {
             LoggerFacade.severe("Unexpected error while creating session: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An unexpected error occurred while creating the session"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    createErrorResponse("An unexpected error occurred while creating the session"));
         }
     }
 
@@ -99,10 +104,8 @@ public class SessionController {
     @GetMapping
     public ResponseEntity<?> getAllSessions() {
         try {
-            List<SessionDTO> sessions = sessionManager.getAllSessions()
-                    .stream()
-                    .map(this::toDTO)
-                    .toList();
+            List<SessionDTO> sessions =
+                    sessionManager.getAllSessions().stream().map(this::toDTO).toList();
 
             LoggerFacade.info("Fetched all sessions. Total count: " + sessions.size());
             return ResponseEntity.ok(sessions);
@@ -118,8 +121,8 @@ public class SessionController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getSessionById(@PathVariable Long id) {
         try {
-            Session session = sessionManager.getSession(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
+            Session session = sessionManager.getSession(id).orElseThrow(
+                    () -> new EntityNotFoundException("Session not found with ID: " + id));
 
             LoggerFacade.info("Fetched Session " + id + ".");
             return ResponseEntity.ok(toDTO(session));
@@ -128,7 +131,8 @@ public class SessionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while fetching session " + id + ": " + e.getMessage());
+            LoggerFacade.severe(
+                    "Unexpected error while fetching session " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while retrieving the session"));
         }
@@ -138,8 +142,8 @@ public class SessionController {
     @PutMapping("/{id}/open")
     public ResponseEntity<?> openSession(@PathVariable Long id) {
         try {
-            Session session = sessionManager.getSession(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
+            Session session = sessionManager.getSession(id).orElseThrow(
+                    () -> new EntityNotFoundException("Session not found with ID: " + id));
 
             session.setOpen(true);
             Session updated = sessionManager.updateSession(session);
@@ -154,7 +158,8 @@ public class SessionController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while opening session " + id + ": " + e.getMessage());
+            LoggerFacade
+                    .severe("Unexpected error while opening session " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while opening the session"));
         }
@@ -164,14 +169,15 @@ public class SessionController {
     @PutMapping("/{id}/close")
     public ResponseEntity<?> closeSession(@PathVariable Long id) {
         try {
-            Session session = sessionManager.getSession(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
+            Session session = sessionManager.getSession(id).orElseThrow(
+                    () -> new EntityNotFoundException("Session not found with ID: " + id));
 
             session.setOpen(false);
             Session updated = sessionManager.updateSession(session);
-            
+
             // Set all PENDING attendance records to ABSENT
-            List<Attendance> pendingAttendances = attendanceManager.findBySessionAndStatus(id, "PENDING");
+            List<Attendance> pendingAttendances =
+                    attendanceManager.findBySessionAndStatus(id, "PENDING");
             if (!pendingAttendances.isEmpty()) {
                 for (Attendance attendance : pendingAttendances) {
                     attendance.setStatus("ABSENT");
@@ -179,9 +185,10 @@ public class SessionController {
                     // attendance.setTimestamp(LocalDateTime.now());
                 }
                 attendanceManager.saveAll(pendingAttendances);
-                LoggerFacade.info("Set " + pendingAttendances.size() + " PENDING attendance records to ABSENT for Session " + id + ".");
+                LoggerFacade.info("Set " + pendingAttendances.size()
+                        + " PENDING attendance records to ABSENT for Session " + id + ".");
             }
-            
+
             LoggerFacade.info("Closed Session " + id + ".");
             return ResponseEntity.ok(toDTO(updated));
         } catch (EntityNotFoundException e) {
@@ -193,7 +200,8 @@ public class SessionController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while closing session " + id + ": " + e.getMessage());
+            LoggerFacade
+                    .severe("Unexpected error while closing session " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while closing the session"));
         }
@@ -203,8 +211,8 @@ public class SessionController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSession(@PathVariable Long id) {
         try {
-            Session session = sessionManager.getSession(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
+            Session session = sessionManager.getSession(id).orElseThrow(
+                    () -> new EntityNotFoundException("Session not found with ID: " + id));
 
             if (session.isOpen()) {
                 throw new IllegalStateException("Cannot delete an active session");
@@ -222,7 +230,8 @@ public class SessionController {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while deleting session " + id + ": " + e.getMessage());
+            LoggerFacade.severe(
+                    "Unexpected error while deleting session " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while deleting the session"));
         }
@@ -230,14 +239,15 @@ public class SessionController {
 
     // Link roster to session
     @PutMapping("/{id}/roster/{rosterId}")
-    public ResponseEntity<?> linkRosterToSession(@PathVariable Long id, @PathVariable Long rosterId) {
+    public ResponseEntity<?> linkRosterToSession(@PathVariable Long id,
+            @PathVariable Long rosterId) {
         try {
             // Fetch session and roster
-            Session session = sessionManager.getSession(id)
-                    .orElseThrow(() -> new EntityNotFoundException("Session not found with ID: " + id));
+            Session session = sessionManager.getSession(id).orElseThrow(
+                    () -> new EntityNotFoundException("Session not found with ID: " + id));
 
-            Roster roster = rosterManager.getRoster(rosterId)
-                    .orElseThrow(() -> new EntityNotFoundException("Roster not found with ID: " + rosterId));
+            Roster roster = rosterManager.getRoster(rosterId).orElseThrow(
+                    () -> new EntityNotFoundException("Roster not found with ID: " + rosterId));
 
             // Link roster to session
             session.setRoster(roster);
@@ -246,9 +256,9 @@ public class SessionController {
             // Create attendance records for all students in the roster
             List<Student> students = roster.getStudents();
             if (students != null && !students.isEmpty()) {
-                List<Attendance> attendances = students.stream()
-                        .map(student -> new Attendance(updatedSession, student, "PENDING", "NOT MARKED", null))
-                        .toList();
+                List<Attendance> attendances =
+                        students.stream().map(student -> new Attendance(updatedSession, student,
+                                "PENDING", "NOT MARKED", null)).toList();
 
                 attendanceManager.saveAll(attendances);
             }
@@ -261,7 +271,8 @@ public class SessionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while linking roster " + rosterId + " to session " + id + ": " + e.getMessage());
+            LoggerFacade.severe("Unexpected error while linking roster " + rosterId + " to session "
+                    + id + ": " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while linking roster to session"));
@@ -270,18 +281,11 @@ public class SessionController {
 
     // Helper: Convert Session → DTO
     private SessionDTO toDTO(Session session) {
-        return new SessionDTO(
-                session.getId(),
-                session.getCreatedAt(),
-                session.getUpdatedAt(),
-                session.getCourseName(),
-                session.getStartAt(),
-                session.getEndAt(),
-                session.isOpen(),
+        return new SessionDTO(session.getId(), session.getCreatedAt(), session.getUpdatedAt(),
+                session.getCourseName(), session.getStartAt(), session.getEndAt(), session.isOpen(),
                 session.getLateAfterMinutes(),
                 session.getRoster() != null ? session.getRoster().getId() : null,
-                session.getRoster() != null ? session.getRoster().getName() : null
-        );
+                session.getRoster() != null ? session.getRoster().getName() : null);
     }
 
     // Helper: Create error/success responses

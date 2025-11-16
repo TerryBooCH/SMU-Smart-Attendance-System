@@ -43,11 +43,11 @@ public class ReportController {
                     .body(createErrorResponse(e.getMessage()));
 
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while generating session summary (Session ID: " + sessionId + "): "
-                    + e.getMessage());
+            LoggerFacade.severe("Unexpected error while generating session summary (Session ID: "
+                    + sessionId + "): " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while generating the session summary"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    createErrorResponse("An error occurred while generating the session summary"));
         }
     }
 
@@ -56,7 +56,8 @@ public class ReportController {
     public ResponseEntity<?> getStudentAttendanceSummary(@PathVariable String studentId) {
         try {
             LoggerFacade.info("Generating attendance summary for Student ID: " + studentId);
-            StudentAttendanceSummaryDTO summary = reportService.getStudentAttendanceSummary(studentId);
+            StudentAttendanceSummaryDTO summary =
+                    reportService.getStudentAttendanceSummary(studentId);
             return ResponseEntity.ok(summary);
         } catch (EntityNotFoundException | java.util.NoSuchElementException e) {
             LoggerFacade.warning("Student not found: " + studentId);
@@ -70,11 +71,11 @@ public class ReportController {
 
         } catch (Exception e) {
             LoggerFacade
-                    .severe("Unexpected error while generating attendance summary for Student ID: " + studentId + " | "
-                            + e.getMessage());
+                    .severe("Unexpected error while generating attendance summary for Student ID: "
+                            + studentId + " | " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while generating the student attendance summary"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorResponse(
+                    "An error occurred while generating the student attendance summary"));
         }
     }
 }

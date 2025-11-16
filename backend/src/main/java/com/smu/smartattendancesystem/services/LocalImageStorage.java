@@ -40,12 +40,13 @@ public class LocalImageStorage implements ImageStorage {
      * Save an image for a student under {faces.root}/{studentId}/.
      *
      * @param studentId used as the subfolder name
-     * @param file      uploaded image (JPEG/PNG)
+     * @param file uploaded image (JPEG/PNG)
      * @return relative path like "S1234567A/uuid.jpg" (store this in DB)
      * @throws IOException if writing fails
      */
     @Override
-    public String save(String studentId, MultipartFile file) throws IOException, IllegalArgumentException {
+    public String save(String studentId, MultipartFile file)
+            throws IOException, IllegalArgumentException {
 
         // Validate parameters
         if (studentId == null || studentId.isBlank()) {
@@ -171,8 +172,7 @@ public class LocalImageStorage implements ImageStorage {
     }
 
     /**
-     * Delete the entire folder for a student's face images:
-     * {faces.root}/{studentId}/
+     * Delete the entire folder for a student's face images: {faces.root}/{studentId}/
      *
      * @param studentId subfolder to delete
      * @throws IOException if deletion fails unexpectedly

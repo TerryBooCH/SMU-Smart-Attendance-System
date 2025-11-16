@@ -6,7 +6,7 @@ public class StudentDTO {
     private String email;
     private String phone;
     private String className;
-    
+
     public StudentDTO(String studentId, String name, String email, String phone, String className) {
         this.studentId = studentId;
         this.name = name;

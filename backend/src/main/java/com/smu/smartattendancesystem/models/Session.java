@@ -29,8 +29,7 @@ public class Session extends BaseEntity {
     private List<Attendance> attendanceList;
 
     // Constructors
-    public Session() {
-    }
+    public Session() {}
 
     public Session(String courseName, LocalDateTime startAt, LocalDateTime endAt) {
         this.courseName = courseName;
@@ -45,7 +44,8 @@ public class Session extends BaseEntity {
         this.endAt = endAt;
     }
 
-    public Session(Roster roster, String courseName, LocalDateTime startAt, LocalDateTime endAt, Integer lateAfterMinutes) {
+    public Session(Roster roster, String courseName, LocalDateTime startAt, LocalDateTime endAt,
+            Integer lateAfterMinutes) {
         this.roster = roster;
         this.courseName = courseName;
         this.startAt = startAt;

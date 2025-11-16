@@ -18,7 +18,7 @@ import com.smu.smartattendancesystem.biometrics.metrics.*;
 public class EigenFaceRecognizer extends VectorRecognizer {
     private PCA pca;
 
-	public EigenFaceRecognizer(PCA pca, int image_size, BaseMetric metric) {
+    public EigenFaceRecognizer(PCA pca, int image_size, BaseMetric metric) {
         super(image_size, metric);
         this.pca = pca;
     }
@@ -31,9 +31,10 @@ public class EigenFaceRecognizer extends VectorRecognizer {
     public static EigenFaceRecognizer fromConfig(String path) {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> config;
-        
+
         try {
-            config = mapper.readValue(basePath.resolve(path).toFile(), new TypeReference<Map<String, Object>>() {});
+            config = mapper.readValue(basePath.resolve(path).toFile(),
+                    new TypeReference<Map<String, Object>>() {});
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
@@ -81,7 +82,8 @@ public class EigenFaceRecognizer extends VectorRecognizer {
     }
 
     public double computeScore(Mat faceA, Mat faceB) {
-        if (metric == null) throw new IllegalStateException("Metric has not been set.");
+        if (metric == null)
+            throw new IllegalStateException("Metric has not been set.");
 
         double[] vectorA = transform(faceA);
         double[] vectorB = transform(faceB);

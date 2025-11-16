@@ -7,9 +7,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(name = "attendance", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "session_id", "student_id" })
-})
+@Table(name = "attendance",
+        uniqueConstraints = {@UniqueConstraint(columnNames = {"session_id", "student_id"})})
 public class Attendance extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -18,7 +17,7 @@ public class Attendance extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE) 
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Student student;
 
     @Column(nullable = false)
@@ -31,10 +30,10 @@ public class Attendance extends BaseEntity {
     private LocalDateTime timestamp = LocalDateTime.now();
 
     // Constructors
-    public Attendance() {
-    }
+    public Attendance() {}
 
-    public Attendance(Session session, Student student, String status, String method, Double confidence) {
+    public Attendance(Session session, Student student, String status, String method,
+            Double confidence) {
         this.session = session;
         this.student = student;
         this.status = status;

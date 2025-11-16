@@ -24,27 +24,28 @@ public class LoggerController {
     @GetMapping("/download")
     public ResponseEntity<Resource> downloadLogFile() {
         LoggerFacade.info("User attempting to download log file");
-        
+
         try {
             File logFile = new File("attendance.log");
-            
+
             if (!logFile.exists()) {
                 LoggerFacade.warning("Log file download failed - file not found");
                 return ResponseEntity.notFound().build();
             }
 
             InputStreamResource resource = new InputStreamResource(new FileInputStream(logFile));
-            
-            String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+
+            String timestamp =
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String filename = "attendance_log_" + timestamp + ".txt";
-            
-            LoggerFacade.info("Log file download successful - file: " + filename + ", size: " + logFile.length() + " bytes");
+
+            LoggerFacade.info("Log file download successful - file: " + filename + ", size: "
+                    + logFile.length() + " bytes");
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
-                    .contentType(MediaType.TEXT_PLAIN)
-                    .contentLength(logFile.length())
+                    .contentType(MediaType.TEXT_PLAIN).contentLength(logFile.length())
                     .body(resource);
-                    
+
         } catch (FileNotFoundException e) {
             LoggerFacade.severe("Log file download error - file not found: " + e.getMessage());
             return ResponseEntity.notFound().build();

@@ -19,7 +19,7 @@ public interface FaceDataRepository extends JpaRepository<FaceData, Long> {
 
     // Retrieve specific face data by its ID and associated studentId
     Optional<FaceData> findByIdAndStudent_StudentId(Long id, String studentId);
-    
+
     // Retrieve latest face data for student
     Optional<FaceData> findFirstByStudent_StudentIdOrderByCreatedAtDesc(String studentId);
 }

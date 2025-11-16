@@ -28,24 +28,10 @@ public class SessionSummaryDTO {
     private double lateRate; // late / rosterSize
     private double absentRate; // absent / rosterSize
 
-    public SessionSummaryDTO(
-            Long sessionId,
-            String courseName,
-            Long rosterId,
-            int rosterSize,
-            LocalDateTime startAt,
-            LocalDateTime endAt,
-            int lateAfterMinutes,
-            boolean isOpen,
-            int markedCount,
-            int unmarkedCount,
-            int presentCount,
-            int lateCount,
-            int absentCount,
-            int pendingCount,
-            double attendanceRate,
-            double punctualRate,
-            double lateRate,
+    public SessionSummaryDTO(Long sessionId, String courseName, Long rosterId, int rosterSize,
+            LocalDateTime startAt, LocalDateTime endAt, int lateAfterMinutes, boolean isOpen,
+            int markedCount, int unmarkedCount, int presentCount, int lateCount, int absentCount,
+            int pendingCount, double attendanceRate, double punctualRate, double lateRate,
             double absentRate) {
         this.sessionId = sessionId;
         this.courseName = courseName;

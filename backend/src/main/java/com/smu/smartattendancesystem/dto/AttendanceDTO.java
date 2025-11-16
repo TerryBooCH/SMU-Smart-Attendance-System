@@ -10,7 +10,7 @@ public class AttendanceDTO {
     private String method;
     private Double confidence;
     private LocalDateTime timestamp;
-    
+
     // Student info
     private Long studentId;
     private String studentStudentId;
@@ -18,7 +18,7 @@ public class AttendanceDTO {
     private String studentEmail;
     private String studentPhone;
     private String studentClassName;
-    
+
     // Session info (minimal)
     private Long sessionId;
     private String sessionCourseName;
@@ -27,11 +27,11 @@ public class AttendanceDTO {
     // Constructors
     public AttendanceDTO() {}
 
-    public AttendanceDTO(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, 
-                        String status, String method, Double confidence, LocalDateTime timestamp,
-                        Long studentId, String studentStudentId, String studentName, 
-                        String studentEmail, String studentPhone, String studentClassName,
-                        Long sessionId, String sessionCourseName, Boolean sessionOpen) {
+    public AttendanceDTO(Long id, LocalDateTime createdAt, LocalDateTime updatedAt, String status,
+            String method, Double confidence, LocalDateTime timestamp, Long studentId,
+            String studentStudentId, String studentName, String studentEmail, String studentPhone,
+            String studentClassName, Long sessionId, String sessionCourseName,
+            Boolean sessionOpen) {
         this.id = id;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
@@ -51,51 +51,131 @@ public class AttendanceDTO {
     }
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
-    public String getMethod() { return method; }
-    public void setMethod(String method) { this.method = method; }
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
 
-    public Double getConfidence() { return confidence; }
-    public void setConfidence(Double confidence) { this.confidence = confidence; }
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 
-    public LocalDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(LocalDateTime timestamp) { this.timestamp = timestamp; }
+    public String getStatus() {
+        return status;
+    }
 
-    public Long getStudentId() { return studentId; }
-    public void setStudentId(Long studentId) { this.studentId = studentId; }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public String getStudentStudentId() { return studentStudentId; }
-    public void setStudentStudentId(String studentStudentId) { this.studentStudentId = studentStudentId; }
+    public String getMethod() {
+        return method;
+    }
 
-    public String getStudentName() { return studentName; }
-    public void setStudentName(String studentName) { this.studentName = studentName; }
+    public void setMethod(String method) {
+        this.method = method;
+    }
 
-    public String getStudentEmail() { return studentEmail; }
-    public void setStudentEmail(String studentEmail) { this.studentEmail = studentEmail; }
+    public Double getConfidence() {
+        return confidence;
+    }
 
-    public String getStudentPhone() { return studentPhone; }
-    public void setStudentPhone(String studentPhone) { this.studentPhone = studentPhone; }
+    public void setConfidence(Double confidence) {
+        this.confidence = confidence;
+    }
 
-    public String getStudentClassName() { return studentClassName; }
-    public void setStudentClassName(String studentClassName) { this.studentClassName = studentClassName; }
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
 
-    public Long getSessionId() { return sessionId; }
-    public void setSessionId(Long sessionId) { this.sessionId = sessionId; }
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
 
-    public String getSessionCourseName() { return sessionCourseName; }
-    public void setSessionCourseName(String sessionCourseName) { this.sessionCourseName = sessionCourseName; }
+    public Long getStudentId() {
+        return studentId;
+    }
 
-    public Boolean getSessionOpen() { return sessionOpen; }
-    public void setSessionOpen(Boolean sessionOpen) { this.sessionOpen = sessionOpen; }
+    public void setStudentId(Long studentId) {
+        this.studentId = studentId;
+    }
+
+    public String getStudentStudentId() {
+        return studentStudentId;
+    }
+
+    public void setStudentStudentId(String studentStudentId) {
+        this.studentStudentId = studentStudentId;
+    }
+
+    public String getStudentName() {
+        return studentName;
+    }
+
+    public void setStudentName(String studentName) {
+        this.studentName = studentName;
+    }
+
+    public String getStudentEmail() {
+        return studentEmail;
+    }
+
+    public void setStudentEmail(String studentEmail) {
+        this.studentEmail = studentEmail;
+    }
+
+    public String getStudentPhone() {
+        return studentPhone;
+    }
+
+    public void setStudentPhone(String studentPhone) {
+        this.studentPhone = studentPhone;
+    }
+
+    public String getStudentClassName() {
+        return studentClassName;
+    }
+
+    public void setStudentClassName(String studentClassName) {
+        this.studentClassName = studentClassName;
+    }
+
+    public Long getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(Long sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getSessionCourseName() {
+        return sessionCourseName;
+    }
+
+    public void setSessionCourseName(String sessionCourseName) {
+        this.sessionCourseName = sessionCourseName;
+    }
+
+    public Boolean getSessionOpen() {
+        return sessionOpen;
+    }
+
+    public void setSessionOpen(Boolean sessionOpen) {
+        this.sessionOpen = sessionOpen;
+    }
 }

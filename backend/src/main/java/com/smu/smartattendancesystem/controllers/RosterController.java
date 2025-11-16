@@ -31,12 +31,13 @@ public class RosterController {
     private final RosterService rosterService;
     private final FaceDataService faceDataService;
     private final AttendanceManager attendanceManager;
-    private final SessionManager sessionManager; 
+    private final SessionManager sessionManager;
 
-    public RosterController(RosterService rosterService, FaceDataService faceDataService, AttendanceManager attendanceManager, SessionManager sessionManager) {
+    public RosterController(RosterService rosterService, FaceDataService faceDataService,
+            AttendanceManager attendanceManager, SessionManager sessionManager) {
         this.rosterService = rosterService;
         this.faceDataService = faceDataService;
-        this.attendanceManager = attendanceManager; 
+        this.attendanceManager = attendanceManager;
         this.sessionManager = sessionManager;
     }
 
@@ -45,7 +46,8 @@ public class RosterController {
     public ResponseEntity<?> createRoster(@RequestBody Roster roster) {
         try {
             Roster created = rosterService.createRoster(roster);
-            LoggerFacade.info("Created Roster: " + created.getName() + " (ID: " + created.getId() + ").");
+            LoggerFacade.info(
+                    "Created Roster: " + created.getName() + " (ID: " + created.getId() + ").");
             return ResponseEntity.status(HttpStatus.CREATED).body(created);
         } catch (IllegalArgumentException e) {
             LoggerFacade.warning("Failed to create roster: " + e.getMessage());
@@ -68,13 +70,9 @@ public class RosterController {
         try {
             List<Roster> rosters = rosterService.getAllRosters();
             List<RosterSummaryDTO> summaries = rosters.stream()
-                    .map(r -> new RosterSummaryDTO(
-                            r.getId(),
-                            r.getName(),
-                            r.getCreatedAt(),
+                    .map(r -> new RosterSummaryDTO(r.getId(), r.getName(), r.getCreatedAt(),
                             r.getUpdatedAt(),
-                            (r.getStudentRosters() != null) ? r.getStudentRosters().size() : 0
-                    ))
+                            (r.getStudentRosters() != null) ? r.getStudentRosters().size() : 0))
                     .toList();
 
             LoggerFacade.info("Fetched all rosters (" + summaries.size() + " total).");
@@ -105,7 +103,8 @@ public class RosterController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Roster not found with ID: " + id));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while fetching roster ID " + id + ": " + e.getMessage());
+            LoggerFacade.severe(
+                    "Unexpected error while fetching roster ID " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while retrieving the roster"));
         }
@@ -123,7 +122,8 @@ public class RosterController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Roster not found with ID: " + id));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while deleting roster ID " + id + ": " + e.getMessage());
+            LoggerFacade.severe(
+                    "Unexpected error while deleting roster ID " + id + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while deleting the roster"));
         }
@@ -131,30 +131,29 @@ public class RosterController {
 
     // ADD student to roster
     @PostMapping("/{rosterId}/students/{studentId}")
-    public ResponseEntity<?> addStudentToRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
+    public ResponseEntity<?> addStudentToRoster(@PathVariable Long rosterId,
+            @PathVariable String studentId) {
         try {
             Roster updated = rosterService.addStudentToRoster(rosterId, studentId);
-            StudentRoster newStudentRoster = updated.getStudentRosters()
-                    .stream()
-                    .filter(sr -> sr.getStudent().getStudentId().equals(studentId))
-                    .findFirst()
-                    .orElseThrow(() -> new NoSuchElementException("Student not found after adding to roster"));
+            StudentRoster newStudentRoster = updated.getStudentRosters().stream()
+                    .filter(sr -> sr.getStudent().getStudentId().equals(studentId)).findFirst()
+                    .orElseThrow(() -> new NoSuchElementException(
+                            "Student not found after adding to roster"));
 
             Student student = newStudentRoster.getStudent();
 
             // Auto-create attendance for linked sessions
             List<Session> linkedSessions = sessionManager.getSessionsByRosterId(rosterId);
             if (!linkedSessions.isEmpty()) {
-                List<Attendance> attendances = linkedSessions.stream()
-                        .map(session -> new Attendance(session, student, "PENDING", "NOT MARKED", null))
+                List<Attendance> attendances = linkedSessions.stream().map(
+                        session -> new Attendance(session, student, "PENDING", "NOT MARKED", null))
                         .toList();
                 attendanceManager.saveAll(attendances);
             }
 
             List<FaceDataDTO> faceList = faceDataService.list(studentId);
-            String latestFaceBase64 = faceList.isEmpty()
-                    ? null
-                    : faceList.get(faceList.size() - 1).getImageBase64();
+            String latestFaceBase64 =
+                    faceList.isEmpty() ? null : faceList.get(faceList.size() - 1).getImageBase64();
 
             Map<String, Object> response = new HashMap<>();
             response.put("id", student.getId());
@@ -171,61 +170,72 @@ public class RosterController {
         } catch (NoSuchElementException e) {
             String msg = e.getMessage().toLowerCase();
             if (msg.contains("roster")) {
-                LoggerFacade.warning("Failed to add Student " + studentId + " — Roster not found: ID " + rosterId);
+                LoggerFacade.warning("Failed to add Student " + studentId
+                        + " — Roster not found: ID " + rosterId);
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(createErrorResponse("Roster not found with ID: " + rosterId));
             } else if (msg.contains("student")) {
-                LoggerFacade.warning("Failed to add Student " + studentId + " — Student not found.");
+                LoggerFacade
+                        .warning("Failed to add Student " + studentId + " — Student not found.");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(createErrorResponse("Student not found with ID: " + studentId));
             } else {
-                LoggerFacade.warning("Failed to add Student " + studentId + " — Resource not found: " + e.getMessage());
+                LoggerFacade.warning("Failed to add Student " + studentId
+                        + " — Resource not found: " + e.getMessage());
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(createErrorResponse("Resource not found: " + e.getMessage()));
             }
         } catch (IllegalStateException e) {
-            LoggerFacade.warning("Conflict while adding Student " + studentId + " to Roster " + rosterId + ": already exists.");
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(createErrorResponse("Student with ID " + studentId + " is already in this roster"));
+            LoggerFacade.warning("Conflict while adding Student " + studentId + " to Roster "
+                    + rosterId + ": already exists.");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(createErrorResponse(
+                    "Student with ID " + studentId + " is already in this roster"));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while adding Student " + studentId + " to Roster " + rosterId + ": " + e.getMessage());
+            LoggerFacade.severe("Unexpected error while adding Student " + studentId + " to Roster "
+                    + rosterId + ": " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An unexpected error occurred while adding student to roster"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(createErrorResponse(
+                    "An unexpected error occurred while adding student to roster"));
         }
     }
 
     // REMOVE student from roster
     @DeleteMapping("/{rosterId}/students/{studentId}")
-    public ResponseEntity<?> removeStudentFromRoster(@PathVariable Long rosterId, @PathVariable String studentId) {
+    public ResponseEntity<?> removeStudentFromRoster(@PathVariable Long rosterId,
+            @PathVariable String studentId) {
         try {
             Roster updated = rosterService.removeStudentFromRoster(rosterId, studentId);
-            LoggerFacade.info("Removed Student " + studentId + " from Roster (ID: " + rosterId + ").");
+            LoggerFacade
+                    .info("Removed Student " + studentId + " from Roster (ID: " + rosterId + ").");
             return ResponseEntity.ok(updated);
         } catch (NoSuchElementException e) {
             LoggerFacade.warning("Failed to remove Student " + studentId + " — " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while removing Student " + studentId + " from Roster " + rosterId + ": " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while removing student from roster"));
+            LoggerFacade.severe("Unexpected error while removing Student " + studentId
+                    + " from Roster " + rosterId + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    createErrorResponse("An error occurred while removing student from roster"));
         }
     }
 
     // BULK update roster students
     @PutMapping("/{rosterId}/students")
-    public ResponseEntity<?> updateRosterStudents(@PathVariable Long rosterId, @RequestBody List<String> studentIds) {
+    public ResponseEntity<?> updateRosterStudents(@PathVariable Long rosterId,
+            @RequestBody List<String> studentIds) {
         try {
             Roster updated = rosterService.updateRosterStudents(rosterId, studentIds);
-            LoggerFacade.info("Updated student list for Roster (ID: " + rosterId + ") with " + studentIds.size() + " students.");
+            LoggerFacade.info("Updated student list for Roster (ID: " + rosterId + ") with "
+                    + studentIds.size() + " students.");
             return ResponseEntity.ok(updated);
         } catch (NoSuchElementException e) {
             LoggerFacade.warning("Failed to update students — Roster not found: ID " + rosterId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Roster not found with ID: " + rosterId));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while updating students for Roster " + rosterId + ": " + e.getMessage());
+            LoggerFacade.severe("Unexpected error while updating students for Roster " + rosterId
+                    + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while updating roster students"));
         }
@@ -260,7 +270,8 @@ public class RosterController {
                 return studentMap;
             }).collect(Collectors.toList());
 
-            LoggerFacade.info("Fetched " + response.size() + " students from Roster (ID: " + rosterId + ").");
+            LoggerFacade.info(
+                    "Fetched " + response.size() + " students from Roster (ID: " + rosterId + ").");
             return ResponseEntity.ok(response);
 
         } catch (NoSuchElementException e) {
@@ -268,15 +279,17 @@ public class RosterController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Roster not found with ID: " + rosterId));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while fetching students from Roster " + rosterId + ": " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while retrieving students in roster"));
+            LoggerFacade.severe("Unexpected error while fetching students from Roster " + rosterId
+                    + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    createErrorResponse("An error occurred while retrieving students in roster"));
         }
     }
 
     // UPDATE roster name
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateRosterName(@PathVariable Long id, @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> updateRosterName(@PathVariable Long id,
+            @RequestBody Map<String, String> request) {
         try {
             String newName = request.get("name");
             Roster updated = rosterService.updateRosterName(id, newName);
@@ -298,7 +311,8 @@ public class RosterController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while updating roster name (ID: " + id + "): " + e.getMessage());
+            LoggerFacade.severe("Unexpected error while updating roster name (ID: " + id + "): "
+                    + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while updating roster name"));
         }

@@ -38,14 +38,15 @@ public class BiometricWebSocketHandler extends BinaryWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) {
         // Increase allowed message size per session
         session.setBinaryMessageSizeLimit(10 * 1024 * 1024); // 10 MB
-        session.setTextMessageSizeLimit(10 * 1024 * 1024);   // 10 MB
+        session.setTextMessageSizeLimit(10 * 1024 * 1024); // 10 MB
         System.out.println("WebSocket connected: " + session.getId());
     }
 
     // Decode base64 image in the format data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD...
     private byte[] decodeImage(String base64Image) {
         String[] parts = base64Image.split(",");
-        if (parts.length < 2) throw new IllegalArgumentException("Invalid base64 image format");
+        if (parts.length < 2)
+            throw new IllegalArgumentException("Invalid base64 image format");
 
         return Base64.getDecoder().decode(parts[1]);
     }
@@ -56,7 +57,8 @@ public class BiometricWebSocketHandler extends BinaryWebSocketHandler {
 
         String detector_type = getOptionalText(json, "detector_type");
 
-        List<DetectionResultDTO> detectionResults = biometricService.detect(imageBytes, detector_type);
+        List<DetectionResultDTO> detectionResults =
+                biometricService.detect(imageBytes, detector_type);
         sendMessage(session, detectionResults);
     }
 
@@ -72,11 +74,10 @@ public class BiometricWebSocketHandler extends BinaryWebSocketHandler {
         String metric_name = getOptionalText(json, "metric_name");
         Double manualThreshold = getOptionalDouble(json, "manualThreshold");
         Double autoThreshold = getOptionalDouble(json, "autoThreshold");
-        
+
         // Delegate processing to service
-        RecognitionResponse response = biometricService.recognize(
-            imageBytes, session_id, detector_type, type, metric_name, manualThreshold, autoThreshold
-        );
+        RecognitionResponse response = biometricService.recognize(imageBytes, session_id,
+                detector_type, type, metric_name, manualThreshold, autoThreshold);
 
         ObjectNode success = objectMapper.createObjectNode();
         success.put("status", "success");
@@ -97,14 +98,15 @@ public class BiometricWebSocketHandler extends BinaryWebSocketHandler {
 
             switch (json.get("event").asText()) {
                 case "detect": {
-                    handleDetection(session, json); 
+                    handleDetection(session, json);
                     break;
                 }
                 case "recognize": {
                     handleRecognition(session, json);
                     break;
                 }
-                default: throw new IllegalArgumentException("Invalid field 'event'.");
+                default:
+                    throw new IllegalArgumentException("Invalid field 'event'.");
             }
         } catch (IllegalArgumentException | JsonProcessingException e) {
             ObjectNode error = objectMapper.createObjectNode();
@@ -124,13 +126,15 @@ public class BiometricWebSocketHandler extends BinaryWebSocketHandler {
         try {
             String jsonString = objectMapper.writeValueAsString(payload);
             sendMessage(session, new TextMessage(jsonString));
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
     }
 
     private void sendMessage(WebSocketSession session, WebSocketMessage<?> message) {
         try {
             session.sendMessage(message);
-        } catch (IOException e) {}
+        } catch (IOException e) {
+        }
     }
 
     private String getOptionalText(JsonNode json, String field) {

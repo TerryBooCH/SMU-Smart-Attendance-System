@@ -35,10 +35,8 @@ public class ReportService {
     private StudentRosterRepository studentRosterRepository;
     private AttendanceRepository attendanceRepository;
 
-    public ReportService(SessionManager sessionManager,
-            AttendanceManager attendanceManager,
-            StudentManager studentManager,
-            StudentRosterRepository studentRosterRepository,
+    public ReportService(SessionManager sessionManager, AttendanceManager attendanceManager,
+            StudentManager studentManager, StudentRosterRepository studentRosterRepository,
             AttendanceRepository attendanceRepository) {
         this.sessionManager = sessionManager;
         this.attendanceManager = attendanceManager;
@@ -93,7 +91,8 @@ public class ReportService {
         int unmarkedCount = rosterSize - markedCount;
 
         // Compute attendance rates
-        double denom = rosterSize == 0 ? 1.0 : rosterSize; // if roster size is 0, set denom to 1, else set it to
+        double denom = rosterSize == 0 ? 1.0 : rosterSize; // if roster size is 0, set denom to 1,
+                                                           // else set it to
                                                            // rosterSize
         double attendanceRate = (presentCount + lateCount) / denom;
         double punctualRate = presentCount / denom;
@@ -101,28 +100,25 @@ public class ReportService {
         double absentRate = absentCount / denom;
 
         // Return the SessionSummaryDTO
-        return new SessionSummaryDTO(
-                session.getId(),
-                session.getCourseName(),
-                session.getRoster() != null ? session.getRoster().getId() : null, // if roster exists, return rosterId,
-                                                                                  // else return null
-                rosterSize,
-                session.getStartAt(),
-                session.getEndAt(),
-                session.getLateAfterMinutes() != null ? session.getLateAfterMinutes() : 15, // use the value specified,
-                                                                                            // else fallback to 15
-                                                                                            // minutes by default
-                session.isOpen(),
-                markedCount,
-                unmarkedCount,
-                presentCount,
-                lateCount,
-                absentCount,
-                pendingCount,
-                attendanceRate,
-                punctualRate,
-                lateRate,
-                absentRate);
+        return new SessionSummaryDTO(session.getId(), session.getCourseName(),
+                session.getRoster() != null ? session.getRoster().getId() : null, // if roster
+                                                                                  // exists, return
+                                                                                  // rosterId,
+                                                                                  // else return
+                                                                                  // null
+                rosterSize, session.getStartAt(), session.getEndAt(),
+                session.getLateAfterMinutes() != null ? session.getLateAfterMinutes() : 15, // use
+                                                                                            // the
+                                                                                            // value
+                                                                                            // specified,
+                                                                                            // else
+                                                                                            // fallback
+                                                                                            // to 15
+                                                                                            // minutes
+                                                                                            // by
+                                                                                            // default
+                session.isOpen(), markedCount, unmarkedCount, presentCount, lateCount, absentCount,
+                pendingCount, attendanceRate, punctualRate, lateRate, absentRate);
     }
 
     public StudentAttendanceSummaryDTO getStudentAttendanceSummary(String studentId) {
@@ -135,13 +131,9 @@ public class ReportService {
 
         // If student is not inside a roster
         if (studentRosters.isEmpty()) {
-            return new StudentAttendanceSummaryDTO(
-                    new ArrayList<>(), // return empty sessions
-                    student.getStudentId(),
-                    student.getName(),
-                    student.getClassName(),
-                    0, 0, 0, 0, 0, 0,
-                    0.0, 0.0, 0.0, 0.0);
+            return new StudentAttendanceSummaryDTO(new ArrayList<>(), // return empty sessions
+                    student.getStudentId(), student.getName(), student.getClassName(), 0, 0, 0, 0,
+                    0, 0, 0.0, 0.0, 0.0, 0.0);
         }
 
         // Retrieve student roster
@@ -152,13 +144,9 @@ public class ReportService {
 
         // If roster exists but has no sessions yet
         if (sessions.isEmpty()) {
-            return new StudentAttendanceSummaryDTO(
-                    new ArrayList<>(),
-                    student.getStudentId(),
-                    student.getName(),
-                    student.getClassName(),
-                    0, 0, 0, 0, 0, 0,
-                    0.0, 0.0, 0.0, 0.0);
+            return new StudentAttendanceSummaryDTO(new ArrayList<>(), student.getStudentId(),
+                    student.getName(), student.getClassName(), 0, 0, 0, 0, 0, 0, 0.0, 0.0, 0.0,
+                    0.0);
         }
 
         // Retrieve student attendances for the sessions retrieved
@@ -167,7 +155,8 @@ public class ReportService {
             sessionIds.add(s.getId());
         }
 
-        List<Attendance> attendances = attendanceRepository.findByStudentIdAndSessionIdIn(student.getId(), sessionIds);
+        List<Attendance> attendances =
+                attendanceRepository.findByStudentIdAndSessionIdIn(student.getId(), sessionIds);
 
         // Map the attendances with the relevant sessions for O(1) lookups
         Map<Long, Attendance> attendanceBySessionId = new HashMap<>();
@@ -226,23 +215,21 @@ public class ReportService {
                 unmarkedCount++;
             }
             // Build the per-session DTO
-            sessionDetails.add(new StudentSessionAttendanceDTO(
-                    s.getId(),
-                    s.getCourseName(),
-                    s.getRoster() != null ? s.getRoster().getId() : null, // if roster exists, return it's id, else
+            sessionDetails.add(new StudentSessionAttendanceDTO(s.getId(), s.getCourseName(),
+                    s.getRoster() != null ? s.getRoster().getId() : null, // if roster exists,
+                                                                          // return it's id, else
                                                                           // return null
-                    s.getRoster() != null ? s.getRoster().getName() : null, // if roster exists, return it's name, else
+                    s.getRoster() != null ? s.getRoster().getName() : null, // if roster exists,
+                                                                            // return it's name,
+                                                                            // else
                                                                             // return null
-                    s.getStartAt(),
-                    s.getEndAt(),
-                    s.getLateAfterMinutes() != null ? s.getLateAfterMinutes() : 15, // if no lateAfterMinutes set, set
-                                                                                    // default to 15 minutes
-                    s.isOpen(),
-                    status,
-                    method,
-                    confidence,
-                    timestamp,
-                    offsetMinutes));
+                    s.getStartAt(), s.getEndAt(),
+                    s.getLateAfterMinutes() != null ? s.getLateAfterMinutes() : 15, // if no
+                                                                                    // lateAfterMinutes
+                                                                                    // set, set
+                                                                                    // default to 15
+                                                                                    // minutes
+                    s.isOpen(), status, method, confidence, timestamp, offsetMinutes));
         }
 
         // Compute attendance rates
@@ -253,20 +240,9 @@ public class ReportService {
         double absentRate = absentCount / denom;
 
         // Return summary
-        return new StudentAttendanceSummaryDTO(
-                sessionDetails,
-                student.getStudentId(),
-                student.getName(),
-                student.getClassName(),
-                totalSessions,
-                presentCount,
-                lateCount,
-                absentCount,
-                pendingCount,
-                unmarkedCount,
-                attendanceRate,
-                punctualRate,
-                lateRate,
+        return new StudentAttendanceSummaryDTO(sessionDetails, student.getStudentId(),
+                student.getName(), student.getClassName(), totalSessions, presentCount, lateCount,
+                absentCount, pendingCount, unmarkedCount, attendanceRate, punctualRate, lateRate,
                 absentRate);
     }
 

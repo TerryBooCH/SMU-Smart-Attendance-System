@@ -76,8 +76,10 @@ public class SessionService {
         Optional<Roster> rosterOpt = rosterManager.getRoster(rosterId);
 
         if (sessionOpt.isEmpty() || rosterOpt.isEmpty()) {
-            if (sessionOpt.isEmpty()) throw new EntityNotFoundException("Session not found");
-            if (rosterOpt.isEmpty()) throw new EntityNotFoundException("Roster not found");
+            if (sessionOpt.isEmpty())
+                throw new EntityNotFoundException("Session not found");
+            if (rosterOpt.isEmpty())
+                throw new EntityNotFoundException("Roster not found");
         }
 
         Session session = sessionOpt.get();

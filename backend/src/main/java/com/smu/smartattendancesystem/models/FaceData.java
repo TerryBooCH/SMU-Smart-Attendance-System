@@ -24,9 +24,10 @@ public class FaceData extends BaseEntity {
 
     // The owning side of the Many-To-One relationship with Student
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "student_id", nullable = false) // Adds a foreign key column 'student_id' linking to Student's PK id
+    @JoinColumn(name = "student_id", nullable = false) // Adds a foreign key column 'student_id'
+                                                       // linking to Student's PK id
     @JsonIgnore
-    @OnDelete(action = OnDeleteAction.CASCADE)  
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Student student;
 
     @Column(name = "image_path", nullable = false)
@@ -38,8 +39,7 @@ public class FaceData extends BaseEntity {
     private LocalDateTime capturedAt = LocalDateTime.now();
 
     // Constructors
-    public FaceData() {
-    }
+    public FaceData() {}
 
     public FaceData(Student student, String imagePath) {
         this.student = student;

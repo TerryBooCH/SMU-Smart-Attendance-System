@@ -26,8 +26,7 @@ public class StudentRoster implements Serializable {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // Constructors
-    public StudentRoster() {
-    }
+    public StudentRoster() {}
 
     public StudentRoster(Student student, Roster roster) {
         this.student = student;

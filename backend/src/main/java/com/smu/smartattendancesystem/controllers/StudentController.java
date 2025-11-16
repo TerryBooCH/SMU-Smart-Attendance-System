@@ -42,13 +42,12 @@ public class StudentController {
     @PostMapping
     public ResponseEntity<?> addStudent(@RequestBody Student student) {
         try {
-            System.out.println(
-                    "=== Creating Student: " + student.getStudentId() + " | Class: " + student.getClassName() + " ===");
+            System.out.println("=== Creating Student: " + student.getStudentId() + " | Class: "
+                    + student.getClassName() + " ===");
 
             Student createdStudent = studentService.createStudent(student);
             LoggerFacade.info("Enrolled Student " + createdStudent.getStudentId() + ".");
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(createdStudent);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdStudent);
         } catch (IllegalArgumentException e) {
             LoggerFacade.warning("Failed to create student: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -99,7 +98,8 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while fetching student " + studentId + ": " + e.getMessage());
+            LoggerFacade.severe(
+                    "Unexpected error while fetching student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while fetching the student"));
         }
@@ -122,11 +122,13 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalStateException e) {
-            LoggerFacade.warning("Conflict while updating Student " + studentId + ": " + e.getMessage());
+            LoggerFacade.warning(
+                    "Conflict while updating Student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while updating student " + studentId + ": " + e.getMessage());
+            LoggerFacade.severe(
+                    "Unexpected error while updating student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while updating the student"));
         }
@@ -145,7 +147,8 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Student not found with ID: " + studentId));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while deleting student " + studentId + ": " + e.getMessage());
+            LoggerFacade.severe(
+                    "Unexpected error while deleting student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while deleting the student"));
         }
@@ -162,7 +165,8 @@ public class StudentController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while listing faces for Student " + studentId + ": " + e.getMessage());
+            LoggerFacade.severe("Unexpected error while listing faces for Student " + studentId
+                    + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while listing face data"));
         }
@@ -180,18 +184,21 @@ public class StudentController {
             response.put("status", "success");
             response.put("data", dtos);
 
-            LoggerFacade.info("Uploaded " + files.size() + " face images for Student " + studentId + ".");
+            LoggerFacade.info(
+                    "Uploaded " + files.size() + " face images for Student " + studentId + ".");
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (NoSuchElementException e) {
             LoggerFacade.warning("Failed to upload faces — Student not found: " + studentId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalArgumentException | IllegalStateException e) {
-            LoggerFacade.warning("Failed to upload faces for Student " + studentId + ": " + e.getMessage());
+            LoggerFacade.warning(
+                    "Failed to upload faces for Student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while uploading faces for Student " + studentId + ": " + e.getMessage());
+            LoggerFacade.severe("Unexpected error while uploading faces for Student " + studentId
+                    + ": " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while uploading face data"));
@@ -200,17 +207,21 @@ public class StudentController {
 
     // DELETE face data for a student
     @DeleteMapping("/{studentId}/faces/{faceDataId}")
-    public ResponseEntity<?> deleteFace(@PathVariable String studentId, @PathVariable Long faceDataId) {
+    public ResponseEntity<?> deleteFace(@PathVariable String studentId,
+            @PathVariable Long faceDataId) {
         try {
             faceDataService.delete(studentId, faceDataId);
-            LoggerFacade.info("Deleted face data (ID: " + faceDataId + ") for Student " + studentId + ".");
+            LoggerFacade.info(
+                    "Deleted face data (ID: " + faceDataId + ") for Student " + studentId + ".");
             return ResponseEntity.noContent().build();
         } catch (NoSuchElementException e) {
-            LoggerFacade.warning("Failed to delete face data (ID: " + faceDataId + ") — Student not found: " + studentId);
+            LoggerFacade.warning("Failed to delete face data (ID: " + faceDataId
+                    + ") — Student not found: " + studentId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while deleting face data (ID: " + faceDataId + ") for Student " + studentId + ": " + e.getMessage());
+            LoggerFacade.severe("Unexpected error while deleting face data (ID: " + faceDataId
+                    + ") for Student " + studentId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while deleting face data"));
         }
@@ -225,10 +236,10 @@ public class StudentController {
             return ResponseEntity.ok(results);
         } catch (IllegalArgumentException e) {
             LoggerFacade.warning("Invalid search query: " + e.getMessage());
-            return ResponseEntity.badRequest()
-                    .body(createErrorResponse(e.getMessage()));
+            return ResponseEntity.badRequest().body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while searching for students by name (" + name + "): " + e.getMessage());
+            LoggerFacade.severe("Unexpected error while searching for students by name (" + name
+                    + "): " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An error occurred while searching for students"));
         }

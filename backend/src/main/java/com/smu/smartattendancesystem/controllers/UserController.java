@@ -30,11 +30,13 @@ public class UserController {
             LoggerFacade.info("User logged in successfully: " + request.email());
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            LoggerFacade.warning("Login failed for user " + request.email() + ": " + e.getMessage());
+            LoggerFacade
+                    .warning("Login failed for user " + request.email() + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error during login for user " + request.email() + ": " + e.getMessage());
+            LoggerFacade.severe("Unexpected error during login for user " + request.email() + ": "
+                    + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(createErrorResponse("An unexpected error occurred: " + e.getMessage()));
         }

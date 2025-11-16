@@ -16,7 +16,8 @@ public class UserService {
     private final UserManager userManager;
     private final JwtService jwtService;
 
-    public UserService(UserManager userManager, JwtService jwtService) throws IllegalArgumentException {
+    public UserService(UserManager userManager, JwtService jwtService)
+            throws IllegalArgumentException {
         this.userManager = userManager;
         this.jwtService = jwtService;
     }

@@ -31,8 +31,7 @@ public class User extends BaseEntity {
     // Constructors
     // ─────────────────────────────────────────────
 
-    public User() {
-    }
+    public User() {}
 
     public User(String name, String email, String plainPassword, int permissionLevel) {
         this.name = name;
@@ -41,7 +40,8 @@ public class User extends BaseEntity {
         this.permissionLevel = permissionLevel;
     }
 
-    public User(String name, String email, String plainPassword, int permissionLevel, Student student) {
+    public User(String name, String email, String plainPassword, int permissionLevel,
+            Student student) {
         this(name, email, plainPassword, permissionLevel);
         this.student = student;
     }

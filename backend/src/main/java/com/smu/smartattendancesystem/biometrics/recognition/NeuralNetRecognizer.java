@@ -30,34 +30,32 @@ public class NeuralNetRecognizer extends VectorRecognizer {
 
     public double[] transform(Mat face) {
         Mat resized = ImageUtils.letterbox_resize(face, this.image_size, new Scalar(image_size));
-        Mat blob = Dnn.blobFromImage(
-            resized,
-            1.0 / 255.0,  // normalize image
-            new Size(image_size, image_size),
-            new Scalar(0, 0, 0),
-            true,  // SwapRB (BGR -> RGB)
-            false  // Cropping
+        Mat blob = Dnn.blobFromImage(resized, 1.0 / 255.0, // normalize image
+                new Size(image_size, image_size), new Scalar(0, 0, 0), true, // SwapRB (BGR -> RGB)
+                false // Cropping
         );
 
         model.setInput(blob);
-        Mat result = model.forward();  // result is CV_32F type, meaning it can only be converted to a float array
+        Mat result = model.forward(); // result is CV_32F type, meaning it can only be converted to
+                                      // a float array
         int size = (int) result.total();
 
         // Convert Mat to float array
         float[] fvector = new float[size];
-        result.get(0, 0, fvector); 
+        result.get(0, 0, fvector);
 
         // Then copy and cast all elements in float array to double
-        double[] vector = new double[size];  
+        double[] vector = new double[size];
         for (int i = 0; i < size; i++) {
             vector[i] = fvector[i];
         }
 
         return vector;
     }
-    
+
     public double computeScore(Mat faceA, Mat faceB) {
-        if (metric == null) throw new IllegalStateException("Metric has not been set.");
+        if (metric == null)
+            throw new IllegalStateException("Metric has not been set.");
 
         double[] vectorA = transform(faceA);
         double[] vectorB = transform(faceB);

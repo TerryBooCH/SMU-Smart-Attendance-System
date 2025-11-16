@@ -25,21 +25,10 @@ public class StudentAttendanceSummaryDTO {
 
     private final List<StudentSessionAttendanceDTO> sessions;
 
-    public StudentAttendanceSummaryDTO(
-            List<StudentSessionAttendanceDTO> sessions,
-            String studentId,
-            String name,
-            String className,
-            int totalSessions,
-            int presentCount,
-            int lateCount,
-            int absentCount,
-            int pendingCount,
-            int unmarkedCount,
-            double attendanceRate,
-            double punctualRate,
-            double lateRate,
-            double absentRate) {
+    public StudentAttendanceSummaryDTO(List<StudentSessionAttendanceDTO> sessions, String studentId,
+            String name, String className, int totalSessions, int presentCount, int lateCount,
+            int absentCount, int pendingCount, int unmarkedCount, double attendanceRate,
+            double punctualRate, double lateRate, double absentRate) {
         this.sessions = sessions;
         this.studentId = studentId;
         this.name = name;

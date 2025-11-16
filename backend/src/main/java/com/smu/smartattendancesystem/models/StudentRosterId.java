@@ -7,8 +7,7 @@ public class StudentRosterId implements Serializable {
     private Long student;
     private Long roster;
 
-    public StudentRosterId() {
-    }
+    public StudentRosterId() {}
 
     public StudentRosterId(Long student, Long roster) {
         this.student = student;

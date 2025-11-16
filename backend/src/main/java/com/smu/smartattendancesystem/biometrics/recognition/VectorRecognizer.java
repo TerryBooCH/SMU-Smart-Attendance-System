@@ -19,7 +19,7 @@ public abstract class VectorRecognizer extends BaseRecognizer {
     }
 
     public RecognitionResult recognizeVectors(Mat face, Map<Student, List<double[]>> dataset) {
-        if (metric == null) 
+        if (metric == null)
             throw new IllegalStateException("Metric has not been set.");
 
         double[] vector = transform(face);
@@ -48,11 +48,11 @@ public abstract class VectorRecognizer extends BaseRecognizer {
     public abstract double[] transform(Mat face);
 
     public BaseMetric getMetric() {
-		return metric;
-	}
+        return metric;
+    }
 
-	public void setMetric(BaseMetric metric) {
-		this.metric = metric;
-	}
+    public void setMetric(BaseMetric metric) {
+        this.metric = metric;
+    }
 
 }

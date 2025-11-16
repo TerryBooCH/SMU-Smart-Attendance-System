@@ -15,8 +15,7 @@ public class FaceDataDTO {
     private String imageBase64;
 
     // Default constructor for Jackson
-    public FaceDataDTO() {
-    }
+    public FaceDataDTO() {}
 
     // Constructor from entity
     public FaceDataDTO(FaceData faceData, LocalImageStorage storage) {
@@ -28,10 +27,10 @@ public class FaceDataDTO {
         // Read and encode the image
         try {
             byte[] imageBytes = storage.read(faceData.getImagePath());
-            this.imageBase64 = "data:image/jpeg;base64," +
-                    Base64.getEncoder().encodeToString(imageBytes);
+            this.imageBase64 =
+                    "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(imageBytes);
         } catch (Exception e) {
-            this.imageBase64 = null; 
+            this.imageBase64 = null;
         }
     }
 

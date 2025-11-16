@@ -4,7 +4,7 @@ import com.smu.smartattendancesystem.models.Student;
 
 public class RecognitionResult {
     private Student student;
-	private double score;
+    private double score;
 
     public RecognitionResult(Student student, double score) {
         this.student = student;
@@ -16,8 +16,8 @@ public class RecognitionResult {
     }
 
     public void setStudent(Student student) {
-		this.student = student;
-	}
+        this.student = student;
+    }
 
     public double getScore() {
         return this.score;

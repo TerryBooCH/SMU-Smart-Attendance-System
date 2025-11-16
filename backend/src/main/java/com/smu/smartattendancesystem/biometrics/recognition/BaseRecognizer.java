@@ -1,4 +1,5 @@
 package com.smu.smartattendancesystem.biometrics.recognition;
+
 import java.nio.file.*;
 import java.util.*;
 import org.opencv.core.*;
@@ -8,11 +9,13 @@ import com.smu.smartattendancesystem.models.Student;
 import com.smu.smartattendancesystem.biometrics.detection.DetectionResult;
 
 public abstract class BaseRecognizer {
-    static { nu.pattern.OpenCV.loadLocally(); }
+    static {
+        nu.pattern.OpenCV.loadLocally();
+    }
     protected static final Path basePath = Paths.get(System.getProperty("user.dir"));
     protected int image_size;
 
-	public BaseRecognizer(int image_size) {
+    public BaseRecognizer(int image_size) {
         this.image_size = image_size;
     }
 

@@ -16,9 +16,8 @@ public interface EmbeddingRepository extends JpaRepository<Embedding, Long> {
     List<Embedding> findByFaceData(FaceData faceData);
 
     // Find a single embedding by detector + recognizer + face_data
-    Optional<Embedding> findByDetectorAndRecognizerAndFaceData(
-            String detector, String recognizer, FaceData faceData
-    );
+    Optional<Embedding> findByDetectorAndRecognizerAndFaceData(String detector, String recognizer,
+            FaceData faceData);
 
     // Find all embeddings for a detector and recognizer
     List<Embedding> findByDetectorAndRecognizer(String detector, String recognizer);

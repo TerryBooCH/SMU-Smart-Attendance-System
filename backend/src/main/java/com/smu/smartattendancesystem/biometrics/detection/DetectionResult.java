@@ -4,10 +4,10 @@ import java.util.List;
 import org.opencv.core.*;
 import com.smu.smartattendancesystem.dto.DetectionResultDTO;
 
-public class DetectionResult implements Comparable<DetectionResult>{
+public class DetectionResult implements Comparable<DetectionResult> {
     private final Rect2d bbox;
     private final double score;
-    
+
     public DetectionResult(Rect2d bbox, double score) {
         this.bbox = bbox;
         this.score = score;
@@ -24,14 +24,16 @@ public class DetectionResult implements Comparable<DetectionResult>{
     public DetectionResult(Rect bbox) {
         this(new Rect2d(bbox.x, bbox.y, bbox.width, bbox.height), 0.0);
     }
-    
+
     @Override
     public int compareTo(DetectionResult other) {
         int scoreComparison = -Double.compare(this.score, other.score);
-        if (scoreComparison != 0) return scoreComparison;
+        if (scoreComparison != 0)
+            return scoreComparison;
 
         int areaComparison = -Double.compare(this.bbox.area(), other.bbox.area());
-        if (areaComparison != 0) return areaComparison;
+        if (areaComparison != 0)
+            return areaComparison;
 
         return 0;
     }
@@ -42,19 +44,21 @@ public class DetectionResult implements Comparable<DetectionResult>{
     }
 
     public double computeIOU(Rect2d other) {
-        if (this.bbox.area() <= 0 || other.area() <= 0) return 0.0;
-        
+        if (this.bbox.area() <= 0 || other.area() <= 0)
+            return 0.0;
+
         double xLeft = Math.max(this.bbox.x, other.x);
         double yTop = Math.max(this.bbox.y, other.y);
         double xRight = Math.min(this.bbox.x + this.bbox.width, other.x + other.width);
         double yBottom = Math.min(this.bbox.y + this.bbox.height, other.y + other.height);
-        
+
         // If there is no intersection, return 0.
-        if (xRight <= xLeft || yBottom <= yTop) return 0.0;
-        
+        if (xRight <= xLeft || yBottom <= yTop)
+            return 0.0;
+
         double intersectionArea = (xRight - xLeft) * (yBottom - yTop);
         double unionArea = this.bbox.area() + other.area() - intersectionArea;
-        
+
         return intersectionArea / unionArea;
     }
 
@@ -65,15 +69,13 @@ public class DetectionResult implements Comparable<DetectionResult>{
     public Rect2d getBbox() {
         return bbox;
     }
-    
+
     public double getScore() {
         return score;
     }
 
     public static MatOfRect2d toMatOfRect2d(List<DetectionResult> results) {
-        Rect2d[] rects = results.stream()
-                .map(DetectionResult::getBbox)
-                .toArray(Rect2d[]::new);
+        Rect2d[] rects = results.stream().map(DetectionResult::getBbox).toArray(Rect2d[]::new);
         return new MatOfRect2d(rects);
     }
 

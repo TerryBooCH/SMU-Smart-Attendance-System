@@ -15,7 +15,8 @@ public class YoloDetector extends BaseDetector {
     private double scoreThreshold;
 
     // imageSize is the size of the image the model itself will be working with
-    // It is NOT the input size of the image, letterbox resizing is applied so no other
+    // It is NOT the input size of the image, letterbox resizing is applied so no
+    // other
     // preprocessing step is needed.
     public YoloDetector(String yoloPath, int imageSize, double scoreThreshold) {
         this.yoloPath = basePath.resolve(yoloPath);
@@ -50,8 +51,9 @@ public class YoloDetector extends BaseDetector {
 
         Rect roi = new Rect(dx, dy, newW, newH);
         resized.copyTo(blob.submat(roi));
-        
-        blob = Dnn.blobFromImage(blob, 1/255.0, new Size(imageSize, imageSize), new Scalar(0, 0, 0), true);
+
+        blob = Dnn.blobFromImage(blob, 1 / 255.0, new Size(imageSize, imageSize),
+                new Scalar(0, 0, 0), true);
 
         Map<String, Object> result = new HashMap<>();
         result.put("blob", blob);
@@ -70,7 +72,7 @@ public class YoloDetector extends BaseDetector {
         int dx = (int) res.get("dx");
         int dy = (int) res.get("dy");
         model.setInput(blob);
-        
+
         Mat output = model.forward();
         Mat transposed = new Mat();
         Core.transpose(output.reshape(1, output.size(1)), transposed);
@@ -78,9 +80,10 @@ public class YoloDetector extends BaseDetector {
         for (int i = 0; i < transposed.rows(); i++) {
             Mat row = transposed.row(i);
             float[] data = new float[(int) row.total()];
-            row.get(0, 0, data);  // Copy Mat data to a float array
-            
-            if (data[4] < this.scoreThreshold) continue;
+            row.get(0, 0, data); // Copy Mat data to a float array
+
+            if (data[4] < this.scoreThreshold)
+                continue;
 
             double centerX = data[0];
             double centerY = data[1];

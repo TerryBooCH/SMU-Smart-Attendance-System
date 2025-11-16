@@ -11,9 +11,7 @@ public class CustomLogFormatter extends Formatter {
     @Override
     public String format(LogRecord record) {
         String timestamp = dateFormat.format(new Date(record.getMillis()));
-        return String.format("[%s] %s: %s%n",
-                timestamp,
-                record.getLevel().getName(),
+        return String.format("[%s] %s: %s%n", timestamp, record.getLevel().getName(),
                 record.getMessage());
     }
 }

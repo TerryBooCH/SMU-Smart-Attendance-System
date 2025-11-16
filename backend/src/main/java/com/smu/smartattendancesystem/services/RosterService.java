@@ -19,7 +19,8 @@ public class RosterService {
     private final StudentRepository studentRepository;
     private final SessionRepository sessionRepository;
 
-    public RosterService(RosterManager rosterManager, StudentRepository studentRepository, SessionRepository sessionRepository) {
+    public RosterService(RosterManager rosterManager, StudentRepository studentRepository,
+            SessionRepository sessionRepository) {
         this.rosterManager = rosterManager;
         this.studentRepository = studentRepository;
         this.sessionRepository = sessionRepository;
@@ -52,8 +53,8 @@ public class RosterService {
             throw new IllegalArgumentException("Roster name cannot be empty");
         }
 
-        Roster roster = rosterManager.getRoster(rosterId)
-                .orElseThrow(() -> new NoSuchElementException("Roster not found with ID: " + rosterId));
+        Roster roster = rosterManager.getRoster(rosterId).orElseThrow(
+                () -> new NoSuchElementException("Roster not found with ID: " + rosterId));
 
         roster.setName(newName);
         return rosterManager.updateRoster(roster);
@@ -62,26 +63,26 @@ public class RosterService {
     // Add student to roster
     public Roster addStudentToRoster(Long rosterId, String studentId) {
         // Fetch roster using RosterManager
-        Roster roster = rosterManager.getRoster(rosterId)
-                .orElseThrow(() -> new NoSuchElementException("Roster not found with ID: " + rosterId));
+        Roster roster = rosterManager.getRoster(rosterId).orElseThrow(
+                () -> new NoSuchElementException("Roster not found with ID: " + rosterId));
 
         // Fetch student (throws NoSuchElementException if not found)
-        Student student = studentRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new NoSuchElementException("Student not found with studentId: " + studentId));
+        Student student = studentRepository.findByStudentId(studentId).orElseThrow(
+                () -> new NoSuchElementException("Student not found with studentId: " + studentId));
 
         // Check if student already in roster
         boolean alreadyInRoster = roster.getStudentRosters().stream()
                 .anyMatch(sr -> sr.getStudent().getStudentId().equals(studentId));
         if (alreadyInRoster) {
-            throw new IllegalStateException(
-                    "Student with ID " + studentId + " is already in roster \"" + roster.getName() + "\"");
+            throw new IllegalStateException("Student with ID " + studentId
+                    + " is already in roster \"" + roster.getName() + "\"");
         }
 
         // Add to roster
         boolean added = roster.addToRoster(student);
         if (!added) {
-            throw new IllegalStateException(
-                    "Failed to add student to roster \"" + roster.getName() + "\" — possible invalid state");
+            throw new IllegalStateException("Failed to add student to roster \"" + roster.getName()
+                    + "\" — possible invalid state");
         }
 
         // Save and return updated roster
@@ -91,8 +92,8 @@ public class RosterService {
     // Remove student from roster
     public Roster removeStudentFromRoster(Long rosterId, String studentId) {
         Roster roster = getRosterById(rosterId);
-        Student student = studentRepository.findByStudentId(studentId)
-                .orElseThrow(() -> new RuntimeException("Student not found with studentId: " + studentId));
+        Student student = studentRepository.findByStudentId(studentId).orElseThrow(
+                () -> new RuntimeException("Student not found with studentId: " + studentId));
 
         boolean removed = roster.removeFromRoster(student.getId());
         if (!removed) {

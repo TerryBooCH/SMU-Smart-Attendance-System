@@ -25,7 +25,8 @@ public class AttendanceController {
     private final AttendanceManager attendanceManager;
     private final StudentManager studentManager;
 
-    public AttendanceController(AttendanceManager attendanceManager, StudentManager studentManager) {
+    public AttendanceController(AttendanceManager attendanceManager,
+            StudentManager studentManager) {
         this.attendanceManager = attendanceManager;
         this.studentManager = studentManager;
     }
@@ -35,47 +36,47 @@ public class AttendanceController {
     public ResponseEntity<?> getAttendanceBySessionId(@PathVariable Long sessionId) {
         try {
             List<Attendance> attendances = attendanceManager.getAttendanceBySessionId(sessionId);
-            
+
             // Convert to DTO to avoid circular references and include only needed data
-            List<AttendanceDTO> attendanceDTOs = attendances.stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-            
+            List<AttendanceDTO> attendanceDTOs =
+                    attendances.stream().map(this::convertToDTO).collect(Collectors.toList());
+
             // Create response with records and count
             Map<String, Object> response = new LinkedHashMap<>();
             response.put("records", attendanceDTOs);
             response.put("totalCount", attendanceDTOs.size());
-            
-            LoggerFacade.info("Fetched " + attendanceDTOs.size() + " attendance records for Session ID: " + sessionId);
+
+            LoggerFacade.info("Fetched " + attendanceDTOs.size()
+                    + " attendance records for Session ID: " + sessionId);
             return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             LoggerFacade.warning("Session not found while fetching attendance: ID " + sessionId);
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse("Session not found with ID: " + sessionId));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while fetching attendance for session " + sessionId + ": " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while retrieving attendance records"));
+            LoggerFacade.severe("Unexpected error while fetching attendance for session "
+                    + sessionId + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    createErrorResponse("An error occurred while retrieving attendance records"));
         }
     }
 
     // UPDATE attendance status by session and student string ID (like S1234567A)
     @PutMapping("/session/{sessionId}/student/{studentStringId}")
-    public ResponseEntity<?> updateAttendanceStatus(
-            @PathVariable Long sessionId,
-            @PathVariable String studentStringId,
-            @RequestBody Map<String, String> request) {
+    public ResponseEntity<?> updateAttendanceStatus(@PathVariable Long sessionId,
+            @PathVariable String studentStringId, @RequestBody Map<String, String> request) {
         try {
             String newStatus = request.get("status");
             String method = request.get("method");
-            
+
             if (newStatus == null || newStatus.isBlank()) {
                 throw new IllegalArgumentException("Status is required");
             }
 
             // Validate status
             if (!isValidStatus(newStatus)) {
-                throw new IllegalArgumentException("Invalid status. Must be one of: PENDING, ABSENT, PRESENT, LATE");
+                throw new IllegalArgumentException(
+                        "Invalid status. Must be one of: PENDING, ABSENT, PRESENT, LATE");
             }
 
             if (method == null || method.isBlank()) {
@@ -84,69 +85,63 @@ public class AttendanceController {
 
             // Validate method
             if (!isValidMethod(method)) {
-                throw new IllegalArgumentException("Invalid method. Must be one of: AUTO, MANUAL, NOT MARKED");
+                throw new IllegalArgumentException(
+                        "Invalid method. Must be one of: AUTO, MANUAL, NOT MARKED");
             }
 
             // Get student by string ID to find the numerical ID using StudentManager
             Student student = studentManager.getStudentByStudentId(studentStringId)
-                    .orElseThrow(() -> new NoSuchElementException("Student not found with ID: " + studentStringId));
+                    .orElseThrow(() -> new NoSuchElementException(
+                            "Student not found with ID: " + studentStringId));
 
             // If method is MANUAL, set confidence to null
             Double confidence = "MANUAL".equals(method) ? null : null;
 
-            Attendance updatedAttendance = attendanceManager.updateAttendanceStatusBySessionAndStudent(
-                    sessionId, student.getId(), newStatus, method, confidence);
-            
-            LoggerFacade.info("Updated attendance for Session ID: " + sessionId + ", Student: " + studentStringId + " to status: " + newStatus);
+            Attendance updatedAttendance =
+                    attendanceManager.updateAttendanceStatusBySessionAndStudent(sessionId,
+                            student.getId(), newStatus, method, confidence);
+
+            LoggerFacade.info("Updated attendance for Session ID: " + sessionId + ", Student: "
+                    + studentStringId + " to status: " + newStatus);
             return ResponseEntity.ok(convertToDTO(updatedAttendance));
         } catch (NoSuchElementException e) {
             LoggerFacade.warning("Failed to update — " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(createErrorResponse(e.getMessage()));
         } catch (IllegalArgumentException e) {
-            LoggerFacade.warning("Invalid attendance update request for Session ID: " + sessionId + ", Student: " + studentStringId + ": " + e.getMessage());
+            LoggerFacade.warning("Invalid attendance update request for Session ID: " + sessionId
+                    + ", Student: " + studentStringId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(createErrorResponse(e.getMessage()));
         } catch (Exception e) {
-            LoggerFacade.severe("Unexpected error while updating attendance for Session ID: " + sessionId + ", Student: " + studentStringId + ": " + e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(createErrorResponse("An error occurred while updating attendance record"));
+            LoggerFacade.severe("Unexpected error while updating attendance for Session ID: "
+                    + sessionId + ", Student: " + studentStringId + ": " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    createErrorResponse("An error occurred while updating attendance record"));
         }
     }
 
     // Convert Attendance entity to DTO
     private AttendanceDTO convertToDTO(Attendance attendance) {
-        return new AttendanceDTO(
-                attendance.getId(),
-                attendance.getCreatedAt(),
-                attendance.getUpdatedAt(),
-                attendance.getStatus(),
-                attendance.getMethod(),
-                attendance.getConfidence(),
-                attendance.getTimestamp(),
-                attendance.getStudent().getId(),
-                attendance.getStudent().getStudentId(),
-                attendance.getStudent().getName(),
-                attendance.getStudent().getEmail(),
-                attendance.getStudent().getPhone(),
-                attendance.getStudent().getClassName(),
-                attendance.getSession().getId(),
-                attendance.getSession().getCourseName(),
-                attendance.getSession().isOpen()
-        );
+        return new AttendanceDTO(attendance.getId(), attendance.getCreatedAt(),
+                attendance.getUpdatedAt(), attendance.getStatus(), attendance.getMethod(),
+                attendance.getConfidence(), attendance.getTimestamp(),
+                attendance.getStudent().getId(), attendance.getStudent().getStudentId(),
+                attendance.getStudent().getName(), attendance.getStudent().getEmail(),
+                attendance.getStudent().getPhone(), attendance.getStudent().getClassName(),
+                attendance.getSession().getId(), attendance.getSession().getCourseName(),
+                attendance.getSession().isOpen());
     }
 
     // Helper methods
     private boolean isValidStatus(String status) {
-        return status != null && 
-            (status.equals("PENDING") || status.equals("PRESENT") || 
-                status.equals("ABSENT") || status.equals("LATE"));
+        return status != null && (status.equals("PENDING") || status.equals("PRESENT")
+                || status.equals("ABSENT") || status.equals("LATE"));
     }
 
     private boolean isValidMethod(String method) {
-        return method != null && 
-            (method.equals("AUTO") || method.equals("MANUAL") || 
-                method.equals("NOT MARKED"));
+        return method != null && (method.equals("AUTO") || method.equals("MANUAL")
+                || method.equals("NOT MARKED"));
     }
 
     private Map<String, String> createErrorResponse(String message) {

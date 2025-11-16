@@ -37,7 +37,8 @@ public class FaceDataService {
 
     // Upload one or more images for a student
     @Transactional
-    public List<FaceDataDTO> uploadImages(String studentId, List<MultipartFile> files) throws IOException {
+    public List<FaceDataDTO> uploadImages(String studentId, List<MultipartFile> files)
+            throws IOException {
 
         // Validate if student exists
         Student student = validateStudent(studentId);
@@ -93,8 +94,8 @@ public class FaceDataService {
         // Validate if face data exists and belongs to the student
         Optional<FaceData> optFaceData = faceManager.getByIdAndStudentId(faceDataId, studentId);
         if (optFaceData.isEmpty()) {
-            throw new NoSuchElementException(
-                    "Face data not found for student: " + studentId + ", faceDataId: " + faceDataId);
+            throw new NoSuchElementException("Face data not found for student: " + studentId
+                    + ", faceDataId: " + faceDataId);
         }
 
         FaceData fd = optFaceData.get();

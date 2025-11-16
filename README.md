@@ -2,6 +2,8 @@
 
 **Smart Attendance System** is a Java-based application that automates attendance management using face recognition technology. It supports student enrollment, real-time session tracking, automatic/manual attendance marking, reporting, and an intuitive GUI.
 
+**Repository link**: https://github.com/TerryBooCH/SMU-Smart-Attendance-System
+
 ## Overview
 The **Smart Attendance System** is a full-stack web application built with:
 
@@ -249,7 +251,7 @@ cd backend
 mvn spring-boot:run
 ```
 
-Backend will start at: `http://localhost:<8080>`
+Backend will start at: `http://localhost:8080`
 
 ### Run Frontend
 ```bash

@@ -167,9 +167,8 @@ export const AttendanceProvider = ({ children }) => {
                 }
               });
             } else {
-              console.log(
-                "🕒 No detections — keeping previous bounding boxes."
-              );
+              setBoundingBoxes([]);
+              console.log("🧹 Cleared bounding boxes – no detections.");
             }
           }
 

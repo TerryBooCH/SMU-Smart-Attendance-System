@@ -8,7 +8,7 @@ const ThresholdModalContent = () => {
       <div className="p-4 rounded-xl bg-black text-white shadow-sm flex items-center gap-3">
         <Sparkles size={18} className="text-yellow-300" />
         <p className="text-sm leading-relaxed">
-          <span className="font-semibold">Recommended:</span> 0.85 — 
+          <span className="font-semibold">Recommended:</span> 0.80 — 
           Optimal balance between accuracy & real-world variance.
         </p>
       </div>

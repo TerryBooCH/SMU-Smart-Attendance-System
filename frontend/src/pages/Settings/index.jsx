@@ -3,7 +3,7 @@ import Sidebar from "../../components/Sidebar";
 import Breadcrumb from "../../components/Breadcrumb";
 import Header from "./Header";
 import LogEventsSettingsContainer from "./LogEventsSettingsContainer";
-import TreshHoldConfigContainer from "./TreshHoldConfigContainer";
+import ThresholdConfigContainer from "./ThresholdConfigContainer";
 import DetectorConfigContainer from "./DetectorConfigContainer";
 import RecognizerConfigContainer from "./RecognizerConfigContainer";
 
@@ -31,7 +31,7 @@ const Settings = () => {
 
         <div className="flex-1 overflow-y-auto">
           <Header />
-          <TreshHoldConfigContainer />
+          <ThresholdConfigContainer />
           <DetectorConfigContainer />
           <RecognizerConfigContainer />
           <LogEventsSettingsContainer />

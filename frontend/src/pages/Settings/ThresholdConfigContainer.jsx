@@ -3,8 +3,9 @@ import { Info } from "lucide-react";
 import Tooltip from "../../components/ToolTip";
 import { useToast } from "../../hooks/useToast";
 import { useConfigStore } from "../../store/configStore";
+import ThresholdModalButton from "./ThresholdModalButton";
 
-const TreshHoldConfigContainer = () => {
+const ThresholdConfigContainer = () => {
   const { threshold, updateThreshold, loading } = useConfigStore();
 
   const [localThreshold, setLocalThreshold] = useState(threshold);
@@ -12,7 +13,6 @@ const TreshHoldConfigContainer = () => {
 
   const { success, error } = useToast();
 
-  // Sync UI when global store updates
   useEffect(() => {
     setLocalThreshold(threshold);
   }, [threshold]);
@@ -46,7 +46,9 @@ const TreshHoldConfigContainer = () => {
       <div className="border border-[#cecece] rounded-2xl bg-white shadow-sm">
 
         {/* Header */}
-        <div className="py-4 px-6 border-b border-[#cecece]">
+        <div className="py-4 px-6 border-b border-[#cecece] flex items-center gap-3">
+          <ThresholdModalButton />
+
           <h2 className="font-semibold text-lg text-gray-800">
             Face Recognition Threshold
           </h2>
@@ -62,6 +64,7 @@ const TreshHoldConfigContainer = () => {
                 <label className="text-sm font-medium text-gray-600">
                   Recognition Sensitivity
                 </label>
+
                 <Tooltip
                   content="Adjust the confidence threshold used for facial recognition. Range: -1 (very lenient) to 1 (very strict)."
                   position="right"
@@ -72,6 +75,10 @@ const TreshHoldConfigContainer = () => {
 
               <p className="text-sm text-gray-600">
                 Valid range: <strong>-1 to 1</strong>.
+              </p>
+
+              <p className="text-xs text-gray-500 mt-1">
+                The threshold uses <strong>cosine similarity</strong>, which naturally ranges from <strong>-1 to 1</strong>.
               </p>
 
               <p className="text-xs text-gray-500 mt-1">
@@ -112,7 +119,6 @@ const TreshHoldConfigContainer = () => {
                 </>
               )}
             </div>
-
           </div>
 
           {/* Buttons */}
@@ -141,4 +147,4 @@ const TreshHoldConfigContainer = () => {
   );
 };
 
-export default TreshHoldConfigContainer;
+export default ThresholdConfigContainer;

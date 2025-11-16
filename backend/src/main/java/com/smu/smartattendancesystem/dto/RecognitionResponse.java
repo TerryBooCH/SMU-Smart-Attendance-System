@@ -3,6 +3,6 @@ package com.smu.smartattendancesystem.dto;
 import java.util.*;
 
 public record RecognitionResponse(
-    Map<String, List<String>> warnings,
+    Map<String, String> warnings,
     List<RecognitionResultDTO> results
 ) {}

@@ -8,7 +8,7 @@ const NotificationContent = ({id}) => {
     useAttendance();
 
   const hasNotifications =
-    (warnings && warnings.length > 0) ||
+    (warnings && Object.keys(warnings).length > 0) ||
     wsError ||
     error ||
     (successAutoAttendanceMarked && successAutoAttendanceMarked.length > 0) ||
@@ -131,7 +131,7 @@ const NotificationContent = ({id}) => {
       )}
 
       {/* ⚠️ Warnings */}
-      {warnings.map((warning, index) => (
+      {Object.entries(warnings).map(([key, message], index) =>  (
         <div
           key={index}
           className="px-4 py-3 hover:bg-gray-50 transition-colors"
@@ -144,9 +144,9 @@ const NotificationContent = ({id}) => {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-gray-900 font-medium mb-0.5">
-                Missing Reference Photo
+                {key}
               </p>
-              <p className="text-sm text-gray-600 leading-relaxed">{warning}</p>
+              <p className="text-sm text-gray-600 leading-relaxed">{message}</p>
               <p className="text-xs text-gray-400 mt-1">Just now</p>
             </div>
           </div>

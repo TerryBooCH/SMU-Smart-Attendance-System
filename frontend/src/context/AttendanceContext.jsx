@@ -7,7 +7,7 @@ const AttendanceContext = createContext();
 export const AttendanceProvider = ({ children }) => {
   const [attendances, setAttendances] = useState([]);
   const [boundingBoxes, setBoundingBoxes] = useState([]);
-  const [warnings, setWarnings] = useState([]);
+  const [warnings, setWarnings] = useState({});
   const [wsError, setWsError] = useState(null);
   const [successAutoAttendanceMarked, setSuccessAutoAttendanceMarked] =
     useState([]);
@@ -49,13 +49,10 @@ export const AttendanceProvider = ({ children }) => {
           // ✅ Success response
           if (parsed.status === "success") {
             const results = parsed.result?.results;
-            const warningsObj = parsed.result?.warnings;
+            const allWarnings = parsed.result?.warnings || {};
 
             // ⚠️ Handle warnings
-            if (warningsObj && Object.keys(warningsObj).length > 0) {
-              const allWarnings = Object.entries(warningsObj)
-                .map(([key, arr]) => arr.map((msg) => `${key}: ${msg}`))
-                .flat();
+            if (allWarnings && Object.keys(allWarnings).length > 0) {
               console.warn("⚠️ Warnings received:", allWarnings);
               setWarnings(allWarnings);
             } else {

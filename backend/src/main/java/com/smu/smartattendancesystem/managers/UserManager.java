@@ -54,11 +54,16 @@ public class UserManager {
 
     // DELETE: Remove a user
     // Use case: admin deletes an account
-    public void deleteUser(Long id) {
-        userRepo.deleteById(id);
+    public void deleteUserByStudentId(Long studentId) {
+        Optional<User> userOpt = userRepo.findByStudentId(studentId);
+        userOpt.ifPresent(userRepo::delete);
     }
 
     public long countUsers() {
         return userRepo.count();
+    }
+
+    public Optional<User> getUserByStudentId(Long studentId) {
+        return userRepo.findByStudentId(studentId);
     }
 }

@@ -1,9 +1,11 @@
 package com.smu.smartattendancesystem.repositories;
 
-import com.smu.smartattendancesystem.models.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.smu.smartattendancesystem.models.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
@@ -15,4 +17,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     // Check if an email is already registered
     boolean existsByEmail(String email);
+
+    Optional<User> findByStudentId(Long studentId);
 }

@@ -246,7 +246,7 @@ public class StudentService {
         faceDataService.deleteAllImagesByStudentId(studentId);
 
         // Delete user account tied to the student
-        userManager.deleteUser(existingStudent.getId());
+        userManager.deleteUserByStudentId(existingStudent.getId());
 
         // Delete student account
         studentManager.deleteStudentByStudentId(existingStudent.getStudentId());

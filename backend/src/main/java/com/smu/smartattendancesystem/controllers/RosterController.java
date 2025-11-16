@@ -204,6 +204,17 @@ public class RosterController {
     public ResponseEntity<?> removeStudentFromRoster(@PathVariable Long rosterId,
             @PathVariable String studentId) {
         try {
+            // First, remove attendance records for linked sessions
+            List<Session> linkedSessions = sessionManager.getSessionsByRosterId(rosterId);
+            if (!linkedSessions.isEmpty()) {
+                // Remove attendance records for this student from all linked sessions
+                for (Session session : linkedSessions) {
+                    attendanceManager.deleteBySessionIdAndStudentId(session.getId(), studentId);
+                }
+                LoggerFacade.info("Removed attendance records for Student " + studentId + 
+                        " from " + linkedSessions.size() + " linked sessions.");
+            }
+            
             Roster updated = rosterService.removeStudentFromRoster(rosterId, studentId);
             LoggerFacade
                     .info("Removed Student " + studentId + " from Roster (ID: " + rosterId + ").");

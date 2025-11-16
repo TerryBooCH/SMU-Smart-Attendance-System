@@ -7,7 +7,9 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 import com.smu.smartattendancesystem.models.Attendance;
+import com.smu.smartattendancesystem.models.Session;
 import com.smu.smartattendancesystem.repositories.AttendanceRepository;
+import jakarta.transaction.Transactional;
 
 @Service
 public class AttendanceManager {
@@ -117,6 +119,17 @@ public class AttendanceManager {
     // DELETE: Remove a record
     public void deleteAttendance(Long id) {
         attendanceRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void deleteBySessionIdAndStudentId(Long sessionId, String studentId) {
+        // Get all attendances for the session
+        List<Attendance> sessionAttendances = attendanceRepository.findBySessionId(sessionId);
+        
+        // Filter by studentId and delete each one
+        sessionAttendances.stream()
+                .filter(attendance -> attendance.getStudent().getStudentId().equals(studentId))
+                .forEach(attendance -> attendanceRepository.deleteById(attendance.getId()));
     }
 
     private boolean isValidStatus(String status) {
